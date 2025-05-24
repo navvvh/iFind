@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iFind - Lost and Found App</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="main.css">
+</head>
+<body>
+    
+    <div class="sidebar">
+        <div class="logo">
+            <img src="findme.png" alt="iFind Logo">
+        </div>
+
+        <div class="nav-item" id="profile-nav">
+            <i class="fas fa-user"></i>
+            <span>Profile</span>
+        </div>
+        <div class="nav-item active" id="feed-nav">
+            <i class="fas fa-stream"></i>
+            <span>Feed</span>
+        </div>
+        <div class="nav-item" id="about-nav">
+            <i class="fas fa-info-circle"></i>
+            <span>About iFind</span>
+        </div>
+        <div class="nav-item logout" id="logout-nav">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Log Out</span>
+        </div>
+    </div>
+
+    
+    <div class="main-content">
+        
+        <div class="header">
+            <div class="search-container">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" placeholder="Type in search" id="search-input">
+                <button id="filter-btn" class="filter-btn">
+                    <i class="fas fa-sliders-h"></i>
+                </button>
+            </div>
+            <button class="add-new-post-btn" id="add-post-btn">
+                <span>Add new post</span>
+                <i class="fas fa-plus"></i>
+            </button>
+        </div>
+
+        
+        <div class="content">
+            <div class="feed" id="feed-container"></div>
+        </div>
+    </div>
+
+    
+    <div class="modal" id="filter-modal">
+        <div class="modal-content filter-modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Filter Posts</div>
+                <button class="close-modal" id="close-filter-modal">&times;</button>
+            </div>
+            <div class="filter-options">
+                <div class="filter-section">
+                    <div class="filter-title">
+                        <i class="fas fa-filter"></i>
+                        <span>Post Type</span>
+                    </div>
+                    <div class="filter-option">
+                        <input type="checkbox" id="filter-found" class="filter-checkbox" data-type="found">
+                        <label for="filter-found">Found</label>
+                    </div>
+                    <div class="filter-option">
+                        <input type="checkbox" id="filter-lost" class="filter-checkbox" data-type="lost">
+                        <label for="filter-lost">Lost</label>
+                    </div>
+                    <div class="filter-option">
+                        <input type="checkbox" id="filter-claimed" class="filter-checkbox" data-type="claimed">
+                        <label for="filter-claimed">Claimed</label>
+                    </div>
+                </div>
+
+                <div class="filter-section">
+                    <div class="filter-title">Campuses</div>
+                    <div class="filter-option">
+                        <input type="checkbox" id="filter-main" class="filter-checkbox" data-campus="main">
+                        <label for="filter-main">Main Building</label>
+                    </div>
+                    <div class="filter-option">
+                        <input type="checkbox" id="filter-annex" class="filter-checkbox" data-campus="annex">
+                        <label for="filter-annex">Annex Building</label>
+                    </div>
+                    <div class="filter-option">
+                        <input type="checkbox" id="filter-annex2" class="filter-checkbox" data-campus="annex2">
+                        <label for="filter-annex2">Annex II Building</label>
+                    </div>
+                </div>
+                <div class="filter-actions">
+                    <button class="btn btn-secondary" id="clear-filters">Clear All</button>
+                    <button class="btn btn-primary" id="apply-filters">Apply Filters</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+    <div class="modal" id="add-post-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Add New Post</div>
+                <button class="close-modal" id="close-modal">&times;</button>
+            </div>
+            <form class="modal-form" id="post-form">
+                <div class="form-group">
+                    <label for="post-type">Type</label>
+                    <select id="post-type" required>
+                        <option value="found">Found</option>
+                        <option value="lost">Lost</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="post-location">Location</label>
+                    <select id="post-location" required>
+                        <option value="Main Building">Main Building</option>
+                        <option value="Annex Building">Annex Building</option>
+                        <option value="Annex II Building">Annex II Building</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="post-description">Description</label>
+                    <textarea id="post-description" placeholder="Describe the item..." required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Image</label>
+                    <div class="file-input-container">
+                        <label class="file-input-label" for="post-image">Choose Image</label>
+                        <input type="file" id="post-image" class="file-input" accept="image/*">
+                    </div>
+                    <div class="file-name" id="file-name"></div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" id="cancel-post">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Post</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal" id="full-post-modal">
+        <div class="modal-content full-post-modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Post Details</div>
+                <button class="close-modal" id="close-full-post-modal">&times;</button>
+            </div>
+            <div id="full-post-content"></div>
+        </div>
+    </div>
+    <script src="main.js"></script>
+</body>
+</html>

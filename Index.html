@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>iFind</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Fredoka:wght@600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="container" id="container">
+
+    <div class="form-container sign-up">
+      <form>
+        <h1 class="form-title">
+          <img src="iFind.png" alt="iFind Logo" class="logo-img" />
+        </h1>
+        <h2 class="form-subtitle">SIGN UP</h2>
+
+        <div class="input-field">
+          <input type="text" id="signup-username" placeholder="Username*" required />
+          <i class="fa-solid fa-user"></i>
+        </div>
+
+        <div class="input-field">
+          <input type="email" id="signup-email" placeholder="Email*" required />
+          <i class="fa-solid fa-envelope"></i>
+        </div>
+
+        <div class="input-field">
+          <input type="password" id="signup-password" placeholder="Password*" required />
+          <i class="fa-solid fa-lock"></i>
+        </div>
+
+        <button type="submit">SIGN UP</button>
+      </form>
+    </div>
+
+    <div class="form-container sign-in">
+      <form onsubmit="redirectToMain(event)">
+        <h1 class="form-title">
+          <img src="iFind.png" alt="iFind Logo" class="logo-img" />
+        </h1>
+        <h2 class="form-subtitle">LOG IN</h2>
+
+        <div class="input-field">
+          <input type="email" id="login-email" placeholder="Email*" required />
+          <i class="fa-solid fa-envelope"></i>
+        </div>
+
+        <div class="input-field">
+          <input type="password" id="login-password" placeholder="Password*" required />
+          <i class="fa-solid fa-lock"></i>
+        </div>
+
+        <button type="submit">LOG IN</button>
+      </form>
+    </div>
+
+    <div class="toggle-container">
+      <div class="toggle">
+        <div class="toggle-panel toggle-left">
+          <h1 class="toggle-foundright">Found something?<br />Finding something?</h1>
+          <div class="login-link">
+            <span>Already have an account?</span>
+            <a href="#" id="login"><br />LOG IN NOW</a>
+          </div>
+        </div>
+
+        <div class="toggle-panel toggle-right">
+          <h1 class="toggle-foundleft">Found something?<br />Finding something?</h1>
+          <div class="login-link">
+            <span>Don't have an account?</span>
+            <a href="#" id="register"><br />SIGN UP NOW</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="roleSelectionModal" class="role-modal-overlay">
+      <div class="role-modal">
+        <div id="roleSelectionScreen">
+          <h2>How will you primarily be using this website?</h2>
+
+          <div class="role-cards">
+            <div class="role-card" id="studentCard" onclick="selectRole('Student')">
+              <div class="role-icon">
+                <img src="8.png" alt="Student" class="role-image" />
+              </div>
+              <h3>Student</h3>
+            </div>
+
+            <div class="role-card" id="facultyCard" onclick="selectRole('Faculty')">
+              <div class="role-icon">
+                <img src="9.png" alt="Faculty" class="role-image" />
+              </div>
+              <h3>Faculty</h3>
+            </div>
+          </div>
+
+          <button id="continueBtn" class="role-continue-btn" disabled onclick="confirmRole()">PROCEED</button>
+        </div>
+
+        <div id="successScreen" class="success-screen">
+          <div class="checkmark">
+            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+              <polyline points="22,4 12,14.01 9,11.01" />
+            </svg>
+          </div>
+          <h2 id="welcomeMessage">Welcome!</h2>
+          <p class="description" id="successMessage">Your account has been set up successfully.</p>
+          <button class="role-continue-btn" onclick="closeRoleModal()">Continue to Login</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>
