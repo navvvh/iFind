@@ -685,7 +685,7 @@ profilePage.innerHTML = `
       <i class="fas fa-bars"></i>
     </div>
     <div class="profile-nav-center">
-      <img src="findme.png" alt="iFind Logo" class="ifindlogo">
+      <img src="../assets/findme.png"alt="iFind Logo" class="ifindlogo">
     </div>
     <div class="profile-nav-right" id="profile-nav-avatar">
       ${userNavAvatarHTML}
@@ -728,7 +728,7 @@ profilePage.innerHTML = `
   <div class="mobile-menu" id="mobile-menu">
     <div class="mobile-menu-header">
       <div class="logo">
-        <img class="lolo" src="findme.png" alt="iFind Logo">
+        <img class="lolo" src="../assets/findme.png" alt="iFind Logo">
       </div>
       <button class="mobile-menu-close" id="close-menu">
         <i class="fas fa-times"></i>
