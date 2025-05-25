@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - iFind</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/profile.css">
+</head>
+<body>
+    <!-- Top Navigation Bar -->
+    <div class="profile-nav">
+        <button class="hamburger-menu" id="hamburger-menu">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="profile-nav-center">
+            <img src="../assets/findme.png" alt="iFind" width="150" height="auto">
+        </div>
+        <div class="profile-nav-right" id="profile-nav-avatar">
+            <div class="default-avatar-nav">AP</div>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-content">
+            <div class="nav-item active" id="nav-profile">
+                <i class="fas fa-user"></i>
+                <span>Profile</span>
+            </div>
+            <div class="nav-item" id="nav-feed">
+                <i class="fas fa-stream"></i>
+                <span>Feed</span>
+            </div>
+            <div class="nav-item" id="nav-about">
+                <i class="fas fa-info-circle"></i>
+                <span>About iFind</span>
+            </div>
+            <div class="nav-item" id="nav-claimed">
+                <i class="fas fa-check-circle"></i>
+                <span>Claimed Items</span>
+            </div>
+        </div>
+        <div class="sidebar-footer">
+            <div class="nav-item" id="nav-logout">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Log Out</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="profile-page">
+        <!-- Profile Content -->
+        <div class="profile-content">
+            <!-- Profile Sidebar -->
+            <div class="profile-sidebar">
+                <div class="profile-avatar-large">
+                    <div class="default-avatar-large">AP</div>
+                </div>
+                <h1 class="profile-name-large">Ang Pogi</h1>
+                <div class="profile-username-large">@angpogi</div>
+                <div class="profile-role-large">STUDENT</div>
+                
+                <div class="profile-divider"></div>
+                
+                <div class="profile-contact-label">CONTACT</div>
+                <div class="profile-contact-value">
+                    <a href="https://fb.com/username" target="_blank">fb.com/username</a>
+                </div>
+                
+                <button class="profile-edit-btn" id="edit-profile-btn">
+                    <i class="fas fa-pencil-alt"></i> Edit Profile
+                </button>
+            </div>
+
+            <!-- Main Content Area -->
+            <div class="profile-main">
+                <h2 class="profile-section-title">RECENT POSTS</h2>
+                <div class="profile-posts" id="profile-posts">
+                    <!-- Sample Post -->
+                    <div class="post">
+                        <div class="post-header">
+                            <div class="post-user">
+                                <div class="profile-pic">
+                                    <div class="default-avatar">AP</div>
+                                </div>
+                                <div class="post-user-info">
+                                    <div class="post-user-name">Ang Pogi</div>
+                                    <div class="post-user-meta">@angpogi<br>STUDENT</div>
+                                </div>
+                            </div>
+                            <div class="post-options" onclick="togglePostOptions(this)">
+                                <i class="fas fa-ellipsis-h"></i>
+                                <div class="post-options-dropdown">
+                                    <div class="dropdown-item">
+                                        <i class="fas fa-edit"></i>
+                                        <span>Edit</span>
+                                    </div>
+                                    <div class="dropdown-item">
+                                        <i class="fas fa-check"></i>
+                                        <span>Claimed</span>
+                                    </div>
+                                    <div class="dropdown-item">
+                                        <i class="fas fa-trash"></i>
+                                        <span>Delete</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="post-content">
+                            <div class="post-text">
+                                <span class="post-tag lost">Lost</span>
+                                nawawala cellphone ko, maawa na kayo letche paki balik plss tyttttttttttttttttttttt pakyou all
+                            </div>
+                        </div>
+                        <div class="post-actions">
+                            <div class="post-action">
+                                <i class="far fa-heart"></i>
+                                <span>Heart</span>
+                            </div>
+                            <div class="post-action">
+                                <i class="far fa-comment"></i>
+                                <span>COMMENT</span>
+                            </div>
+                            <div class="post-action">
+                                <i class="fas fa-share"></i>
+                                <span>SHARE</span>
+                            </div>
+                        </div>
+                        <div class="post-comments">
+                            <div class="comment-input">
+                                <div class="profile-pic">
+                                    <div class="default-avatar">AP</div>
+                                </div>
+                                <input type="text" class="comment-text" placeholder="Write your comment...">
+                                <button class="send-comment">
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Profile Modal -->
+    <div class="modal" id="edit-profile-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Edit Profile</div>
+                <button class="close-modal" id="close-edit-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form class="profile-edit-form" id="profile-edit-form">
+                    <div class="profile-edit-avatar">
+                        <div class="default-avatar">AP</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-name">Name</label>
+                        <input type="text" id="edit-name" value="Ang Pogi" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-username">Username</label>
+                        <input type="text" id="edit-username" value="angpogi" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-role">Role</label>
+                        <input type="text" id="edit-role" value="STUDENT" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-contact">Contact</label>
+                        <input type="text" id="edit-contact" value="fb.com/username" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Profile Picture</label>
+                        <div class="file-input-container">
+                            <label class="file-input-label" for="edit-profile-image">
+                                <i class="fas fa-camera"></i>
+                                <span>Choose Image</span>
+                            </label>
+                            <input type="file" id="edit-profile-image" class="file-input" accept="image/*">
+                        </div>
+                        <div class="file-name" id="edit-profile-file-name"></div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" id="cancel-edit-profile">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/profile.js"></script>
+</body>
+</html>
