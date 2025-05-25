@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iFind</title>
+    <link rel="stylesheet" href="../css/setup.css">
+</head>
+<body>
+    <div class="main-container">
+        <div class="container" id="container">
+            <div class="logo">
+                <img src="../assets/findme.png" alt="iFind Logo" class="logo-image" width="155">
+            </div>
+            
+            <!-- Step 1: Name -->
+            <div class="step active" id="step1">
+                <h2 class="step-title">What's your name?</h2>
+                <p class="step-description">This is what others see when you post something and more.</p>
+                <input type="text" class="input-field" placeholder="Enter your name" id="nameInput">
+            </div>
+
+            <!-- Step 2: Profile Picture -->
+            <div class="step" id="step2">
+                <h2 class="step-title">Add a profile picture</h2>
+                <p class="step-description">This helps others recognize you when posting or claiming items.</p>
+                <div class="profile-avatar" id="profileAvatar">
+                    <div class="default-profile-icon"></div>
+                    <div class="edit-overlay"></div>
+                </div>
+            </div>
+
+            <!-- Step 3: User Type - UPDATED with images -->
+            <div class="step" id="step3">
+                <h2 class="step-title">How will you primarily be using this website?</h2>
+                <p class="step-description">This helps others know who they're connecting with.</p>
+                <div class="user-type-options">
+                    <div class="user-type-card" data-type="student">
+                        <div class="user-type-icon">
+                            <img src="../assets/8.png" alt="Student" class="user-type-image">
+                        </div>
+                        <div class="user-type-label">Student</div>
+                    </div>
+                    <div class="user-type-card" data-type="faculty">
+                        <div class="user-type-icon">
+                            <img src="../assets/9.png" alt="Faculty" class="user-type-image">
+                        </div>
+                        <div class="user-type-label">Faculty</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="navigation">
+                <button class="back-btn hidden" id="backBtn">←</button>
+                <button class="next-btn" id="nextBtn">Next</button>
+            </div>
+        </div>
+
+        <!-- Progress Indicator -->
+        <div class="progress-indicator">
+            <div class="progress-step completed" id="progress1">
+                <div class="progress-circle completed"></div>
+                <div class="progress-label">Your name</div>
+            </div>
+            <div class="progress-line" id="line1"></div>
+            <div class="progress-step" id="progress2">
+                <div class="progress-circle"></div>
+                <div class="progress-label">Your profile</div>
+            </div>
+            <div class="progress-line" id="line2"></div>
+            <div class="progress-step" id="progress3">
+                <div class="progress-circle"></div>
+                <div class="progress-label">Usertype</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Picture Modal -->
+    <div class="profile-modal" id="profileModal">
+        <div class="modal-content">
+            <button class="close-modal" id="closeModal">×</button>
+            
+            <div class="modal-header">
+                <h3 class="modal-title">Change profile picture</h3>
+                <div class="modal-tabs">
+                    <button class="modal-tab active" data-tab="illustrations">
+                        <span>🎨</span> Illustrations
+                    </button>
+                    <button class="modal-tab" data-tab="device">
+                        <span>💻</span> From device
+                    </button>
+                </div>
+            </div>
+
+            <div class="tab-content active" id="illustrationsTab">
+                <div class="avatar-grid">
+                    <div class="avatar-option avatar-1" data-avatar="1">
+                        <div class="avatar-character">👨‍💼</div>
+                    </div>
+                    <div class="avatar-option avatar-2" data-avatar="2">
+                        <div class="avatar-character">👩‍💼</div>
+                    </div>
+                    <div class="avatar-option avatar-3" data-avatar="3">
+                        <div class="avatar-character">👨‍🎓</div>
+                    </div>
+                    <div class="avatar-option avatar-4" data-avatar="4">
+                        <div class="avatar-character">👩‍🎓</div>
+                    </div>
+                    <div class="avatar-option avatar-5" data-avatar="5">
+                        <div class="avatar-character">👨‍🏫</div>
+                    </div>
+                    <div class="avatar-option avatar-6" data-avatar="6">
+                        <div class="avatar-character">👩‍🏫</div>
+                    </div>
+                    <div class="avatar-option avatar-7" data-avatar="7">
+                        <div class="avatar-character">👨‍💻</div>
+                    </div>
+                    <div class="avatar-option avatar-8" data-avatar="8">
+                        <div class="avatar-character">👩‍💻</div>
+                    </div>
+                    <div class="avatar-option avatar-9" data-avatar="9">
+                        <div class="avatar-character">👨‍🔬</div>
+                    </div>
+                    <div class="avatar-option avatar-10" data-avatar="10">
+                        <div class="avatar-character">👩‍🔬</div>
+                    </div>
+                    <div class="avatar-option avatar-11" data-avatar="11">
+                        <div class="avatar-character">👨‍🎨</div>
+                    </div>
+                    <div class="avatar-option avatar-12" data-avatar="12">
+                        <div class="avatar-character">👩‍🎨</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-content" id="deviceTab">
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">📁</div>
+                    <div class="upload-text">Click to upload or drag and drop</div>
+                    <div class="upload-subtext">PNG, JPG up to 5MB</div>
+                    <input type="file" class="file-input" id="fileInput" accept="image/*">
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button class="modal-btn modal-btn-cancel" id="cancelBtn">Cancel</button>
+                <button class="modal-btn modal-btn-save" id="saveBtn">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/setup.js"></script>
+</body>
+</html>
