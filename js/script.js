@@ -82,12 +82,8 @@ const container = document.getElementById("container");
 
     // Proceed to setup/main application
     function proceedToSetup() {
-      // You can redirect to your main application page here
-      alert('Redirecting to main application...');
-      // window.location.href = 'main.html';
-      
-      // For demo purposes, hide welcome modal
-      welcomeModal.classList.remove('show');
+      // Redirect to setup page
+      window.location.href = '../html/setup.html';
     }
 
     // Hide welcome modal if clicked outside
