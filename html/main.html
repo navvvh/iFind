@@ -10,7 +10,7 @@
 <body>
     <div class="top-navbar">
         <button class="hamburger-menu" id="hamburger-menu">
-            <i class="fas fa-bars"></i>
+            <img src="../assets/seal.jpg" alt="seal" class="seal-logo" width="120px">
         </button>
         <div class="logo-container">
             <img src="../assets/iFind.png" alt="iFind Logo" class="logo-image">
@@ -68,7 +68,6 @@
 
                 <!-- Feed -->
                 <div class="feed" id="feed">
-                    <!-- Empty State -->
                     <div class="empty-state" id="empty-state">
                         <i class="fas fa-search"></i>
                         <h3>No posts yet</h3>
@@ -160,9 +159,9 @@
                     </div>
                     
                     <div class="form-group">
-                        <label class="form-label" for="post-location">Location</label>
+                        <label class="form-label" for="post-location">Campuses</label>
                         <select class="form-select" id="post-location" required>
-                            <option value="">Select location</option>
+                            <option value="">Select Campuses</option>
                             <option value="Main Building">Main Building</option>
                             <option value="Annex Building">Annex Building</option>
                             <option value="Annex II Building">Annex II Building</option>
@@ -184,12 +183,71 @@
                             <input type="file" class="file-input" id="post-image" accept="image/*">
                         </div>
                         <div class="file-name" id="file-name"></div>
+                        <div class="image-preview" id="image-preview"></div>
                     </div>
                 </div>
                 
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" id="cancel-post">Cancel</button>
                     <button type="submit" class="btn btn-primary">Post</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Post Modal -->
+    <div class="modal" id="edit-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Edit Post</h2>
+                <button class="close-modal" id="close-edit-modal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="edit-form">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="form-label" for="edit-type">Type</label>
+                        <select class="form-select" id="edit-type" required>
+                            <option value="">Select type</option>
+                            <option value="found">Found</option>
+                            <option value="lost">Lost</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="edit-location">Campuses</label>
+                        <select class="form-select" id="edit-location" required>
+                            <option value="">Select Campuses</option>
+                            <option value="Main Building">Main Building</option>
+                            <option value="Annex Building">Annex Building</option>
+                            <option value="Annex II Building">Annex II Building</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="edit-description">Description</label>
+                        <textarea class="form-textarea" id="edit-description" placeholder="Describe the item in detail..." required></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Image (Optional)</label>
+                        <div class="current-image" id="current-image"></div>
+                        <div class="file-input-wrapper">
+                            <label class="file-input-label" for="edit-image">
+                                <i class="fas fa-camera"></i>
+                                <span>Change Image</span>
+                            </label>
+                            <input type="file" class="file-input" id="edit-image" accept="image/*">
+                        </div>
+                        <div class="file-name" id="edit-file-name"></div>
+                        <div class="image-preview" id="edit-image-preview"></div>
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="cancel-edit">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Update Post</button>
                 </div>
             </form>
         </div>
