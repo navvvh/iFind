@@ -40,6 +40,11 @@ function getCurrentUserData() {
   }
 }
 
+// Add function to refresh current user data
+function refreshCurrentUser() {
+  Object.assign(currentUser, getCurrentUserData())
+}
+
 // Add the syncUserData function to profile.js
 function syncUserData(updatedData = {}) {
   // Get current data from all sources
@@ -181,6 +186,7 @@ const profileEditForm = document.getElementById("profile-edit-form")
 const profileImageInput = document.getElementById("edit-profile-image")
 const profileFileNameDisplay = document.getElementById("edit-profile-file-name")
 const navFeed = document.getElementById("nav-feed")
+const navClaimed = document.getElementById("nav-claimed")
 
 // Track if we're editing a post
 const editingPostId = null
@@ -400,6 +406,10 @@ hamburgerMenu.addEventListener("click", () => {
 
 navFeed.addEventListener("click", () => {
   window.location.href = "main.html"
+})
+
+navClaimed.addEventListener("click", () => {
+  window.location.href = "claimed.html"
 })
 
 // Close sidebar when clicking outside on mobile
@@ -658,28 +668,20 @@ function setupEventListeners() {
 
         // Use the centralized data synchronization function
         syncUserData(updatedData)
-
-        // Update current user object with new data
-        Object.assign(currentUser, getCurrentUserData())
+        refreshCurrentUser() // Add this line
         updateProfileDisplay()
-        loadUserPosts() // Reload posts to reflect any changes
+        loadUserPosts()
         closeModal()
-
-        // Show success message
         alert("Profile updated successfully!")
       }
       reader.readAsDataURL(imageFile)
     } else {
       // Use the centralized data synchronization function
       syncUserData(updatedData)
-
-      // Update current user object with new data
-      Object.assign(currentUser, getCurrentUserData())
+      refreshCurrentUser() // Add this line
       updateProfileDisplay()
-      loadUserPosts() // Reload posts to reflect any changes
+      loadUserPosts()
       closeModal()
-
-      // Show success message
       alert("Profile updated successfully!")
     }
   })
@@ -830,8 +832,7 @@ document.addEventListener("DOMContentLoaded", init)
 // Enhance the storage event listener
 window.addEventListener("storage", (e) => {
   if (e.key === "userProfile" || e.key === "ifindUserData") {
-    // Refresh current user data
-    Object.assign(currentUser, getCurrentUserData())
+    refreshCurrentUser() // Add this line
     updateProfileDisplay()
     loadUserPosts()
   } else if (e.key === "userPosts") {
