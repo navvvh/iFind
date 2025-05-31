@@ -111,11 +111,11 @@
                 <h3 class="role-title">Choose your role</h3>
                 <div class="role-options">
                     <div class="role-option" data-role="student">
-                        <div class="role-icon-container">👨‍🎓</div>
+                        <img src="../assets/8.png" alt="role" class="role-image" width="250px">
                         <div class="role-label">Student</div>
                     </div>
                     <div class="role-option" data-role="faculty">
-                        <div class="role-icon-container">👩‍🏫</div>
+                        <img src="../assets/9.png" alt="role" class="role-image" width= "250px">
                         <div class="role-label">Faculty</div>
                     </div>
                 </div>
@@ -161,6 +161,57 @@
     </div>
 
     <script src="../js/setup.js"></script>
+
+    <script>
+        // Enhanced role selection functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const roleOptions = document.querySelectorAll('.role-option');
+            const nextBtn = document.getElementById('nextBtn');
+            let selectedRole = null;
+
+            roleOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    // Remove selected class from all options
+                    roleOptions.forEach(opt => opt.classList.remove('selected'));
+                    
+                    // Add selected class to clicked option
+                    this.classList.add('selected');
+                    selectedRole = this.dataset.role;
+                    
+                    // Enable next button
+                    nextBtn.disabled = false;
+                    
+                    // Add a subtle animation to confirm selection
+                    this.style.animation = 'none';
+                    setTimeout(() => {
+                        this.style.animation = 'popIn 0.3s ease forwards';
+                    }, 10);
+                });
+
+                // Enhanced hover effects
+                option.addEventListener('mouseenter', function() {
+                    if (!this.classList.contains('selected')) {
+                        this.style.transform = 'translateY(-8px) scale(1.05)';
+                    }
+                });
+
+                option.addEventListener('mouseleave', function() {
+                    if (!this.classList.contains('selected')) {
+                        this.style.transform = 'translateY(0) scale(1)';
+                    }
+                });
+            });
+
+            // Next button functionality
+            nextBtn.addEventListener('click', function() {
+                if (selectedRole) {
+                    console.log('Selected role:', selectedRole);
+                    // Add your navigation logic here
+                    alert(`Setup complete! Selected role: ${selectedRole}`);
+                }
+            });
+        });
+    </script>
 
 </body>
 </html>
