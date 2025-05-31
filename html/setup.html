@@ -3,150 +3,164 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>iFind</title>
+    <title>iFind Setup - Parallax</title>
     <link rel="stylesheet" href="../css/setup.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
+    <!-- Parallax Background Layers -->
+    <div class="parallax-layer parallax-layer-1">
+        <div class="bg-circle bg-circle-1"></div>
+        <div class="bg-circle bg-circle-2"></div>
+    </div>
+    
+    <div class="parallax-layer parallax-layer-2">
+        <div class="bg-circle bg-circle-3"></div>
+        <div class="bg-circle bg-circle-4"></div>
+    </div>
+    
+    <div class="parallax-layer parallax-layer-3">
+        <div class="bg-circle bg-circle-5"></div>
+        <!-- Floating dots -->
+        <div class="floating-dot" style="top: 15%; left: 25%; animation-delay: 1.5s;"></div>
+        <div class="floating-dot" style="top: 45%; left: 75%; animation-delay: 1.7s;"></div>
+        <div class="floating-dot" style="top: 65%; left: 15%; animation-delay: 1.9s;"></div>
+        <div class="floating-dot" style="top: 85%; left: 85%; animation-delay: 2.1s;"></div>
+        <div class="floating-dot" style="top: 25%; left: 65%; animation-delay: 2.3s;"></div>
+        <div class="floating-dot" style="top: 55%; left: 35%; animation-delay: 2.5s;"></div>
+    </div>
+
     <div class="main-container">
-        <div class="container" id="container">
+        <!-- Header -->
+        <div class="header">
             <div class="logo">iFind</div>
-            
-            <!-- Step 1: Name -->
-            <div class="step active" id="step1">
-                <h2 class="step-title">What's your name?</h2>
-                <p class="step-description">This is what others see when you post something and more.</p>
-                <input type="text" class="input-field" placeholder="Enter your name" id="nameInput">
-            </div>
-
-            <!-- Step 2: Profile Picture -->
-            <div class="step" id="step2">
-                <h2 class="step-title">Add a profile picture</h2>
-                <p class="step-description">This helps others recognize you when posting or claiming items.</p>
-                <div class="profile-avatar" id="profileAvatar">
-                    <div class="default-profile-icon"></div>
-                    <div class="edit-overlay"></div>
-                </div>
-            </div>
-
-            <!-- Step 3: User Type - UPDATED with images -->
-            <div class="step" id="step3">
-                <h2 class="step-title">How will you primarily be using this website?</h2>
-                <p class="step-description">This helps others know who they're connecting with.</p>
-                <div class="user-type-options">
-                    <div class="user-type-card" data-type="student">
-                        <div class="user-type-icon">
-                            <img src="../assets/8.png" alt="Student" class="user-type-image">
-                        </div>
-                        <div class="user-type-label">Student</div>
-                    </div>
-                    <div class="user-type-card" data-type="faculty">
-                        <div class="user-type-icon">
-                            <img src="../assets/9.png" alt="Faculty" class="user-type-image">
-                        </div>
-                        <div class="user-type-label">Faculty</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="navigation">
-                <button class="back-btn hidden" id="backBtn">←</button>
-                <button class="next-btn" id="nextBtn">Next</button>
-            </div>
         </div>
 
-        <!-- Progress Indicator -->
-        <div class="progress-indicator">
-            <div class="progress-step completed" id="progress1">
-                <div class="progress-circle completed"></div>
-                <div class="progress-label">Your name</div>
+        <!-- Setup Container -->
+        <div class="setup-container">
+            <!-- Hero Section -->
+            <div class="hero-section">
+                <h1 class="hero-title">Complete Your Profile</h1>
+                <p class="hero-subtitle">Set up your iFind profile to help others recognize you when posting or claiming items on campus.</p>
             </div>
-            <div class="progress-line" id="line1"></div>
-            <div class="progress-step" id="progress2">
-                <div class="progress-circle"></div>
-                <div class="progress-label">Your profile</div>
+
+            <!-- Progress Section -->
+            <div class="progress-section">
+                <div class="progress-container">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+                <div class="progress-text" id="progressText">0% Complete</div>
             </div>
-            <div class="progress-line" id="line2"></div>
-            <div class="progress-step" id="progress3">
-                <div class="progress-circle"></div>
-                <div class="progress-label">Usertype</div>
+
+            <!-- Setup Steps -->
+            <div class="setup-steps">
+                <!-- Step 1: Name -->
+                <div class="setup-step">
+                    <div class="step-content">
+                        <div class="step-number">Step 01</div>
+                        <h2 class="step-title">What's your name?</h2>
+                        <p class="step-description">We've pre-filled this with your username, but feel free to change it to your preferred display name.</p>
+                        <input type="text" class="input-field" id="nameInput" placeholder="Enter your full name">
+                    </div>
+                    <div class="element-3d">
+                        <div class="pill-container">
+                            <div class="pill-base">
+                                <div class="pill-circle left" id="nameCircle"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2: Profile Picture -->
+                <div class="setup-step reverse">
+                    <div class="step-content">
+                        <div class="step-number">Step 02</div>
+                        <h2 class="step-title">Choose your avatar</h2>
+                        <p class="step-description">Select from our emoji avatars to help others recognize you.</p>
+                    </div>
+                    <div class="element-3d">
+                        <div class="profile-3d">
+                            <div class="avatar-container" id="profileAvatar">
+                                <div class="avatar-base">
+                                    👤
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3: User Type -->
+                <div class="setup-step">
+                    <div class="step-content">
+                        <div class="step-number">Step 03</div>
+                        <h2 class="step-title">How will you use iFind?</h2>
+                        <p class="step-description">Please select your role to help others identify you.</p>
+                    </div>
+                    <div class="element-3d">
+                        <div class="pill-container">
+                            <div class="pill-base">
+                                <div class="pill-circle right" id="roleCircle"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Role Selection -->
+            <div class="role-selection">
+                <h3 class="role-title">Choose your role</h3>
+                <div class="role-options">
+                    <div class="role-option" data-role="student">
+                        <div class="role-icon-container">👨‍🎓</div>
+                        <div class="role-label">Student</div>
+                    </div>
+                    <div class="role-option" data-role="faculty">
+                        <div class="role-icon-container">👩‍🏫</div>
+                        <div class="role-label">Faculty</div>
+                    </div>
+                </div>
+                <div class="action-section">
+                    <button class="next-btn" id="nextBtn" disabled>Complete Setup</button>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Profile Picture Modal -->
-    <div class="profile-modal" id="profileModal">
+    <!-- Enhanced Profile Picture Modal -->
+    <div class="modal" id="avatarModal">
         <div class="modal-content">
-            <button class="close-modal" id="closeModal">×</button>
-            
             <div class="modal-header">
-                <h3 class="modal-title">Change profile picture</h3>
-                <div class="modal-tabs">
-                    <button class="modal-tab active" data-tab="illustrations">
-                        <span>🎨</span> Illustrations
-                    </button>
-                    <button class="modal-tab" data-tab="device">
-                        <span>💻</span> From device
-                    </button>
-                </div>
+                <div class="modal-title">Choose your avatar</div>
+                <button class="close-modal">&times;</button>
             </div>
-
-            <div class="tab-content active" id="illustrationsTab">
+            
+            <!-- Emoji Avatar Grid Only -->
+            <div class="emoji-section">
+                <h4>Select an emoji avatar</h4>
                 <div class="avatar-grid">
-                    <div class="avatar-option avatar-1" data-avatar="1">
-                        <div class="avatar-character">👨‍💼</div>
-                    </div>
-                    <div class="avatar-option avatar-2" data-avatar="2">
-                        <div class="avatar-character">👩‍💼</div>
-                    </div>
-                    <div class="avatar-option avatar-3" data-avatar="3">
-                        <div class="avatar-character">👨‍🎓</div>
-                    </div>
-                    <div class="avatar-option avatar-4" data-avatar="4">
-                        <div class="avatar-character">👩‍🎓</div>
-                    </div>
-                    <div class="avatar-option avatar-5" data-avatar="5">
-                        <div class="avatar-character">👨‍🏫</div>
-                    </div>
-                    <div class="avatar-option avatar-6" data-avatar="6">
-                        <div class="avatar-character">👩‍🏫</div>
-                    </div>
-                    <div class="avatar-option avatar-7" data-avatar="7">
-                        <div class="avatar-character">👨‍💻</div>
-                    </div>
-                    <div class="avatar-option avatar-8" data-avatar="8">
-                        <div class="avatar-character">👩‍💻</div>
-                    </div>
-                    <div class="avatar-option avatar-9" data-avatar="9">
-                        <div class="avatar-character">👨‍🔬</div>
-                    </div>
-                    <div class="avatar-option avatar-10" data-avatar="10">
-                        <div class="avatar-character">👩‍🔬</div>
-                    </div>
-                    <div class="avatar-option avatar-11" data-avatar="11">
-                        <div class="avatar-character">👨‍🎨</div>
-                    </div>
-                    <div class="avatar-option avatar-12" data-avatar="12">
-                        <div class="avatar-character">👩‍🎨</div>
-                    </div>
+                    <div class="avatar-option avatar-1" data-avatar="1">👨‍💼</div>
+                    <div class="avatar-option avatar-2" data-avatar="2">👩‍💼</div>
+                    <div class="avatar-option avatar-3" data-avatar="3">👨‍🎓</div>
+                    <div class="avatar-option avatar-4" data-avatar="4">👩‍🎓</div>
+                    <div class="avatar-option avatar-5" data-avatar="5">👨‍🏫</div>
+                    <div class="avatar-option avatar-6" data-avatar="6">👩‍🏫</div>
+                    <div class="avatar-option avatar-7" data-avatar="7">👨‍💻</div>
+                    <div class="avatar-option avatar-8" data-avatar="8">👩‍💻</div>
+                    <div class="avatar-option avatar-9" data-avatar="9">🧑‍🎨</div>
+                    <div class="avatar-option avatar-10" data-avatar="10">👨‍🔬</div>
+                    <div class="avatar-option avatar-11" data-avatar="11">👩‍🔬</div>
+                    <div class="avatar-option avatar-12" data-avatar="12">👨‍🎨</div>
                 </div>
             </div>
-
-            <div class="tab-content" id="deviceTab">
-                <div class="upload-area" id="uploadArea">
-                    <div class="upload-icon">📁</div>
-                    <div class="upload-text">Click to upload or drag and drop</div>
-                    <div class="upload-subtext">PNG, JPG up to 5MB</div>
-                    <input type="file" class="file-input" id="fileInput" accept="image/*">
-                </div>
-            </div>
-
+            
             <div class="modal-actions">
-                <button class="modal-btn modal-btn-cancel" id="cancelBtn">Cancel</button>
-                <button class="modal-btn modal-btn-save" id="saveBtn">Save</button>
+                <button class="modal-btn cancel-btn">Cancel</button>
+                <button class="modal-btn save-btn">Save</button>
             </div>
         </div>
     </div>
 
     <script src="../js/setup.js"></script>
+
 </body>
 </html>

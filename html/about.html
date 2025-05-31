@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iFind - A smarter way to recover lost items</title>
+    <link rel="stylesheet" href="../css/about.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Load Three.js directly -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.min.js"></script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="hamburger" id="hamburger-menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <div class="logo">
+                <img src="../assets/iFind.png" alt="iFind">
+            </div>
+        </div>
+    </nav>
+
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-content">
+            <div class="nav-item" id="nav-profile">
+                <i class="fas fa-user"></i>
+                <span>Profile</span>
+            </div>
+            <div class="nav-item" id="nav-feed">
+                <i class="fas fa-stream"></i>
+                <span>Feed</span>
+            </div>
+            <div class="nav-item active" id="nav-about">
+                <i class="fas fa-info-circle"></i>
+                <span>About</span>
+            </div>
+            <div class="nav-item" id="nav-ifind">
+                <i class="fas fa-search"></i>
+                <span>iFind</span>
+            </div>
+            <div class="nav-item" id="nav-claimed">
+                <i class="fas fa-check-circle"></i>
+                <span>Claimed</span>
+            </div>
+        </div>
+        <div class="sidebar-footer">
+            <div class="nav-item" id="nav-logout">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Log Out</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-container">
+            <div class="hero-content">
+                <h1 class="hero-title">A smarter way to <br>recover lost items</h1>
+                <p class="hero-description">
+                    <span style="margin-left: 30px;">iFind</span> is a web-based platform designed to help students, faculty, and staff easily report and recover lost or found items within the campus.
+                </p>
+            </div>
+            <div class="hero-robot">
+                <div class="robot-container" id="kitty-container">
+                    <!-- Fallback image that shows immediately -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Post Section -->
+    <section class="content-section">
+        <div class="section-grid">
+            <div class="section-content">
+                <h2>Post</h2>
+                <p>Users can create posts for lost or found items. Each post includes details like item name, description, photo, and where it was seen or found on campus.</p>
+            </div>
+            <div class="mockup post-mockup">
+                <div class="post-header">
+                    <div class="user-avatar">
+                        <img src="../assets/pokemon (2).png" alt="Hajj" class="avatar-img">
+                    </div>
+                    <div class="user-details">
+                        <h4>Hajj</h4>
+                        <span class="username">@H4jj</span>
+                        <span class="user-type">STUDENT</span>
+                    </div>
+                    <button class="close-btn">×</button>
+                </div>
+                <div class="post-input-area">
+                    <textarea placeholder="Write in your posting!" class="post-textarea"></textarea>
+                    <div class="post-tools">
+                        <div class="tool-icons">
+                            <button class="tool-btn">📎</button>
+                        </div>
+                        <button class="post-submit-btn">POST</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Comment Section -->
+    <section class="content-section">
+        <div class="section-grid">
+            <div class="comment-mockup">
+                <div class="interaction-buttons">
+                    <button class="interaction-btn">
+                        <span class="heart-icon">♡</span>
+                        <span>Heart</span>
+                    </button>
+                    <button class="interaction-btn active">
+                        <span class="comment-icon">💬</span>
+                        <span>COMMENT</span>
+                    </button>
+                    <button class="interaction-btn">
+                        <span class="share-icon">↗</span>
+                        <span>SHARE</span>
+                    </button>
+                </div>
+                <div class="comment-input-section">
+                    <div class="comment-avatar">
+                        <img src="../assets/pokemon (2).png" alt="User" class="comment-avatar-img">
+                    </div>
+                    <div class="comment-input-wrapper">
+                        <input type="text" placeholder="Write your comment.." class="comment-input">
+                        <button class="send-comment-btn">▶</button>
+                    </div>
+                </div>
+            </div>
+            <div class="section-content">
+                <h2>Comment</h2>
+                <p>Community members can leave comments on posts for updates, or ask questions. Comments make it easier to clarify details and reconnect items with their rightful owners.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Search Section -->
+    <section class="content-section">
+        <div class="search-grid">
+            <div class="search-content">
+                <h2>Search</h2>
+                <p>Easily browse or search for items using keywords or filters. iFind helps you quickly check if your lost item has already been found or reported.</p>
+            </div>
+            <div class="search-mockup">
+                <div class="search-input-wrapper">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" placeholder="Type in search" class="search-input" readonly>
+                    <button class="filter-btn">☰</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <hr style="width: 100%; height: 2px; background-color: black; border: none;">
+
+    <!-- Team Section -->
+    <section class="team-section">
+        <div class="content-section">
+            <h2>Meet the team</h2>
+            <div class="team-grid">
+                <div class="team-member">
+                    <div class="team-avatar">
+                        <img src="../assets/hajj.jpg" alt="Vhan Hajj Macaria">
+                    </div>
+                    <div class="team-name">Vhan Hajj Macaria</div>
+                </div>
+                <div class="team-member">
+                    <div class="team-avatar">
+                        <img src="../assets/hajj.jpg" alt="Patrick Mandrilla">
+                    </div>
+                    <div class="team-name">Patrick Mandrilla</div>
+                </div>
+                <div class="team-member">
+                    <div class="team-avatar">
+                        <img src="../assets/ronald.jpg" alt="Denese Manuel">
+                    </div>
+                    <div class="team-name">Denese Manuel</div>
+                </div>
+                <div class="team-member">
+                    <div class="team-avatar">
+                        <img src="../assets/ronald.jpg" alt="Ronald Rafael Sena">
+                    </div>
+                    <div class="team-name">Ronald Rafael Sena</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-left">
+                <p>iFind 2025 ©</p>
+            </div>
+            <div class="footer-right">
+                <p>All rights reserved</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../js/about.js"></script>
+    
+    <!-- Direct 3D Kitty Script -->
+    <script>
+        // Wait for Three.js to load
+        window.addEventListener('load', function() {
+            // Check if THREE is available
+            if (typeof THREE === 'undefined') {
+                console.error('THREE.js not loaded');
+                return;
+            }
+            
+            // Check if GLTFLoader is available
+            if (typeof THREE.GLTFLoader === 'undefined') {
+                console.error('GLTFLoader not loaded');
+                return;
+            }
+            
+            console.log('Starting 3D kitty setup...');
+            
+            // Get container
+            const container = document.getElementById('kitty-container');
+            const fallbackImg = document.getElementById('fallback-kitty');
+            
+            // Scene setup
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(100, 1, 2.1, 1000);
+            const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            renderer.setSize(595, 595);
+            renderer.setClearColor(0x000000, 0);
+            
+            // Create canvas element
+            const canvas = renderer.domElement;
+            canvas.className = 'robot';
+            canvas.style.borderRadius = '';
+            
+            // Add canvas to container (but keep fallback visible until model loads)
+            container.appendChild(canvas);
+            
+            // Lighting
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+            scene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(5, 5, 5);
+            scene.add(directionalLight);
+            
+            // Position camera
+            camera.position.z = 6;
+            
+            // Load model - using direct URL
+            const loader = new THREE.GLTFLoader();
+            let kitty;
+            
+            console.log('Loading kitty model...');
+            loader.load(
+                'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Curious_Kitty_Explore_0529151010_texture-wBwTsz5KyKWgg99urTfnWp0r1pfaPC.glb', // Direct URL to your model
+                function(gltf) {
+                    console.log('Kitty model loaded successfully!');
+                    kitty = gltf.scene;
+                    
+                    // Make it bigger and position properly
+                    kitty.scale.set(5, 5, 5); // Much bigger now
+                    kitty.position.set(0, 0.2, 0); // Raised up a bit
+                    kitty.rotation.y = 0; // Face forward (no rotation)
+                    kitty.rotation.x = 0; // No tilt
+                    kitty.rotation.z = 0; // No roll
+                    
+                    scene.add(kitty);
+                    
+                    // Hide fallback image once model is loaded
+                    fallbackImg.style.display = 'none';
+                },
+                function(progress) {
+                    console.log('Loading progress: ' + (progress.loaded / progress.total * 100) + '%');
+                },
+                function(error) {
+                    console.error('Error loading kitty model:', error);
+                }
+            );
+            
+            // Mouse interaction
+            let mouseX = 0, mouseY = 0;
+            container.addEventListener('mousemove', function(e) {
+                const rect = container.getBoundingClientRect();
+                mouseX = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+                mouseY = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+            });
+            
+            // Animation loop
+            function animate() {
+                requestAnimationFrame(animate);
+                
+                if (kitty) {
+                    // More subtle rotation based on mouse position
+                    kitty.rotation.y = mouseX * 0.6; // Less rotation
+                    kitty.rotation.x = mouseY * 0.3; // Very subtle tilt
+                    
+                    // Gentle floating animation
+                    kitty.position.y = -0.5 + Math.sin(Date.now() * 0.001) * 0.1;
+                }
+                
+                renderer.render(scene, camera);
+            }
+            
+            animate();
+        });
+    </script>
+</body>
+</html>

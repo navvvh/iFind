@@ -1,16 +1,174 @@
-// Get user data from localStorage
-const storedUser = JSON.parse(localStorage.getItem("mockUser")) || {}
+// UPDATED: Enhanced getCurrentUserData with setup data synchronization
+function getCurrentUserData() {
+  // Priority order: userProfile > ifindUserData > mockUser > userData > userSession
+  const userProfile = JSON.parse(localStorage.getItem("userProfile")) || {}
+  const ifindUserData = JSON.parse(localStorage.getItem("ifindUserData")) || {}
+  const mockUser = JSON.parse(localStorage.getItem("mockUser")) || {}
+  const userData = JSON.parse(localStorage.getItem("userData")) || {}
+  const sessionData = JSON.parse(localStorage.getItem("userSession")) || {}
 
-// Create currentUser object
-const currentUser = {
-  id: 1,
-  name: storedUser.username || "Ang Pogi",
-  username: storedUser.username ? `@${storedUser.username}` : "@angpogi",
-  email: storedUser.email || "user@example.com",
-  role: storedUser.role || "STUDENT",
-  contact: "fb.com/username",
-  avatar: storedUser.avatar || null,
+  // Create unified user object with proper fallback chain
+  return {
+    name:
+      userProfile.name ||
+      ifindUserData.name ||
+      mockUser.username ||
+      userData.username ||
+      sessionData.username ||
+      "Ang Pogi",
+    username:
+      userProfile.username ||
+      ifindUserData.name?.toLowerCase().replace(/\s+/g, "") ||
+      mockUser.username ||
+      userData.username ||
+      sessionData.username ||
+      "angpogi",
+    email: userProfile.email || mockUser.email || userData.email || sessionData.email || "user@example.com",
+    role: userProfile.role || ifindUserData.role?.toUpperCase() || mockUser.role || "STUDENT",
+
+    // Enhanced avatar handling
+    avatar: userProfile.avatar || mockUser.avatar || null,
+    avatarId: userProfile.avatarId || ifindUserData.avatarId || mockUser.avatarId || null,
+    avatarEmoji: userProfile.avatarEmoji || ifindUserData.avatar || null,
+
+    contact:
+      userProfile.contact ||
+      `fb.com/${(userProfile.username || ifindUserData.name?.toLowerCase().replace(/\s+/g, "") || mockUser.username || userData.username || sessionData.username || "username").toLowerCase()}`,
+
+    // Setup completion status
+    completedSetup: userProfile.completedSetup || Boolean(ifindUserData.name && ifindUserData.role),
+  }
 }
+
+// Add the syncUserData function to profile.js
+function syncUserData(updatedData = {}) {
+  // Get current data from all sources
+  const userProfile = JSON.parse(localStorage.getItem("userProfile")) || {}
+  const ifindUserData = JSON.parse(localStorage.getItem("ifindUserData")) || {}
+  const mockUser = JSON.parse(localStorage.getItem("mockUser")) || {}
+  const userData = JSON.parse(localStorage.getItem("userData")) || {}
+  const sessionData = JSON.parse(localStorage.getItem("userSession")) || {}
+
+  // Create updated userProfile (main source of truth)
+  const newUserProfile = {
+    ...userProfile,
+    ...updatedData,
+    name:
+      updatedData.name ||
+      userProfile.name ||
+      ifindUserData.name ||
+      mockUser.username ||
+      userData.username ||
+      sessionData.username,
+    username:
+      updatedData.username ||
+      userProfile.username ||
+      ifindUserData.name?.toLowerCase().replace(/\s+/g, "") ||
+      mockUser.username ||
+      userData.username ||
+      sessionData.username,
+    email: updatedData.email || userProfile.email || mockUser.email || userData.email || sessionData.email,
+    role: updatedData.role || userProfile.role || ifindUserData.role?.toUpperCase() || mockUser.role,
+    avatar: updatedData.avatar !== undefined ? updatedData.avatar : userProfile.avatar || mockUser.avatar,
+    avatarId:
+      updatedData.avatarId !== undefined
+        ? updatedData.avatarId
+        : userProfile.avatarId || ifindUserData.avatarId || mockUser.avatarId,
+    avatarEmoji:
+      updatedData.avatarEmoji !== undefined ? updatedData.avatarEmoji : userProfile.avatarEmoji || ifindUserData.avatar,
+    completedSetup:
+      updatedData.completedSetup !== undefined
+        ? updatedData.completedSetup
+        : userProfile.completedSetup || Boolean(ifindUserData.name && ifindUserData.role),
+    lastUpdated: new Date().toISOString(),
+  }
+
+  // Generate initials if name exists
+  if (newUserProfile.name) {
+    newUserProfile.initials = newUserProfile.name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .substring(0, 2)
+  }
+
+  // Format username with @ if needed
+  if (newUserProfile.username && !newUserProfile.username.startsWith("@")) {
+    newUserProfile.username = "@" + newUserProfile.username
+  }
+
+  // Update userProfile (main source of truth)
+  localStorage.setItem("userProfile", JSON.stringify(newUserProfile))
+
+  // Update ifindUserData
+  const newIfindUserData = {
+    ...ifindUserData,
+    name: newUserProfile.name,
+    role: newUserProfile.role?.toLowerCase(),
+    avatar: newUserProfile.avatarEmoji,
+    avatarId: newUserProfile.avatarId,
+    uploadedImage: newUserProfile.avatar,
+  }
+  localStorage.setItem("ifindUserData", JSON.stringify(newIfindUserData))
+
+  // Update mockUser
+  const newMockUser = {
+    ...mockUser,
+    username: newUserProfile.username.replace("@", ""),
+    email: newUserProfile.email,
+    role: newUserProfile.role,
+    avatar: newUserProfile.avatar,
+    avatarId: newUserProfile.avatarId,
+    avatarEmoji: newUserProfile.avatarEmoji,
+  }
+  localStorage.setItem("mockUser", JSON.stringify(newMockUser))
+
+  // Update userData
+  const newUserData = {
+    ...userData,
+    username: newUserProfile.username.replace("@", ""),
+    email: newUserProfile.email,
+  }
+  localStorage.setItem("userData", JSON.stringify(newUserData))
+
+  // Update userSession
+  const newSessionData = {
+    ...sessionData,
+    username: newUserProfile.username.replace("@", ""),
+    email: newUserProfile.email,
+    profileComplete: true,
+    lastUpdated: new Date().toISOString(),
+  }
+  localStorage.setItem("userSession", JSON.stringify(newSessionData))
+
+  // Update all existing posts with new user information
+  const allPosts = JSON.parse(localStorage.getItem("userPosts")) || []
+  const updatedPosts = allPosts.map((post) => {
+    if (post.userId === "current_user") {
+      return {
+        ...post,
+        userName: newUserProfile.name,
+        userHandle: newUserProfile.username,
+        userRole: newUserProfile.role,
+        userInitials: newUserProfile.initials,
+        avatar: newUserProfile.avatar,
+        avatarId: newUserProfile.avatarId,
+        avatarEmoji: newUserProfile.avatarEmoji,
+      }
+    }
+    return post
+  })
+  localStorage.setItem("userPosts", JSON.stringify(updatedPosts))
+
+  // Dispatch storage event to notify other pages
+  window.dispatchEvent(new Event("storage"))
+
+  return newUserProfile
+}
+
+// Create currentUser object - will be updated dynamically
+const currentUser = getCurrentUserData()
 
 // DOM Elements
 const hamburgerMenu = document.getElementById("hamburger-menu")
@@ -25,7 +183,7 @@ const profileFileNameDisplay = document.getElementById("edit-profile-file-name")
 const navFeed = document.getElementById("nav-feed")
 
 // Track if we're editing a post
-let editingPostId = null
+const editingPostId = null
 
 // Load user posts from localStorage
 function loadUserPosts() {
@@ -58,26 +216,53 @@ function displayUserPosts(posts) {
 // Function to determine image container class based on dimensions
 function getImageContainerClass(img) {
   const aspectRatio = img.naturalWidth / img.naturalHeight
-  
+
   if (aspectRatio > 2) {
-    return 'wide-image'
+    return "wide-image"
   } else if (aspectRatio < 0.75) {
-    return 'tall-image'
+    return "tall-image"
   }
-  return ''
+  return ""
 }
 
-// Create post element for profile page with improved image handling
+// UPDATED: Enhanced createProfilePostElement with setup data avatar support
 function createProfilePostElement(postData) {
   const postElement = document.createElement("div")
   postElement.className = "post"
   postElement.dataset.postId = postData.id
 
-  const avatarHTML = postData.avatar
-    ? `<img src="${postData.avatar}" alt="${postData.userName}" style="width: 100%; height: 100%; object-fit: cover;">`
-    : `<div class="default-avatar">${postData.userInitials}</div>`
+  // Enhanced avatar display - support uploaded images, emoji avatars, and setup data
+  let avatarHTML = ""
+  if (postData.avatar) {
+    // User uploaded image
+    avatarHTML = `<img src="${postData.avatar}" alt="${postData.userName}" style="width: 100%; height: 100%; object-fit: cover;">`
+  } else if (postData.avatarEmoji && postData.avatarEmoji !== "👤") {
+    // Emoji avatar from setup
+    avatarHTML = `<div class="default-avatar" style="font-size: 20px;">${postData.avatarEmoji}</div>`
+  } else if (postData.avatarId) {
+    // Legacy emoji avatar system
+    const avatarEmojis = [
+      "👨‍💼",
+      "👩‍💼",
+      "👨‍🎓",
+      "👩‍🎓",
+      "👨‍🏫",
+      "👩‍🏫",
+      "👨‍💻",
+      "👩‍💻",
+      "👨‍🔬",
+      "👩‍🔬",
+      "👨‍🎨",
+      "👩‍🎨",
+    ]
+    const emoji = avatarEmojis[postData.avatarId - 1] || "👤"
+    avatarHTML = `<div class="default-avatar" style="font-size: 20px;">${emoji}</div>`
+  } else {
+    // Default initials
+    avatarHTML = `<div class="default-avatar">${postData.userInitials}</div>`
+  }
 
-  // Create image HTML with proper container - same as main feed
+  // Create image HTML with proper container
   let imageHTML = ""
   if (postData.image) {
     imageHTML = `
@@ -158,12 +343,11 @@ function createProfilePostElement(postData) {
 }
 
 // Global functions for profile image handling
-window.handleProfileImageLoad = function(img, postId) {
+window.handleProfileImageLoad = (img, postId) => {
   const container = document.getElementById(`profile-image-container-${postId}`)
   if (container) {
-    container.classList.remove('loading')
-    
-    // Add appropriate class based on image dimensions
+    container.classList.remove("loading")
+
     const containerClass = getImageContainerClass(img)
     if (containerClass) {
       container.classList.add(containerClass)
@@ -171,10 +355,10 @@ window.handleProfileImageLoad = function(img, postId) {
   }
 }
 
-window.handleProfileImageError = function(img, postId) {
+window.handleProfileImageError = (img, postId) => {
   const container = document.getElementById(`profile-image-container-${postId}`)
   if (container) {
-    container.classList.remove('loading')
+    container.classList.remove("loading")
     container.innerHTML = `
       <div style="padding: 40px; text-align: center; color: #666;">
         <i class="fas fa-image" style="font-size: 48px; margin-bottom: 16px;"></i>
@@ -205,7 +389,6 @@ function markAsClaimed(postId) {
 }
 
 function editPost(postId) {
-  // Store the post ID and redirect to main page with edit parameter
   localStorage.setItem("editPostId", postId)
   window.location.href = "main.html?edit=" + postId
 }
@@ -251,18 +434,48 @@ document.addEventListener("click", (event) => {
 
 // Initialize profile page
 function init() {
+  // Check if user has completed setup
+  if (!currentUser.completedSetup) {
+    // Redirect to setup if not completed
+    window.location.href = "setup.html"
+    return
+  }
+
   updateProfileDisplay()
   setupEventListeners()
   loadUserPosts()
 }
 
-// Update profile display with current user data
+// UPDATED: Enhanced updateProfileDisplay with setup data avatar support
 function updateProfileDisplay() {
   const profileNavAvatar = document.getElementById("profile-nav-avatar")
   if (profileNavAvatar) {
     if (currentUser.avatar) {
-      profileNavAvatar.innerHTML = `<img src="${currentUser.avatar}" alt="${currentUser.name}">`
+      // User uploaded image
+      profileNavAvatar.innerHTML = `<img src="${currentUser.avatar}" alt="${currentUser.name}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`
+    } else if (currentUser.avatarEmoji && currentUser.avatarEmoji !== "👤") {
+      // Emoji avatar from setup
+      profileNavAvatar.innerHTML = `<div class="default-avatar-nav" style="font-size: 20px;">${currentUser.avatarEmoji}</div>`
+    } else if (currentUser.avatarId) {
+      // Legacy emoji avatar system
+      const avatarEmojis = [
+        "👨‍💼",
+        "👩‍💼",
+        "👨‍🎓",
+        "👩‍🎓",
+        "👨‍🏫",
+        "👩‍🏫",
+        "👨‍💻",
+        "👩‍💻",
+        "👨‍🔬",
+        "👩‍🔬",
+        "👨‍🎨",
+        "👩‍🎨",
+      ]
+      const emoji = avatarEmojis[currentUser.avatarId - 1] || "👤"
+      profileNavAvatar.innerHTML = `<div class="default-avatar-nav" style="font-size: 20px;">${emoji}</div>`
     } else {
+      // Default initials
       const initials = currentUser.name
         .split(" ")
         .map((n) => n[0])
@@ -274,8 +487,31 @@ function updateProfileDisplay() {
   const profileAvatarLarge = document.querySelector(".profile-avatar-large")
   if (profileAvatarLarge) {
     if (currentUser.avatar) {
-      profileAvatarLarge.innerHTML = `<img src="${currentUser.avatar}" alt="${currentUser.name}">`
+      // User uploaded image
+      profileAvatarLarge.innerHTML = `<img src="${currentUser.avatar}" alt="${currentUser.name}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`
+    } else if (currentUser.avatarEmoji && currentUser.avatarEmoji !== "👤") {
+      // Emoji avatar from setup
+      profileAvatarLarge.innerHTML = `<div class="default-avatar-large" style="font-size: 60px;">${currentUser.avatarEmoji}</div>`
+    } else if (currentUser.avatarId) {
+      // Legacy emoji avatar system
+      const avatarEmojis = [
+        "👨‍💼",
+        "👩‍💼",
+        "👨‍🎓",
+        "👩‍🎓",
+        "👨‍🏫",
+        "👩‍🏫",
+        "👨‍💻",
+        "👩‍💻",
+        "👨‍🔬",
+        "👩‍🔬",
+        "👨‍🎨",
+        "👩‍🎨",
+      ]
+      const emoji = avatarEmojis[currentUser.avatarId - 1] || "👤"
+      profileAvatarLarge.innerHTML = `<div class="default-avatar-large" style="font-size: 60px;">${emoji}</div>`
     } else {
+      // Default initials
       const initials = currentUser.name
         .split(" ")
         .map((n) => n[0])
@@ -291,7 +527,8 @@ function updateProfileDisplay() {
 
   const profileUsernameLarge = document.querySelector(".profile-username-large")
   if (profileUsernameLarge) {
-    profileUsernameLarge.textContent = currentUser.username
+    const username = currentUser.username.startsWith("@") ? currentUser.username : "@" + currentUser.username
+    profileUsernameLarge.textContent = username
   }
 
   const profileRoleLarge = document.querySelector(".profile-role-large")
@@ -305,7 +542,7 @@ function updateProfileDisplay() {
     profileContactValue.href = `https://${currentUser.contact}`
   }
 
-  // Update edit form values (removed role field)
+  // Update edit form values
   document.getElementById("edit-name").value = currentUser.name
   document.getElementById("edit-username").value = currentUser.username.replace("@", "")
   document.getElementById("edit-contact").value = currentUser.contact
@@ -313,8 +550,31 @@ function updateProfileDisplay() {
   const profileEditAvatar = document.querySelector(".profile-edit-avatar")
   if (profileEditAvatar) {
     if (currentUser.avatar) {
-      profileEditAvatar.innerHTML = `<img src="${currentUser.avatar}" alt="${currentUser.name}">`
+      // User uploaded image
+      profileEditAvatar.innerHTML = `<img src="${currentUser.avatar}" alt="${currentUser.name}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`
+    } else if (currentUser.avatarEmoji && currentUser.avatarEmoji !== "👤") {
+      // Emoji avatar from setup
+      profileEditAvatar.innerHTML = `<div class="default-avatar" style="font-size: 40px;">${currentUser.avatarEmoji}</div>`
+    } else if (currentUser.avatarId) {
+      // Legacy emoji avatar system
+      const avatarEmojis = [
+        "👨‍💼",
+        "👩‍💼",
+        "👨‍🎓",
+        "👩‍🎓",
+        "👨‍🏫",
+        "👩‍🏫",
+        "👨‍💻",
+        "👩‍💻",
+        "👨‍🔬",
+        "👩‍🔬",
+        "👨‍🎨",
+        "👩‍🎨",
+      ]
+      const emoji = avatarEmojis[currentUser.avatarId - 1] || "👤"
+      profileEditAvatar.innerHTML = `<div class="default-avatar" style="font-size: 40px;">${emoji}</div>`
     } else {
+      // Default initials
       const initials = currentUser.name
         .split(" ")
         .map((n) => n[0])
@@ -345,47 +605,212 @@ function setupEventListeners() {
     }
   })
 
-  // Profile form submission (removed role handling)
+  // UPDATED: Enhanced profile form submission with setup data synchronization and image validation
   profileEditForm.addEventListener("submit", (e) => {
     e.preventDefault()
 
-    currentUser.name = document.getElementById("edit-name").value
-    currentUser.username = "@" + document.getElementById("edit-username").value.replace("@", "")
-    currentUser.contact = document.getElementById("edit-contact").value
+    const newName = document.getElementById("edit-name").value.trim()
+    const newUsername = document.getElementById("edit-username").value.replace("@", "").trim()
+    const newContact = document.getElementById("edit-contact").value.trim()
+
+    // Validation
+    if (!newName) {
+      alert("Name is required")
+      return
+    }
+
+    if (!newUsername) {
+      alert("Username is required")
+      return
+    }
+
+    if (!newContact) {
+      alert("Contact is required")
+      return
+    }
+
+    // Update current user object
+    const updatedData = {
+      name: newName,
+      username: newUsername,
+      contact: newContact,
+    }
 
     const imageFile = profileImageInput.files[0]
     if (imageFile) {
+      // Validate file type
+      if (!imageFile.type.startsWith("image/")) {
+        alert("Please select a valid image file.")
+        return
+      }
+
+      // Validate file size (max 5MB)
+      if (imageFile.size > 5 * 1024 * 1024) {
+        alert("File size must be less than 5MB.")
+        return
+      }
+
       const reader = new FileReader()
       reader.onload = (e) => {
-        currentUser.avatar = e.target.result
+        updatedData.avatar = e.target.result
+        updatedData.avatarId = null // Clear emoji avatar when uploading image
+        updatedData.avatarEmoji = null // Clear setup emoji when uploading image
 
-        const storedUser = JSON.parse(localStorage.getItem("mockUser")) || {}
-        storedUser.avatar = currentUser.avatar
-        storedUser.username = currentUser.username.replace("@", "")
-        localStorage.setItem("mockUser", JSON.stringify(storedUser))
+        // Use the centralized data synchronization function
+        syncUserData(updatedData)
 
+        // Update current user object with new data
+        Object.assign(currentUser, getCurrentUserData())
         updateProfileDisplay()
+        loadUserPosts() // Reload posts to reflect any changes
         closeModal()
+
+        // Show success message
+        alert("Profile updated successfully!")
       }
       reader.readAsDataURL(imageFile)
     } else {
-      const storedUser = JSON.parse(localStorage.getItem("mockUser")) || {}
-      storedUser.username = currentUser.username.replace("@", "")
-      localStorage.setItem("mockUser", JSON.stringify(storedUser))
+      // Use the centralized data synchronization function
+      syncUserData(updatedData)
 
+      // Update current user object with new data
+      Object.assign(currentUser, getCurrentUserData())
       updateProfileDisplay()
+      loadUserPosts() // Reload posts to reflect any changes
       closeModal()
+
+      // Show success message
+      alert("Profile updated successfully!")
     }
   })
 
+  // ENHANCED: Profile image input with validation and preview
   profileImageInput.addEventListener("change", (e) => {
-    if (e.target.files.length > 0) {
-      profileFileNameDisplay.textContent = e.target.files[0].name
+    const file = e.target.files[0]
+
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith("image/")) {
+        alert("Please select a valid image file.")
+        e.target.value = ""
+        profileFileNameDisplay.textContent = ""
+        return
+      }
+
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        alert("File size must be less than 5MB.")
+        e.target.value = ""
+        profileFileNameDisplay.textContent = ""
+        return
+      }
+
+      profileFileNameDisplay.textContent = file.name
+
+      // Show preview
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        const profileEditAvatar = document.querySelector(".profile-edit-avatar")
+        if (profileEditAvatar) {
+          profileEditAvatar.innerHTML = `<img src="${e.target.result}" alt="Preview" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`
+        }
+      }
+      reader.readAsDataURL(file)
     } else {
       profileFileNameDisplay.textContent = ""
     }
   })
 }
+
+// UPDATED: Enhanced function to update all localStorage sources for synchronization
+function updateAllUserDataSources() {
+  // Update userProfile (main source of truth)
+  const userProfile = {
+    name: currentUser.name,
+    username: currentUser.username,
+    email: currentUser.email,
+    role: currentUser.role,
+    avatar: currentUser.avatar,
+    avatarId: currentUser.avatarId,
+    avatarEmoji: currentUser.avatarEmoji,
+    contact: currentUser.contact,
+    completedSetup: true,
+    setupDate: new Date().toISOString(),
+    initials: currentUser.name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .substring(0, 2),
+  }
+  localStorage.setItem("userProfile", JSON.stringify(userProfile))
+
+  // Update ifindUserData for backward compatibility
+  const ifindUserData = {
+    name: currentUser.name,
+    avatar: currentUser.avatarEmoji || currentUser.avatar || "👤",
+    avatarId: currentUser.avatarId,
+    role: currentUser.role.toLowerCase(),
+    uploadedImage: currentUser.avatar,
+  }
+  localStorage.setItem("ifindUserData", JSON.stringify(ifindUserData))
+
+  // Update mockUser data (for existing code compatibility)
+  const mockUserData = {
+    username: currentUser.username,
+    email: currentUser.email,
+    role: currentUser.role,
+    avatar: currentUser.avatar,
+    avatarId: currentUser.avatarId,
+    avatarEmoji: currentUser.avatarEmoji,
+  }
+  localStorage.setItem("mockUser", JSON.stringify(mockUserData))
+
+  // Update session data
+  const sessionData = JSON.parse(localStorage.getItem("userSession")) || {}
+  sessionData.username = currentUser.username
+  sessionData.email = currentUser.email
+  sessionData.profileComplete = true
+  sessionData.lastUpdated = new Date().toISOString()
+  localStorage.setItem("userSession", JSON.stringify(sessionData))
+
+  // Update all existing posts with new user information
+  const allPosts = JSON.parse(localStorage.getItem("userPosts")) || []
+  const updatedPosts = allPosts.map((post) => {
+    if (post.userId === "current_user") {
+      return {
+        ...post,
+        userName: currentUser.name,
+        userHandle: currentUser.username.startsWith("@") ? currentUser.username : "@" + currentUser.username,
+        userRole: currentUser.role,
+        userInitials: currentUser.name
+          .split(" ")
+          .map((n) => n[0])
+          .join("")
+          .toUpperCase()
+          .substring(0, 2),
+        avatar: currentUser.avatar,
+        avatarId: currentUser.avatarId,
+        avatarEmoji: currentUser.avatarEmoji,
+      }
+    }
+    return post
+  })
+  localStorage.setItem("userPosts", JSON.stringify(updatedPosts))
+
+  // Reload posts to reflect changes
+  loadUserPosts()
+}
+
+// ADDED: Listen for setup completion and refresh user data
+window.addEventListener("storage", (e) => {
+  if (e.key === "userProfile" || e.key === "ifindUserData") {
+    // Refresh current user data
+    Object.assign(currentUser, getCurrentUserData())
+    updateProfileDisplay()
+    loadUserPosts()
+  }
+})
 
 // Listen for storage changes
 window.addEventListener("storage", (e) => {
@@ -401,3 +826,15 @@ document.addEventListener("visibilitychange", () => {
 })
 
 document.addEventListener("DOMContentLoaded", init)
+
+// Enhance the storage event listener
+window.addEventListener("storage", (e) => {
+  if (e.key === "userProfile" || e.key === "ifindUserData") {
+    // Refresh current user data
+    Object.assign(currentUser, getCurrentUserData())
+    updateProfileDisplay()
+    loadUserPosts()
+  } else if (e.key === "userPosts") {
+    loadUserPosts()
+  }
+})

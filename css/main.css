@@ -51,11 +51,23 @@ body {
   background-color: #f0f2f5;
 }
 
-.seal-logo {
-  width: 40px;
-  height: 40px;
-  object-fit: cover;
+.hamburger-menu .profile-pic {
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
+  background-color: #e1e4e8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  overflow: hidden;
+  position: relative;
+}
+
+.hamburger-menu .profile-pic img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .logo-container {
@@ -70,6 +82,246 @@ body {
   height: 55px;
   width: auto;
   object-fit: contain;
+}
+
+/* Navbar Right Section */
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+/* Notification Bell */
+.notification-icon {
+  position: relative;
+  cursor: pointer;
+  padding: 12px;
+  border-radius: 50%;
+  background-color: #f8f9fa;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.notification-icon:hover {
+  background-color: #e9ecef;
+}
+
+.notification-icon i {
+  font-size: 20px;
+  color: var(--gray-text);
+}
+
+.notification-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background-color: #dc3545;
+  color: white;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  font-size: 11px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid white;
+}
+
+/* Announcement Icon */
+.announcement-icon {
+  position: relative;
+  cursor: pointer;
+  padding: 12px;
+  border-radius: 50%;
+  background-color: #f8f9fa;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.announcement-icon:hover {
+  background-color: #e9ecef;
+}
+
+.announcement-icon i {
+  font-size: 20px;
+  color: var(--gray-text);
+}
+
+/* Notification Dropdown */
+.notification-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: 350px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  border: 1px solid var(--border-color);
+  z-index: 1001;
+  display: none;
+  margin-top: 8px;
+  max-height: 400px;
+  overflow: hidden;
+}
+
+.notification-dropdown.active {
+  display: block;
+  animation: slideDown 0.3s ease;
+}
+
+/* Announcement Dropdown */
+.announcement-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: 320px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  border: 1px solid var(--border-color);
+  z-index: 1001;
+  display: none;
+  margin-top: 8px;
+  max-height: 350px;
+  overflow: hidden;
+}
+
+.announcement-dropdown.active {
+  display: block;
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.notification-header,
+.announcement-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.notification-header h4,
+.announcement-header h4 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-color);
+  margin: 0;
+}
+
+.mark-all-read {
+  background: none;
+  border: none;
+  color: var(--primary-color);
+  font-size: 12px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.mark-all-read:hover {
+  background-color: rgba(10, 31, 68, 0.1);
+}
+
+.notification-list,
+.announcement-list {
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.notification-item,
+.announcement-item {
+  padding: 16px 20px;
+  border-bottom: 1px solid #f8f9fa;
+  display: flex;
+  gap: 12px;
+  transition: background-color 0.2s;
+  cursor: pointer;
+}
+
+.notification-item:hover,
+.announcement-item:hover {
+  background-color: #f8f9fa;
+}
+
+.notification-item.unread {
+  background-color: rgba(10, 31, 68, 0.02);
+  border-left: 3px solid var(--primary-color);
+}
+
+.notification-icon-small {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: #f8f9fa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.notification-content,
+.announcement-content {
+  flex: 1;
+}
+
+.notification-content p,
+.announcement-content p {
+  margin: 0 0 4px 0;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.notification-content p:first-child,
+.announcement-content p:first-child {
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.notification-content p:last-of-type,
+.announcement-content p:last-of-type {
+  color: var(--gray-text);
+}
+
+.notification-time,
+.announcement-time {
+  font-size: 12px;
+  color: var(--gray-text);
+  margin-top: 4px;
+  display: block;
+}
+
+.notification-footer {
+  padding: 12px 20px;
+  border-top: 1px solid var(--border-color);
+  text-align: center;
+}
+
+.view-all-notifications {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.view-all-notifications:hover {
+  text-decoration: underline;
 }
 
 .profile-pic {
@@ -110,7 +362,7 @@ body {
 
 /* Sidebar - Below navbar */
 .sidebar {
-  width: 289px;
+  width: 290px;
   background-color: var(--primary-color);
   color: var(--sidebar-text);
   display: flex;
@@ -124,7 +376,7 @@ body {
 
 .sidebar-content {
   flex: 1;
-  padding: 20px 0;
+  padding: 25px 0;
 }
 
 .nav-item {
@@ -133,7 +385,7 @@ body {
   padding: 16px 24px;
   cursor: pointer;
   transition: background-color 0.3s;
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 500;
 }
 
@@ -264,7 +516,7 @@ body {
   font-size: 14px;
 }
 
-/* Post Styles */
+/* Post Styles - COPIED FROM PROFILE PAGE FORMAT */
 .post {
   background-color: var(--white);
   border-radius: 12px;
@@ -272,7 +524,6 @@ body {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   position: relative;
-  transition: all 0.3s ease;
 }
 
 .post.claimed {
@@ -308,6 +559,14 @@ body {
   font-size: 14px;
   color: var(--gray-text);
   line-height: 1.3;
+  margin-bottom: 2px;
+}
+
+.post-time {
+  font-size: 12px;
+  color: var(--gray-text);
+  margin-top: 2px;
+  font-weight: 400;
 }
 
 .post-options {
@@ -438,7 +697,7 @@ body {
   color: #333;
 }
 
-/* FACEBOOK-STYLE IMAGE CONTAINER - Perfect image fitting */
+/* IMAGE CONTAINER - COPIED FROM PROFILE PAGE FORMAT */
 .post-image-container {
   width: 100%;
   max-height: 500px;
@@ -873,7 +1132,6 @@ body {
   padding: 12px 16px;
   border-radius: 8px;
   margin-bottom: 16px;
-  font-weight: 500;
 }
 
 .message.success {
@@ -890,6 +1148,16 @@ body {
 
 /* Responsive Design */
 @media (max-width: 768px) {
+  .navbar-right {
+    gap: 8px;
+  }
+
+  .notification-dropdown,
+  .announcement-dropdown {
+    width: 280px;
+    right: -20px;
+  }
+
   .sidebar {
     transform: translateX(-100%);
     transition: transform 0.3s ease;
@@ -937,14 +1205,20 @@ body {
     height: 45px;
   }
 
-  .profile-pic {
-    width: 45px;
-    height: 45px;
+  .hamburger-menu .profile-pic {
+    width: 40px;
+    height: 40px;
   }
 
-  .seal-logo {
-    width: 35px;
-    height: 35px;
+  .notification-icon,
+  .announcement-icon {
+    padding: 8px;
+  }
+
+  .notification-dropdown,
+  .announcement-dropdown {
+    width: 260px;
+    right: -30px;
   }
 
   .post-image-container {
