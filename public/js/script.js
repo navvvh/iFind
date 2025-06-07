@@ -2,6 +2,7 @@ const container = document.getElementById("container")
 const registerBtn = document.getElementById("register")
 const loginBtn = document.getElementById("login")
 const welcomeModal = document.getElementById("welcome-modal")
+const errorModal = document.getElementById("error-modal")
 
 // Toggle between sign up and sign in
 registerBtn.addEventListener("click", (e) => {
@@ -12,6 +13,24 @@ registerBtn.addEventListener("click", (e) => {
 loginBtn.addEventListener("click", (e) => {
   e.preventDefault()
   container.classList.remove("active")
+})
+
+// Error modal functions
+function showErrorModal(message = "Invalid username or password") {
+  const errorMessage = document.querySelector(".error-message")
+  errorMessage.textContent = message
+  errorModal.classList.add("show")
+}
+
+function closeErrorModal() {
+  errorModal.classList.remove("show")
+}
+
+// Close error modal when clicking outside
+errorModal.addEventListener("click", (event) => {
+  if (event.target === errorModal) {
+    closeErrorModal()
+  }
 })
 
 // Add the syncUserData function to script.js
@@ -141,22 +160,29 @@ function syncUserData(updatedData = {}) {
   return newUserProfile
 }
 
-// Update the signup form handler to use syncUserData
-document.getElementById("signup-form").addEventListener("submit", (event) => {
+// Update the signup form handler to use SweetAlert2
+document.getElementById("signup-form").addEventListener("submit", async (event) => {
   event.preventDefault()
 
-  const username = document.getElementById("signup-username").value
-  const email = document.getElementById("signup-email").value
+  const username = document.getElementById("signup-username").value.trim()
+  const email = document.getElementById("signup-email").value.trim()
   const password = document.getElementById("signup-password").value
 
   // Basic validation
   if (!username || !email || !password) {
-    alert("Please fill in all fields")
+    showErrorModal("Please fill in all fields")
     return
   }
 
   if (password.length < 6) {
-    alert("Password must be at least 6 characters long")
+    showErrorModal("Password must be at least 6 characters long")
+    return
+  }
+
+  // Email validation
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  if (!emailRegex.test(email)) {
+    showErrorModal("Please enter a valid email address")
     return
   }
 
@@ -173,9 +199,21 @@ document.getElementById("signup-form").addEventListener("submit", (event) => {
   userData.password = password
   localStorage.setItem("userData", JSON.stringify(userData))
 
-  // Show success message and switch to login
-  alert("Account created successfully! Please log in.")
-  container.classList.remove("active") // Switch to login form
+  // Show SweetAlert2 success notification
+  await Swal.fire({
+    position: "top-end",
+    icon: "success",
+    title: "Your work has been saved",
+    showConfirmButton: false,
+    timer: 1500,
+    toast: true,
+    background: "#fff",
+    color: "#0a2342",
+    iconColor: "#28a745",
+  })
+
+  // Switch to login form after the alert
+  container.classList.remove("active")
 
   // Clear signup form
   document.getElementById("signup-form").reset()
@@ -185,8 +223,14 @@ document.getElementById("signup-form").addEventListener("submit", (event) => {
 document.getElementById("login-form").addEventListener("submit", (event) => {
   event.preventDefault()
 
-  const email = document.getElementById("login-email").value
+  const email = document.getElementById("login-email").value.trim()
   const password = document.getElementById("login-password").value
+
+  // Basic validation - only show error modal for actual validation issues
+  if (!email || !password) {
+    showErrorModal("Please fill in all fields")
+    return
+  }
 
   // Get stored user data
   const storedUserData = localStorage.getItem("userData")
@@ -197,11 +241,15 @@ document.getElementById("login-form").addEventListener("submit", (event) => {
     if (email === userData.email && password === userData.password) {
       // Successful login - show welcome modal
       showWelcomeModal()
+      // Clear login form
+      document.getElementById("login-form").reset()
     } else {
-      alert("Invalid email or password")
+      // Show error modal only for wrong credentials
+      showErrorModal("Invalid username or password")
     }
   } else {
-    alert("No account found. Please sign up first.")
+    // Show error modal for no account found
+    showErrorModal("No account found. Please sign up first.")
   }
 })
 

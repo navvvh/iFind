@@ -45,6 +45,34 @@ function refreshCurrentUser() {
   Object.assign(currentUser, getCurrentUserData())
 }
 
+// NEW: Function to update existing comments with new user avatar data
+function updateExistingCommentsAvatar(newUserData) {
+  const allPosts = JSON.parse(localStorage.getItem("userPosts")) || []
+  let postsUpdated = false
+
+  allPosts.forEach((post) => {
+    if (post.comments && post.comments.length > 0) {
+      post.comments.forEach((comment) => {
+        // Update comments made by the current user
+        if (comment.authorHandle === newUserData.username || comment.author === newUserData.name) {
+          comment.author = newUserData.name
+          comment.authorHandle = newUserData.username
+          comment.authorInitials = newUserData.initials
+          comment.avatar = newUserData.avatar
+          comment.avatarId = newUserData.avatarId
+          comment.avatarEmoji = newUserData.avatarEmoji
+          postsUpdated = true
+        }
+      })
+    }
+  })
+
+  if (postsUpdated) {
+    localStorage.setItem("userPosts", JSON.stringify(allPosts))
+    loadUserPosts() // Refresh display
+  }
+}
+
 // Add the syncUserData function to profile.js
 function syncUserData(updatedData = {}) {
   // Get current data from all sources
@@ -166,6 +194,9 @@ function syncUserData(updatedData = {}) {
   })
   localStorage.setItem("userPosts", JSON.stringify(updatedPosts))
 
+  // NEW: Update existing comments with new avatar data
+  updateExistingCommentsAvatar(newUserProfile)
+
   // Dispatch storage event to notify other pages
   window.dispatchEvent(new Event("storage"))
 
@@ -282,6 +313,118 @@ function createProfilePostElement(postData) {
     `
   }
 
+  // UPDATED: Create comments HTML with current user avatar check
+  let commentsHTML = ""
+  const commentCount = (postData.comments && postData.comments.length) || 0
+  if (postData.comments && postData.comments.length > 0) {
+    commentsHTML = `
+    <div class="comments-list" style="display: none;">
+      ${postData.comments
+        .map((comment) => {
+          const currentUser = getCurrentUserData()
+          let commentAvatarHTML = ""
+
+          // Check if this comment is from the current user
+          if (comment.authorHandle === currentUser.username || comment.author === currentUser.name) {
+            // Use current user's avatar
+            if (currentUser.avatar) {
+              commentAvatarHTML = `<img src="${currentUser.avatar}" alt="${currentUser.name}" style="width: 100%; height: 100%; object-fit: cover;">`
+            } else if (currentUser.avatarEmoji && currentUser.avatarEmoji !== "👤") {
+              commentAvatarHTML = `<div class="default-avatar" style="font-size: 12px;">${currentUser.avatarEmoji}</div>`
+            } else if (currentUser.avatarId) {
+              const avatarEmojis = [
+                "👨‍💼",
+                "👩‍💼",
+                "👨‍🎓",
+                "👩‍🎓",
+                "👨‍🏫",
+                "👩‍🏫",
+                "👨‍💻",
+                "👩‍💻",
+                "👨‍🔬",
+                "👩‍🔬",
+                "👨‍🎨",
+                "👩‍🎨",
+              ]
+              const avatarIndex = Number.parseInt(currentUser.avatarId) - 1
+              const emoji = avatarEmojis[avatarIndex] || "👤"
+              commentAvatarHTML = `<div class="default-avatar" style="font-size: 12px;">${emoji}</div>`
+            } else {
+              commentAvatarHTML = `<div class="default-avatar" style="font-size: 12px;">${currentUser.name
+                .split(" ")
+                .map((n) => n[0])
+                .join("")
+                .toUpperCase()
+                .substring(0, 2)}</div>`
+            }
+          } else {
+            // Use stored comment avatar data
+            if (comment.avatar) {
+              commentAvatarHTML = `<img src="${comment.avatar}" alt="${comment.author}" style="width: 100%; height: 100%; object-fit: cover;">`
+            } else if (comment.avatarEmoji && comment.avatarEmoji !== "👤") {
+              commentAvatarHTML = `<div class="default-avatar" style="font-size: 12px;">${comment.avatarEmoji}</div>`
+            } else {
+              commentAvatarHTML = `<div class="default-avatar" style="font-size: 12px;">${comment.author
+                .split(" ")
+                .map((n) => n[0])
+                .join("")
+                .toUpperCase()
+                .substring(0, 2)}</div>`
+            }
+          }
+
+          return `
+          <div class="comment">
+            <div class="comment-avatar">
+              ${commentAvatarHTML}
+            </div>
+            <div class="comment-bubble">
+              <div class="comment-author">${comment.author}</div>
+              <div class="comment-text">${comment.text}</div>
+            </div>
+          </div>
+          <div class="comment-time">${formatPostTime(comment.timestamp)}</div>
+        `
+        })
+        .join("")}
+    </div>
+  `
+  }
+
+  // Get current user for comment input avatar
+  const currentUserForInput = getCurrentUserData()
+  let currentUserAvatarHTML = ""
+  if (currentUserForInput.avatar) {
+    currentUserAvatarHTML = `<img src="${currentUserForInput.avatar}" alt="${currentUserForInput.name}" style="width: 100%; height: 100%; object-fit: cover;">`
+  } else if (currentUserForInput.avatarEmoji && currentUserForInput.avatarEmoji !== "👤") {
+    currentUserAvatarHTML = `<div class="default-avatar" style="font-size: 12px;">${currentUserForInput.avatarEmoji}</div>`
+  } else if (currentUserForInput.avatarId) {
+    const avatarEmojis = [
+      "👨‍💼",
+      "👩‍💼",
+      "👨‍🎓",
+      "👩‍🎓",
+      "👨‍🏫",
+      "👩‍🏫",
+      "👨‍💻",
+      "👩‍💻",
+      "👨‍🔬",
+      "👩‍🔬",
+      "👨‍🎨",
+      "👩‍🎨",
+    ]
+    const avatarIndex = Number.parseInt(currentUserForInput.avatarId) - 1
+    const emoji = avatarEmojis[avatarIndex] || "👤"
+    currentUserAvatarHTML = `<div class="default-avatar" style="font-size: 12px;">${emoji}</div>`
+  } else {
+    currentUserAvatarHTML = `<div class="default-avatar" style="font-size: 12px;">${currentUserForInput.name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .substring(0, 2)}</div>`
+  }
+
   postElement.innerHTML = `
         <div class="post-header">
             <div class="post-user">
@@ -319,13 +462,13 @@ function createProfilePostElement(postData) {
             ${imageHTML}
         </div>
         <div class="post-actions">
-            <div class="post-action">
-                <i class="far fa-heart"></i>
-                <span>Heart</span>
-            </div>
-            <div class="post-action">
+            <div class="post-action ${postData.liked ? "liked" : ""}" onclick="toggleHeart('${postData.id}', this)">
+  <i class="${postData.liked ? "fas" : "far"} fa-heart" ${postData.liked ? 'style="color: #dc3545;"' : ""}></i>
+  <span ${postData.liked ? 'style="color: #dc3545;"' : ""}>Heart</span>
+</div>
+            <div class="post-action" onclick="toggleComments('${postData.id}', this)">
                 <i class="far fa-comment"></i>
-                <span>COMMENT</span>
+                <span>COMMENT${commentCount > 0 ? ` (${commentCount})` : ""}</span>
             </div>
             <div class="post-action">
                 <i class="fas fa-share"></i>
@@ -333,19 +476,68 @@ function createProfilePostElement(postData) {
             </div>
         </div>
         <div class="post-comments">
+            ${commentsHTML}
             <div class="comment-input">
-                <div class="profile-pic">
-                    ${avatarHTML}
-                </div>
-                <input type="text" class="comment-text" placeholder="Write your comment...">
-                <button class="send-comment">
-                    <i class="fas fa-paper-plane"></i>
-                </button>
-            </div>
+  <div class="comment-input-avatar">
+    ${currentUserAvatarHTML}
+  </div>
+  <input type="text" class="comment-text" placeholder="Write your comment..." onkeypress="handleCommentKeypress(event, '${postData.id}', this)">
+  <button class="send-comment" onclick="handleCommentSubmit('${postData.id}', this)">
+    <i class="fas fa-paper-plane"></i>
+  </button>
+</div>
         </div>
     `
 
   return postElement
+}
+
+// Add this function after the createProfilePostElement function
+function toggleHeart(postId, element) {
+  const allPosts = JSON.parse(localStorage.getItem("userPosts")) || []
+  const post = allPosts.find((p) => p.id === postId)
+  if (!post) return
+
+  const icon = element.querySelector("i")
+  const span = element.querySelector("span")
+
+  if (!post.liked) {
+    post.liked = true
+    post.likeCount = (post.likeCount || 0) + 1
+    icon.classList.remove("far")
+    icon.classList.add("fas")
+    icon.style.color = "#dc3545"
+    span.style.color = "#dc3545"
+    element.classList.add("liked")
+  } else {
+    post.liked = false
+    post.likeCount = Math.max((post.likeCount || 1) - 1, 0)
+    icon.classList.remove("fas")
+    icon.classList.add("far")
+    icon.style.color = ""
+    span.style.color = ""
+    element.classList.remove("liked")
+  }
+
+  localStorage.setItem("userPosts", JSON.stringify(allPosts))
+  syncLikeStateAcrossPages(postId, post.liked, post.likeCount)
+}
+
+function syncLikeStateAcrossPages(postId, liked, likeCount) {
+  const likeEvent = new CustomEvent("likeStateChanged", {
+    detail: { postId, liked, likeCount },
+  })
+  window.dispatchEvent(likeEvent)
+
+  localStorage.setItem(
+    "lastLikeUpdate",
+    JSON.stringify({
+      postId,
+      liked,
+      likeCount,
+      timestamp: Date.now(),
+    }),
+  )
 }
 
 // Global functions for profile image handling
@@ -399,6 +591,83 @@ function editPost(postId) {
   window.location.href = "main.html?edit=" + postId
 }
 
+// Toggle comments visibility
+function toggleComments(postId, element) {
+  const post = document.querySelector(`[data-post-id="${postId}"]`)
+  if (!post) return
+
+  const commentsList = post.querySelector(".comments-list")
+  const commentInput = post.querySelector(".comment-input")
+
+  if (commentsList) {
+    const isHidden = commentsList.style.display === "none"
+    commentsList.style.display = isHidden ? "block" : "none"
+
+    // Update button state
+    if (isHidden) {
+      element.classList.add("active")
+      // Focus on comment input when opening
+      setTimeout(() => {
+        const input = commentInput?.querySelector(".comment-text")
+        if (input) input.focus()
+      }, 100)
+    } else {
+      element.classList.remove("active")
+    }
+  }
+}
+
+// Handle comment keypress (Enter to submit)
+function handleCommentKeypress(event, postId, input) {
+  if (event.key === "Enter") {
+    event.preventDefault()
+    submitComment(postId, input.value, input)
+  }
+}
+
+// Handle comment submit button click
+function handleCommentSubmit(postId, button) {
+  const input = button.previousElementSibling
+  submitComment(postId, input.value, input)
+}
+
+// Comment functionality
+function submitComment(postId, commentText, commentInput) {
+  if (!commentText.trim()) return
+
+  const allPosts = JSON.parse(localStorage.getItem("userPosts")) || []
+  const post = allPosts.find((p) => p.id === postId)
+  if (!post) return
+
+  if (!post.comments) post.comments = []
+
+  const currentUser = getCurrentUserData()
+  const newComment = {
+    id: Date.now().toString(),
+    text: commentText.trim(),
+    author: currentUser.name,
+    authorHandle: currentUser.username,
+    authorInitials: currentUser.name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .substring(0, 2),
+    avatar: currentUser.avatar,
+    avatarId: currentUser.avatarId,
+    avatarEmoji: currentUser.avatarEmoji,
+    timestamp: new Date(),
+  }
+
+  post.comments.push(newComment)
+  localStorage.setItem("userPosts", JSON.stringify(allPosts))
+
+  commentInput.value = ""
+
+  // Refresh the display to update comment count
+  loadUserPosts()
+}
+
 // Navigation
 hamburgerMenu.addEventListener("click", () => {
   sidebar.classList.toggle("active")
@@ -409,7 +678,7 @@ navFeed.addEventListener("click", () => {
 })
 
 navClaimed.addEventListener("click", () => {
-  window.location.href = "claimed.html"
+  window.location.href = "claim.html"
 })
 
 // Close sidebar when clicking outside on mobile
@@ -454,6 +723,47 @@ function init() {
   updateProfileDisplay()
   setupEventListeners()
   loadUserPosts()
+
+  // Add this in the init function or at the end of the file
+  window.addEventListener("likeStateChanged", (e) => {
+    const { postId, liked, likeCount } = e.detail
+
+    const postElement = document.querySelector(`[data-post-id="${postId}"]`)
+    if (postElement) {
+      const heartButton = postElement.querySelector('.post-action[onclick*="toggleHeart"]')
+      if (heartButton) {
+        const icon = heartButton.querySelector("i")
+        const span = heartButton.querySelector("span")
+
+        if (liked) {
+          icon.classList.remove("far")
+          icon.classList.add("fas")
+          icon.style.color = "#dc3545"
+          span.style.color = "#dc3545"
+          heartButton.classList.add("liked")
+        } else {
+          icon.classList.remove("fas")
+          icon.classList.add("far")
+          icon.style.color = ""
+          span.style.color = ""
+          heartButton.classList.remove("liked")
+        }
+      }
+    }
+  })
+
+  window.addEventListener("storage", (e) => {
+    if (e.key === "lastLikeUpdate") {
+      const updateData = JSON.parse(e.newValue)
+      if (updateData) {
+        window.dispatchEvent(
+          new CustomEvent("likeStateChanged", {
+            detail: updateData,
+          }),
+        )
+      }
+    }
+  })
 }
 
 // UPDATED: Enhanced updateProfileDisplay with setup data avatar support
@@ -720,122 +1030,49 @@ function setupEventListeners() {
       reader.readAsDataURL(file)
     } else {
       profileFileNameDisplay.textContent = ""
+      updateProfileDisplay() // Reset to current avatar
     }
   })
 }
 
-// UPDATED: Enhanced function to update all localStorage sources for synchronization
-function updateAllUserDataSources() {
-  // Update userProfile (main source of truth)
-  const userProfile = {
-    name: currentUser.name,
-    username: currentUser.username,
-    email: currentUser.email,
-    role: currentUser.role,
-    avatar: currentUser.avatar,
-    avatarId: currentUser.avatarId,
-    avatarEmoji: currentUser.avatarEmoji,
-    contact: currentUser.contact,
-    completedSetup: true,
-    setupDate: new Date().toISOString(),
-    initials: currentUser.name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .substring(0, 2),
+// Format timestamp for posts
+function formatPostTime(timestamp) {
+  const now = new Date()
+  const postTime = new Date(timestamp)
+  const diffInSeconds = Math.floor((now - postTime) / 1000)
+  const diffInMinutes = Math.floor(diffInSeconds / 60)
+  const diffInHours = Math.floor(diffInMinutes / 60)
+  const diffInDays = Math.floor(diffInHours / 24)
+
+  if (diffInSeconds < 60) {
+    return "Just now"
+  } else if (diffInMinutes < 60) {
+    return `${diffInMinutes}m ago`
+  } else if (diffInHours < 24) {
+    return `${diffInHours}h ago`
+  } else if (diffInDays === 1) {
+    return "Yesterday"
+  } else if (diffInDays < 7) {
+    return `${diffInDays}d ago`
+  } else {
+    return postTime.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: postTime.getFullYear() !== now.getFullYear() ? "numeric" : undefined,
+    })
   }
-  localStorage.setItem("userProfile", JSON.stringify(userProfile))
-
-  // Update ifindUserData for backward compatibility
-  const ifindUserData = {
-    name: currentUser.name,
-    avatar: currentUser.avatarEmoji || currentUser.avatar || "👤",
-    avatarId: currentUser.avatarId,
-    role: currentUser.role.toLowerCase(),
-    uploadedImage: currentUser.avatar,
-  }
-  localStorage.setItem("ifindUserData", JSON.stringify(ifindUserData))
-
-  // Update mockUser data (for existing code compatibility)
-  const mockUserData = {
-    username: currentUser.username,
-    email: currentUser.email,
-    role: currentUser.role,
-    avatar: currentUser.avatar,
-    avatarId: currentUser.avatarId,
-    avatarEmoji: currentUser.avatarEmoji,
-  }
-  localStorage.setItem("mockUser", JSON.stringify(mockUserData))
-
-  // Update session data
-  const sessionData = JSON.parse(localStorage.getItem("userSession")) || {}
-  sessionData.username = currentUser.username
-  sessionData.email = currentUser.email
-  sessionData.profileComplete = true
-  sessionData.lastUpdated = new Date().toISOString()
-  localStorage.setItem("userSession", JSON.stringify(sessionData))
-
-  // Update all existing posts with new user information
-  const allPosts = JSON.parse(localStorage.getItem("userPosts")) || []
-  const updatedPosts = allPosts.map((post) => {
-    if (post.userId === "current_user") {
-      return {
-        ...post,
-        userName: currentUser.name,
-        userHandle: currentUser.username.startsWith("@") ? currentUser.username : "@" + currentUser.username,
-        userRole: currentUser.role,
-        userInitials: currentUser.name
-          .split(" ")
-          .map((n) => n[0])
-          .join("")
-          .toUpperCase()
-          .substring(0, 2),
-        avatar: currentUser.avatar,
-        avatarId: currentUser.avatarId,
-        avatarEmoji: currentUser.avatarEmoji,
-      }
-    }
-    return post
-  })
-  localStorage.setItem("userPosts", JSON.stringify(updatedPosts))
-
-  // Reload posts to reflect changes
-  loadUserPosts()
 }
 
-// ADDED: Listen for setup completion and refresh user data
+// UPDATED: Enhanced storage event listener to handle setup data changes
 window.addEventListener("storage", (e) => {
   if (e.key === "userProfile" || e.key === "ifindUserData") {
-    // Refresh current user data
-    Object.assign(currentUser, getCurrentUserData())
-    updateProfileDisplay()
-    loadUserPosts()
-  }
-})
-
-// Listen for storage changes
-window.addEventListener("storage", (e) => {
-  if (e.key === "userPosts") {
-    loadUserPosts()
-  }
-})
-
-document.addEventListener("visibilitychange", () => {
-  if (!document.hidden) {
-    loadUserPosts()
-  }
-})
-
-document.addEventListener("DOMContentLoaded", init)
-
-// Enhance the storage event listener
-window.addEventListener("storage", (e) => {
-  if (e.key === "userProfile" || e.key === "ifindUserData") {
-    refreshCurrentUser() // Add this line
+    refreshCurrentUser()
     updateProfileDisplay()
     loadUserPosts()
   } else if (e.key === "userPosts") {
     loadUserPosts()
   }
 })
+
+// Initialize when DOM is loaded
+document.addEventListener("DOMContentLoaded", init)

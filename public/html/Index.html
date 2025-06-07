@@ -6,7 +6,10 @@
   <title>iFind</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Fredoka:wght@600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <!-- SweetAlert2 CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
   <link rel="stylesheet" href="../css/styles.css">
+  <link rel="icon" href="../assets/android-chrome-192x192.png" sizes="32x32" type="image/png">
 </head>
 <body>
   <div class="container" id="container">
@@ -90,6 +93,33 @@
     </div>
   </div>
 
+  <!-- Error Modal -->
+  <div class="error-modal-overlay" id="error-modal">
+    <div class="error-modal">
+      <button class="error-close-btn" onclick="closeErrorModal()">&times;</button>
+      <div class="error-content">
+        <div class="error-top-section">
+          <div class="sad-cloud">
+            <div class="cloud-body">
+              <div class="cloud-eyes">
+                <div class="eye"></div>
+                <div class="eye"></div>
+              </div>
+              <div class="cloud-mouth"></div>
+            </div>
+          </div>
+        </div>
+        <div class="error-bottom-section">
+          <h2 class="error-title">ERROR!</h2>
+          <p class="error-message">Invalid username or password</p>
+          <button class="try-again-btn" onclick="closeErrorModal()">Try again</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SweetAlert2 JS -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="../js/script.js"></script>
 </body>
 </html>

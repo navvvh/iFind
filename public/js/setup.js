@@ -10,15 +10,6 @@ const closeModalBtn = document.querySelector(".close-modal")
 const cancelBtn = document.querySelector(".cancel-btn")
 const saveBtn = document.querySelector(".save-btn")
 const avatarOptions = document.querySelectorAll(".avatar-option")
-const nameCircle = document.getElementById("nameCircle")
-const roleCircle = document.getElementById("roleCircle")
-
-// Parallax elements
-const parallaxLayers = document.querySelectorAll(".parallax-layer")
-const mainContainer = document.querySelector(".main-container")
-
-// Mouse tracking
-const mousePosition = { x: 0, y: 0 }
 
 // Setup Data - track user interactions separately
 const setupData = {
@@ -40,19 +31,48 @@ const userInteractions = {
 let progress = 0
 updateProgress()
 
-// Parallax Mouse Movement
-document.addEventListener("mousemove", (e) => {
-  mousePosition.x = (e.clientX / window.innerWidth - 0.5) * 2
-  mousePosition.y = (e.clientY / window.innerHeight - 0.5) * 2
-  updateParallax()
-})
+// Scroll Animation Implementation
+document.addEventListener("DOMContentLoaded", () => {
+  // Add scroll-reveal class to elements we want to animate
+  const header = document.querySelector(".header")
+  const heroSection = document.querySelector(".hero-section")
+  const setupSteps = document.querySelectorAll(".setup-step")
 
-function updateParallax() {
-  parallaxLayers[0].style.transform = `translate(${mousePosition.x * 10}px, ${mousePosition.y * 10}px)`
-  parallaxLayers[1].style.transform = `translate(${mousePosition.x * 20}px, ${mousePosition.y * 20}px)`
-  parallaxLayers[2].style.transform = `translate(${mousePosition.x * 30}px, ${mousePosition.y * 30}px)`
-  mainContainer.style.transform = `translate(${mousePosition.x * 5}px, ${mousePosition.y * 5}px)`
-}
+  if (header) header.classList.add("delay-100")
+  if (heroSection) heroSection.classList.add("delay-200")
+
+  // Add staggered delays to setup steps
+  setupSteps.forEach((step, index) => {
+    step.classList.add("delay-" + (index + 3) * 100)
+  })
+
+  // Initialize Intersection Observer
+  const observerOptions = {
+    threshold: 0.1,
+    rootMargin: "0px 0px -50px 0px",
+  }
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add("visible")
+      }
+    })
+  }, observerOptions)
+
+  // Observe scroll-reveal elements
+  document.querySelectorAll(".scroll-reveal").forEach((element) => {
+    observer.observe(element)
+  })
+
+  // Observe setup steps
+  document.querySelectorAll(".setup-step").forEach((step) => {
+    observer.observe(step)
+  })
+
+  // Load existing data
+  loadExistingData()
+})
 
 // 3D hover effects
 document.querySelectorAll(".element-3d").forEach((element) => {
@@ -65,14 +85,14 @@ document.querySelectorAll(".element-3d").forEach((element) => {
     const rotateX = (y - centerY) / 10
     const rotateY = (centerX - x) / 10
 
-    const container = element.querySelector(".pill-container, .avatar-container")
+    const container = element.querySelector(".avatar-container")
     if (container) {
       container.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`
     }
   })
 
   element.addEventListener("mouseleave", () => {
-    const container = element.querySelector(".pill-container, .avatar-container")
+    const container = element.querySelector(".avatar-container")
     if (container) {
       container.style.transform = "rotateX(0deg) rotateY(0deg)"
     }
@@ -88,7 +108,6 @@ nameInput.addEventListener("input", function () {
   userInteractions.nameChanged = setupData.name !== "" && setupData.name !== originalName
 
   updateProgress()
-  updateNameCircle()
   saveProgressData()
 })
 
@@ -190,7 +209,6 @@ roleOptions.forEach((option) => {
     setupData.role = this.dataset.role
     userInteractions.roleConfirmed = true
     updateProgress()
-    updateRoleCircle()
     saveProgressData()
   })
 })
@@ -206,23 +224,40 @@ function closeModal() {
 // Progress calculation based on actual user interactions
 function updateProgress() {
   progress = 0
+  let completedSteps = 0
 
   // Only count progress for actual user interactions
   if (userInteractions.nameChanged || (setupData.name && setupData.name !== getOriginalUserName())) {
     progress += 33.33
+    completedSteps++
   }
 
   if (userInteractions.avatarChanged) {
     progress += 33.33
+    completedSteps++
   }
 
   if (userInteractions.roleConfirmed) {
     progress += 33.34
+    completedSteps++
   }
 
-  // Update progress bar
-  progressBar.style.width = `${progress}%`
-  progressText.textContent = `${Math.round(progress)}% Complete`
+  // Update vertical progress bar
+  const progressBar = document.getElementById("progressBar")
+  if (progressBar) {
+    progressBar.style.height = `${progress}%`
+  }
+
+  // Update progress text with exact percentage
+  const progressText = document.getElementById("progressText")
+  if (progressText) {
+    // Round to nearest 25% increment to match the image
+    const displayProgress = Math.round(progress / 25) * 25
+    progressText.textContent = `${displayProgress}%`
+  }
+
+  // Update step indicators
+  updateStepIndicators(completedSteps)
 
   // Enable next button when user has made at least one change
   const hasAnyInteraction =
@@ -232,24 +267,19 @@ function updateProgress() {
   saveProgressData()
 }
 
-function updateNameCircle() {
-  if (userInteractions.nameChanged || (setupData.name && setupData.name !== getOriginalUserName())) {
-    nameCircle.style.transform = "translateX(165px)"
-    nameCircle.style.background = "#4CAF50"
-  } else {
-    nameCircle.style.transform = "translateX(0)"
-    nameCircle.style.background = "#05234D"
-  }
-}
+function updateStepIndicators(completedSteps) {
+  const steps = document.querySelectorAll(".progress-step")
 
-function updateRoleCircle() {
-  if (userInteractions.roleConfirmed) {
-    roleCircle.style.transform = "translateX(-165px)"
-    roleCircle.style.background = "#4CAF50"
-  } else {
-    roleCircle.style.transform = "translateX(0)"
-    roleCircle.style.background = "#05234D"
-  }
+  steps.forEach((step, index) => {
+    const stepNumber = index + 1
+    step.classList.remove("active", "completed")
+
+    if (stepNumber <= completedSteps) {
+      step.classList.add("completed")
+    } else if (stepNumber === completedSteps + 1) {
+      step.classList.add("active")
+    }
+  })
 }
 
 function saveProgressData() {
@@ -285,12 +315,11 @@ function prefillUserData() {
     setupData.name = originalName
     // Don't mark as changed since this is just pre-filling
     userInteractions.nameChanged = false
-    updateNameCircle()
   }
 }
 
-// Enhanced completeSetup function
-function completeSetup() {
+// Enhanced completeSetup function with proper completion message
+async function completeSetup() {
   const existingSession = JSON.parse(localStorage.getItem("userSession")) || {}
   const existingUserData = JSON.parse(localStorage.getItem("userData")) || {}
 
@@ -320,10 +349,24 @@ function completeSetup() {
     localStorage.setItem("userPosts", JSON.stringify([]))
   }
 
-  alert(
-    `Setup complete!\n\nName: ${setupData.name}\nRole: ${setupData.role.toUpperCase()}\nAvatar: ${setupData.uploadedImage ? "Custom Image" : setupData.avatar}\n\nYour profile is now synced across all sections!`,
-  )
+  // Show simplified setup completion message
+  await Swal.fire({
+    title: "Setup Complete!",
+    icon: "success",
+    confirmButtonText: "Continue to iFind",
+    confirmButtonColor: "#4CAF50",
+    customClass: {
+      popup: "custom-setup-complete-popup",
+      title: "custom-setup-title",
+      confirmButton: "custom-confirm-button",
+    },
+    width: 400,
+    padding: "2em",
+    background: "#fff",
+    backdrop: "rgba(5, 35, 77, 0.8)",
+  })
 
+  // Redirect to main page
   window.location.href = "main.html"
 }
 
@@ -459,4 +502,41 @@ window.addEventListener("storage", (e) => {
   if (e.key === "userProfile" || e.key === "ifindUserData") {
     loadExistingData()
   }
+})
+
+function loadExistingData() {
+  prefillUserData()
+  loadProgressData()
+}
+
+// Initialize step indicators and add enhanced role selection functionality on page load
+document.addEventListener("DOMContentLoaded", () => {
+  updateStepIndicators(0)
+
+  // Enhanced role selection functionality
+  roleOptions.forEach((option) => {
+    // Enhanced hover effects
+    option.addEventListener("mouseenter", function () {
+      if (!this.classList.contains("selected")) {
+        this.style.transform = "translateY(-8px) scale(1.05)"
+      }
+    })
+
+    option.addEventListener("mouseleave", function () {
+      if (!this.classList.contains("selected")) {
+        this.style.transform = "translateY(0) scale(1)"
+      }
+    })
+
+    // Add a subtle animation to confirm selection when clicked
+    option.addEventListener("click", function () {
+      this.style.animation = "none"
+      setTimeout(() => {
+        this.style.animation = "popIn 0.3s ease forwards"
+      }, 10)
+    })
+  })
+
+  // Load existing data
+  loadExistingData()
 })
