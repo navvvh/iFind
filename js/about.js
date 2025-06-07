@@ -39,18 +39,6 @@ document.querySelectorAll(".team-section").forEach((section) => {
   teamObserver.observe(section)
 })
 
-// Navbar scroll effect
-window.addEventListener("scroll", () => {
-  const navbar = document.querySelector(".navbar")
-  if (window.scrollY > 100) {
-    navbar.style.background = "rgb(0, 0, 0)"
-    navbar.style.boxShadow = "0 2px 20px rgba(0, 0, 0, 0.1)"
-  } else {
-    navbar.style.background = "rgba(255, 255, 255, 0.95)"
-    navbar.style.boxShadow = "none"
-  }
-})
-
 // DOM Elements for sidebar functionality
 const hamburgerMenu = document.getElementById("hamburger-menu")
 const sidebar = document.getElementById("sidebar")
@@ -107,26 +95,45 @@ navFeed.addEventListener("click", () => {
 })
 
 navAbout.addEventListener("click", () => {
-  // Already on about page, just close sidebar
   sidebar.classList.remove("active")
   hamburgerMenu.classList.remove("active")
 })
 
-navIFind.addEventListener("click", () => {
-  window.location.href = "main.html" // or wherever iFind search is located
-})
-
 navClaimed.addEventListener("click", () => {
-  window.location.href = "claimed.html" // or wherever claimed items page is
+  window.location.href = "claim.html" 
 })
 
 navLogout.addEventListener("click", () => {
   if (confirm("Are you sure you want to log out?")) {
     localStorage.removeItem("mockUser")
     localStorage.removeItem("userPosts")
-    window.location.href = "login.html" // or wherever login page is
+    window.location.href = "login.html" 
   }
 })
 
 // Smooth scrolling for better UX
 document.documentElement.style.scrollBehavior = "smooth"
+
+// Cat image interaction enhancement
+document.addEventListener("DOMContentLoaded", function() {
+  const catImage = document.querySelector(".cat-image")
+  
+  if (catImage) {
+    // Add click event for fun interaction
+    catImage.addEventListener("click", function() {
+      this.style.transform = "scale(1.2) rotate(360deg)"
+      setTimeout(() => {
+        this.style.transform = "scale(1) rotate(0deg)"
+      }, 500)
+    })
+    
+    // Add mouse enter/leave events for enhanced hover
+    catImage.addEventListener("mouseenter", function() {
+      this.style.filter = "brightness(1.2) saturate(1.3) drop-shadow(0 15px 30px rgba(245, 230, 163, 0.4))"
+    })
+    
+    catImage.addEventListener("mouseleave", function() {
+      this.style.filter = "drop-shadow(0 10px 20px rgba(0, 0, 0, 0.3))"
+    })
+  }
+})

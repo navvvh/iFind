@@ -117,6 +117,33 @@ function getCurrentUser() {
   return user
 }
 
+// NEW: Function to update existing comments with new user avatar data
+function updateExistingCommentsAvatar(newUserData) {
+  let postsUpdated = false
+
+  allPosts.forEach((post) => {
+    if (post.comments && post.comments.length > 0) {
+      post.comments.forEach((comment) => {
+        // Update comments made by the current user
+        if (comment.authorHandle === newUserData.username || comment.author === newUserData.name) {
+          comment.author = newUserData.name
+          comment.authorHandle = newUserData.username
+          comment.authorInitials = newUserData.initials
+          comment.avatar = newUserData.avatar
+          comment.avatarId = newUserData.avatarId
+          comment.avatarEmoji = newUserData.avatarEmoji
+          postsUpdated = true
+        }
+      })
+    }
+  })
+
+  if (postsUpdated) {
+    localStorage.setItem("userPosts", JSON.stringify(allPosts))
+    filterPosts() // Refresh display
+  }
+}
+
 // Add this new function to synchronize user data across all storage keys
 function syncUserData(updatedData = {}) {
   // Get current data from all sources
@@ -237,6 +264,9 @@ function syncUserData(updatedData = {}) {
     return post
   })
   localStorage.setItem("userPosts", JSON.stringify(updatedPosts))
+
+  // NEW: Update existing comments with new avatar data
+  updateExistingCommentsAvatar(newUserProfile)
 
   // Dispatch storage event to notify other pages
   window.dispatchEvent(new Event("storage"))
@@ -428,7 +458,7 @@ navAbout.addEventListener("click", () => {
 })
 
 navClaimed.addEventListener("click", () => {
-  window.location.href = "claimed.html"
+  window.location.href = "claim.html"
 })
 
 navLogout.addEventListener("click", () => {
@@ -646,6 +676,121 @@ function toggleHeart(postId, element) {
   }
 
   savePostsToStorage()
+  syncLikeStateAcrossPages(postId, post.liked, post.likeCount)
+}
+
+// Add this function after the toggleHeart function (around line 280)
+function syncLikeStateAcrossPages(postId, liked, likeCount) {
+  // Dispatch custom event to notify other pages of like state change
+  const likeEvent = new CustomEvent("likeStateChanged", {
+    detail: { postId, liked, likeCount },
+  })
+  window.dispatchEvent(likeEvent)
+
+  // Also trigger storage event for cross-tab synchronization
+  localStorage.setItem(
+    "lastLikeUpdate",
+    JSON.stringify({
+      postId,
+      liked,
+      likeCount,
+      timestamp: Date.now(),
+    }),
+  )
+}
+
+// NEW: Toggle comments visibility (Facebook-style)
+function toggleComments(postId, element) {
+  const post = allPosts.find((p) => p.id === postId)
+  if (!post) return
+
+  const postElement = document.querySelector(`[data-post-id="${postId}"]`)
+  const commentsList = postElement.querySelector(".comments-list")
+  const commentInput = postElement.querySelector(".comment-input .comment-text")
+
+  // Toggle visibility
+  if (commentsList.style.display === "none" || !commentsList.style.display) {
+    commentsList.style.display = "block"
+    element.classList.add("active")
+    // Auto-focus on comment input when opening
+    setTimeout(() => commentInput.focus(), 100)
+  } else {
+    commentsList.style.display = "none"
+    element.classList.remove("active")
+  }
+}
+
+// NEW: Create comments HTML with Facebook-style bubbles and current user avatar check
+function createCommentsHTML(comments) {
+  if (!comments || comments.length === 0) return ""
+
+  const currentUser = getCurrentUser()
+
+  return comments
+    .map((comment) => {
+      let commentAvatarHTML = ""
+
+      // Check if this comment is from the current user
+      if (comment.authorHandle === currentUser.username || comment.author === currentUser.name) {
+        // Use current user's avatar
+        if (currentUser.avatar) {
+          commentAvatarHTML = `<img src="${currentUser.avatar}" alt="${currentUser.name}" style="width: 100%; height: 100%; object-fit: cover;">`
+        } else if (currentUser.avatarEmoji && currentUser.avatarEmoji !== "👤") {
+          commentAvatarHTML = `<div class="default-avatar" style="font-size: 12px;">${currentUser.avatarEmoji}</div>`
+        } else if (currentUser.avatarId) {
+          const avatarEmojis = [
+            "👨‍💼",
+            "👩‍💼",
+            "👨‍🎓",
+            "👩‍🎓",
+            "👨‍🏫",
+            "👩‍🏫",
+            "👨‍💻",
+            "👩‍💻",
+            "👨‍🔬",
+            "👩‍🔬",
+            "👨‍🎨",
+            "👩‍🎨",
+          ]
+          const avatarIndex = Number.parseInt(currentUser.avatarId) - 1
+          const emoji = avatarEmojis[avatarIndex] || "👤"
+          commentAvatarHTML = `<div class="default-avatar" style="font-size: 12px;">${emoji}</div>`
+        } else {
+          commentAvatarHTML = `<div class="default-avatar" style="font-size: 12px;">${currentUser.initials}</div>`
+        }
+      } else {
+        // Use stored comment avatar data
+        if (comment.avatar) {
+          commentAvatarHTML = `<img src="${comment.avatar}" alt="${comment.author}" style="width: 100%; height: 100%; object-fit: cover;">`
+        } else if (comment.avatarEmoji && comment.avatarEmoji !== "👤") {
+          commentAvatarHTML = `<div class="default-avatar" style="font-size: 12px;">${comment.avatarEmoji}</div>`
+        } else {
+          commentAvatarHTML = `<div class="default-avatar" style="font-size: 12px;">${
+            comment.authorInitials ||
+            comment.author
+              .split(" ")
+              .map((n) => n[0])
+              .join("")
+              .toUpperCase()
+              .substring(0, 2)
+          }</div>`
+        }
+      }
+
+      return `
+        <div class="comment">
+          <div class="comment-avatar">
+            ${commentAvatarHTML}
+          </div>
+          <div class="comment-bubble">
+            <div class="comment-author">${comment.author}</div>
+            <div class="comment-text">${comment.text}</div>
+          </div>
+        </div>
+        <div class="comment-time">${formatPostTime(comment.timestamp)}</div>
+      `
+    })
+    .join("")
 }
 
 // Comment functionality
@@ -664,6 +809,9 @@ function submitComment(postId, commentText, commentInput) {
     author: currentUser.name,
     authorHandle: currentUser.username,
     authorInitials: currentUser.initials,
+    avatar: currentUser.avatar,
+    avatarId: currentUser.avatarId,
+    avatarEmoji: currentUser.avatarEmoji,
     timestamp: new Date(),
   }
 
@@ -674,7 +822,16 @@ function submitComment(postId, commentText, commentInput) {
 
   addNotification("comment", "Comment Added!", "You commented on this post")
 
-  filterPosts()
+  // Update the comment count in the button
+  const postElement = document.querySelector(`[data-post-id="${postId}"]`)
+  const commentButton = postElement.querySelector('.post-action[onclick*="toggleComments"]')
+  const commentCount = post.comments.length
+  const commentSpan = commentButton.querySelector("span")
+  commentSpan.textContent = `COMMENT${commentCount > 0 ? ` (${commentCount})` : ""}`
+
+  // Refresh the comments display
+  const commentsList = postElement.querySelector(".comments-list")
+  commentsList.innerHTML = createCommentsHTML(post.comments)
 }
 
 // Share functionality
@@ -736,7 +893,7 @@ function fallbackShare(text) {
     })
 }
 
-// UPDATED: Enhanced createPostElement with setup data avatar support
+// UPDATED: Enhanced createPostElement with Facebook-style comments
 function createPostElement(postData, index) {
   const postElement = document.createElement("div")
   postElement.className = "post"
@@ -790,27 +947,9 @@ function createPostElement(postData, index) {
     `
   }
 
-  // Create comments HTML
-  let commentsHTML = ""
-  if (postData.comments && postData.comments.length > 0) {
-    commentsHTML = `
-      <div class="comments-list">
-        ${postData.comments
-          .map(
-            (comment) => `
-          <div class="comment">
-            <div class="comment-author">
-              <strong>${comment.author}</strong>
-              <span class="comment-time">${new Date(comment.timestamp).toLocaleDateString()}</span>
-            </div>
-            <div class="comment-text">${comment.text}</div>
-          </div>
-        `,
-          )
-          .join("")}
-      </div>
-    `
-  }
+  // Create comments HTML (hidden by default)
+  const commentCount = postData.comments ? postData.comments.length : 0
+  const commentsHTML = postData.comments && postData.comments.length > 0 ? createCommentsHTML(postData.comments) : ""
 
   // Get current user for comment input avatar
   const currentUser = getCurrentUser()
@@ -818,7 +957,7 @@ function createPostElement(postData, index) {
   if (currentUser.avatar) {
     currentUserAvatarHTML = `<img src="${currentUser.avatar}" alt="${currentUser.name}" style="width: 100%; height: 100%; object-fit: cover;">`
   } else if (currentUser.avatarEmoji && currentUser.avatarEmoji !== "👤") {
-    currentUserAvatarHTML = `<div class="default-avatar" style="font-size: 20px; display: flex; align-items: center; justify-content: center;">${currentUser.avatarEmoji}</div>`
+    currentUserAvatarHTML = `<div class="default-avatar" style="font-size: 16px; display: flex; align-items: center; justify-content: center;">${currentUser.avatarEmoji}</div>`
   } else if (currentUser.avatarId) {
     const avatarEmojis = [
       "👨‍💼",
@@ -836,7 +975,7 @@ function createPostElement(postData, index) {
     ]
     const avatarIndex = Number.parseInt(currentUser.avatarId) - 1
     const emoji = avatarEmojis[avatarIndex] || "👤"
-    currentUserAvatarHTML = `<div class="default-avatar" style="font-size: 20px; display: flex; align-items: center; justify-content: center;">${emoji}</div>`
+    currentUserAvatarHTML = `<div class="default-avatar" style="font-size: 16px; display: flex; align-items: center; justify-content: center;">${emoji}</div>`
   } else {
     currentUserAvatarHTML = `<div class="default-avatar" style="display: flex; align-items: center; justify-content: center;">${currentUser.initials}</div>`
   }
@@ -883,9 +1022,9 @@ function createPostElement(postData, index) {
                 <i class="${postData.liked ? "fas" : "far"} fa-heart" ${postData.liked ? 'style="color: #dc3545;"' : ""}></i>
                 <span ${postData.liked ? 'style="color: #dc3545;"' : ""}>Heart</span>
             </div>
-            <div class="post-action">
+            <div class="post-action" onclick="toggleComments('${postData.id}', this)">
                 <i class="far fa-comment"></i>
-                <span>COMMENT</span>
+                <span>COMMENT${commentCount > 0 ? ` (${commentCount})` : ""}</span>
             </div>
             <div class="post-action" onclick="sharePost('${postData.id}')">
                 <i class="fas fa-share"></i>
@@ -893,9 +1032,11 @@ function createPostElement(postData, index) {
             </div>
         </div>
         <div class="post-comments">
-            ${commentsHTML}
+            <div class="comments-list" style="display: none;">
+                ${commentsHTML}
+            </div>
             <div class="comment-input">
-                <div class="profile-pic">
+                <div class="comment-input-avatar">
                     ${currentUserAvatarHTML}
                 </div>
                 <input type="text" class="comment-text" placeholder="Write your comment..." onkeypress="handleCommentKeypress(event, '${postData.id}', this)">
@@ -948,6 +1089,9 @@ window.handleImageError = (img, postId) => {
     `
   }
 }
+
+// Make toggleComments globally available
+window.toggleComments = toggleComments
 
 // Post management functions
 function deletePost(postId) {
@@ -1116,32 +1260,45 @@ postForm.addEventListener("submit", (event) => {
   }
 })
 
-// ADDED: Listen for setup completion and refresh user data
-window.addEventListener("storage", (e) => {
-  if (e.key === "userProfile" || e.key === "ifindUserData") {
-    // Refresh user avatar when setup data changes
-    initializeUserAvatar()
+window.addEventListener("likeStateChanged", (e) => {
+  const { postId, liked, likeCount } = e.detail
 
-    // Update any existing posts with new user data
-    const currentUser = getCurrentUser()
-    let postsUpdated = false
+  // Update UI elements for this post if it exists on current page
+  const postElement = document.querySelector(`[data-post-id="${postId}"]`)
+  if (postElement) {
+    const heartButton = postElement.querySelector('.post-action[onclick*="toggleHeart"]')
+    if (heartButton) {
+      const icon = heartButton.querySelector("i")
+      const span = heartButton.querySelector("span")
 
-    allPosts.forEach((post) => {
-      if (post.userId === "current_user") {
-        post.userName = currentUser.name
-        post.userHandle = currentUser.username
-        post.userRole = currentUser.role
-        post.userInitials = currentUser.initials
-        post.avatar = currentUser.avatar
-        post.avatarId = currentUser.avatarId
-        post.avatarEmoji = currentUser.avatarEmoji
-        postsUpdated = true
+      if (liked) {
+        icon.classList.remove("far")
+        icon.classList.add("fas")
+        icon.style.color = "#dc3545"
+        span.style.color = "#dc3545"
+        heartButton.classList.add("liked")
+      } else {
+        icon.classList.remove("fas")
+        icon.classList.add("far")
+        icon.style.color = ""
+        span.style.color = ""
+        heartButton.classList.remove("liked")
       }
-    })
+    }
+  }
+})
 
-    if (postsUpdated) {
-      savePostsToStorage()
-      filterPosts()
+// Listen for storage changes from other tabs
+window.addEventListener("storage", (e) => {
+  if (e.key === "lastLikeUpdate") {
+    const updateData = JSON.parse(e.newValue)
+    if (updateData) {
+      // Trigger the like state change event
+      window.dispatchEvent(
+        new CustomEvent("likeStateChanged", {
+          detail: updateData,
+        }),
+      )
     }
   }
 })
