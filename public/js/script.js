@@ -3,6 +3,7 @@ const registerBtn = document.getElementById("register")
 const loginBtn = document.getElementById("login")
 const welcomeModal = document.getElementById("welcome-modal")
 const errorModal = document.getElementById("error-modal")
+const Swal = window.Swal // Declare the Swal variable
 
 // Toggle between sign up and sign in
 registerBtn.addEventListener("click", (e) => {
@@ -160,7 +161,7 @@ function syncUserData(updatedData = {}) {
   return newUserProfile
 }
 
-// Update the signup form handler to use SweetAlert2
+// Update the signup form handler to use SweetAlert2 with centered position
 document.getElementById("signup-form").addEventListener("submit", async (event) => {
   event.preventDefault()
 
@@ -199,17 +200,18 @@ document.getElementById("signup-form").addEventListener("submit", async (event) 
   userData.password = password
   localStorage.setItem("userData", JSON.stringify(userData))
 
-  // Show SweetAlert2 success notification
+  // Show SweetAlert2 success notification - CENTERED
   await Swal.fire({
-    position: "top-end",
     icon: "success",
-    title: "Your work has been saved",
+    title: "Registered successfully!",
     showConfirmButton: false,
     timer: 1500,
-    toast: true,
     background: "#fff",
     color: "#0a2342",
     iconColor: "#28a745",
+    customClass: {
+      popup: "centered-success-popup",
+    },
   })
 
   // Switch to login form after the alert
