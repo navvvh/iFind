@@ -5,105 +5,505 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>iFind - Lost and Found App</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="../css/main.css">
+    <style>
+        :root {
+          --primary-color: #0a1f44;
+          --sidebar-text: #fceca1;
+          --background-color: #f0f2f5;
+          --white: #ffffff;
+          --border-color: #e1e4e8;
+          --text-color: #333;
+          --gray-text: #65676b;
+          --navbar-height: 90px;
+          --comment-bubble-bg: transparent;
+          --comment-bubble-radius: 0px;
+          --username-color: #0a4b8c;
+        }
+
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+          font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+          background-color: var(--background-color);
+          min-height: 100vh;
+        }
+
+        .top-navbar {
+          background-color: var(--white);
+          border-bottom: 1px solid var(--border-color);
+          padding: 16px 24px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          height: var(--navbar-height);
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          z-index: 1000;
+        }
+
+        .hamburger-menu {
+          background: none;
+          border: none;
+          cursor: pointer;
+          color: var(--text-color);
+          padding: 8px;
+          border-radius: 8px;
+          transition: background-color 0.2s;
+        }
+
+        .hamburger-menu:hover {
+          background-color: #f0f2f5;
+        }
+
+        .hamburger-menu .profile-pic {
+          width: 50px;
+          height: 50px;
+          border-radius: 50%;
+          background-color: #e1e4e8;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          overflow: hidden;
+          position: relative;
+        }
+
+        .hamburger-menu .profile-pic img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        .logo-container {
+          position: absolute;
+          left: 50%;
+          transform: translateX(-50%);
+          display: flex;
+          align-items: center;
+        }
+
+        .logo-image {
+          height: 55px;
+          width: auto;
+          object-fit: contain;
+        }
+
+        .navbar-right {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+        }
+
+        .content-wrapper {
+          display: flex;
+          margin-top: var(--navbar-height);
+          min-height: calc(100vh - var(--navbar-height));
+        }
+
+        .sidebar {
+          width: 290px;
+          background-color: var(--primary-color);
+          color: var(--sidebar-text);
+          display: flex;
+          flex-direction: column;
+          height: calc(100vh - var(--navbar-height));
+          position: fixed;
+          top: var(--navbar-height);
+          left: 0;
+          z-index: 100;
+        }
+
+        .sidebar-content {
+          flex: 1;
+          padding: 25px 0;
+        }
+
+        .nav-item {
+          display: flex;
+          align-items: center;
+          padding: 16px 24px;
+          cursor: pointer;
+          transition: background-color 0.3s;
+          font-size: 20px;
+          font-weight: 500;
+        }
+
+        .nav-item:hover {
+          background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-item.active {
+          background-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .nav-item i {
+          margin-right: 16px;
+          font-size: 20px;
+          width: 24px;
+        }
+
+        .sidebar-footer {
+          margin-top: auto;
+          border-top: 1px solid rgba(255, 255, 255, 0.1);
+          padding-top: 20px;
+        }
+
+        .main-content {
+          flex: 1;
+          margin-left: 289px;
+          display: flex;
+          flex-direction: column;
+        }
+
+        .content-area {
+          flex: 1;
+          padding: 24px;
+          overflow-y: auto;
+        }
+
+        .feed {
+          max-width: 1000px;
+          margin: 0 auto;
+        }
+
+        .post {
+          background-color: var(--white);
+          border-radius: 12px;
+          margin-bottom: 12px;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+          overflow: hidden;
+          position: relative;
+        }
+
+        .post-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 20px 20px 16px 20px;
+        }
+
+        .post-user {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
+
+        .post-user-info {
+          display: flex;
+          flex-direction: column;
+        }
+
+        .post-user-name {
+          font-weight: 600;
+          font-size: 18px;
+          color: var(--text-color);
+        }
+
+        .post-user-meta {
+          font-size: 14px;
+          color: var(--gray-text);
+          line-height: 1.3;
+          margin-bottom: 2px;
+        }
+
+        .post-time {
+          font-size: 12px;
+          color: var(--gray-text);
+          margin-top: 2px;
+          font-weight: 400;
+        }
+
+        .post-options {
+          cursor: pointer;
+          padding: 8px;
+          color: var(--gray-text);
+          border-radius: 50%;
+          transition: background-color 0.2s;
+          position: relative;
+        }
+
+        .post-options:hover {
+          background-color: #f0f2f5;
+        }
+
+        .post-options-dropdown {
+          display: none;
+          position: absolute;
+          background-color: var(--white);
+          border-radius: 12px;
+          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+          z-index: 1000;
+          min-width: 200px;
+          top: 100%;
+          right: 0;
+          padding: 8px 0;
+          border: 1px solid rgba(0, 0, 0, 0.08);
+        }
+
+        .dropdown-item {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 12px 16px;
+          cursor: pointer;
+          transition: all 0.2s;
+          font-size: 14px;
+          font-weight: 500;
+          border: none;
+          background: none;
+          width: 100%;
+          text-align: left;
+        }
+
+        .dropdown-item:hover {
+          background-color: #f8f9fa;
+        }
+
+        .dropdown-item:last-child {
+          color: #dc3545;
+        }
+
+        .dropdown-item:last-child:hover {
+          background-color: rgba(220, 53, 69, 0.1);
+        }
+
+        .dropdown-item:last-child i {
+          color: #dc3545;
+          font-size: 16px;
+        }
+
+        .post-content {
+          padding: 0 20px 20px 20px;
+        }
+
+        .post-text {
+          margin-bottom: 12px;
+          font-size: 16px;
+          color: var(--text-color);
+          line-height: 1.5;
+          word-wrap: break-word;
+          overflow-wrap: break-word;
+          hyphens: auto;
+        }
+
+        .post-tag {
+          display: inline-block;
+          color: white;
+          font-size: 12px;
+          font-weight: 600;
+          padding: 6px 10px;
+          border-radius: 12px;
+          margin-right: 8px;
+          margin-bottom: 8px;
+          text-transform: uppercase;
+        }
+
+        .post-tag.found {
+          background-color: #28a745;
+        }
+
+        .post-tag.lost {
+          background-color: #dc3545;
+        }
+
+        /* Delete Confirmation Modal Styles */
+        .delete-modal {
+          display: none;
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background-color: rgba(0, 0, 0, 0.5);
+          z-index: 3000;
+          justify-content: center;
+          align-items: center;
+        }
+
+        .delete-modal.active {
+          display: flex;
+          animation: fadeIn 0.2s ease;
+        }
+
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
+        }
+
+        .delete-modal-content {
+          background-color: var(--white);
+          border-radius: 12px;
+          width: 400px;
+          max-width: 90%;
+          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+          animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+          from {
+            opacity: 0;
+            transform: scale(0.9) translateY(-20px);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+          }
+        }
+
+        .delete-modal-header {
+          padding: 24px 24px 16px 24px;
+          text-align: center;
+        }
+
+        .delete-modal-icon {
+          width: 60px;
+          height: 60px;
+          background-color: #fee;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin: 0 auto 16px auto;
+        }
+
+        .delete-modal-icon i {
+          font-size: 24px;
+          color: #dc3545;
+        }
+
+        .delete-modal-title {
+          font-size: 18px;
+          font-weight: 600;
+          color: var(--text-color);
+          margin-bottom: 8px;
+        }
+
+        .delete-modal-message {
+          font-size: 14px;
+          color: var(--gray-text);
+          line-height: 1.4;
+        }
+
+        .delete-modal-footer {
+          padding: 16px 24px 24px 24px;
+          display: flex;
+          gap: 12px;
+          justify-content: center;
+        }
+
+        .delete-btn {
+          padding: 10px 24px;
+          border: none;
+          border-radius: 8px;
+          font-size: 14px;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all 0.2s;
+          min-width: 80px;
+        }
+
+        .delete-btn-cancel {
+          background-color: #f8f9fa;
+          color: var(--text-color);
+          border: 1px solid var(--border-color);
+        }
+
+        .delete-btn-cancel:hover {
+          background-color: #e9ecef;
+        }
+
+        .delete-btn-confirm {
+          background-color: #dc3545;
+          color: white;
+        }
+
+        .delete-btn-confirm:hover {
+          background-color: #c82333;
+        }
+
+        .profile-pic {
+          width: 55px;
+          height: 55px;
+          border-radius: 50%;
+          background-color: #e1e4e8;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          overflow: hidden;
+          position: relative;
+        }
+
+        .profile-pic img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        .default-avatar {
+          color: var(--text-color);
+          font-weight: bold;
+          font-size: 14px;
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+        }
+
+        @media (max-width: 768px) {
+          .sidebar {
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+          }
+
+          .sidebar.active {
+            transform: translateX(0);
+          }
+
+          .main-content {
+            margin-left: 0;
+          }
+
+          .content-area {
+            padding: 16px;
+          }
+
+          .delete-modal-content {
+            width: 95%;
+            margin: 20px;
+          }
+        }
+    </style>
 </head>
 <body>
     <div class="top-navbar">
         <button class="hamburger-menu" id="hamburger-menu">
             <div class="profile-pic">
-                <img src="" alt="Profile" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <img src="/placeholder.svg" alt="Profile" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                 <div class="default-avatar" style="display: none;">AP</div>
             </div>
         </button>
         <div class="logo-container">
-            <img src="../assets/iFind.png" alt="iFind Logo" class="logo-image">
+            <img src="/placeholder.svg?height=55&width=120" alt="iFind Logo" class="logo-image">
         </div>
         <div class="navbar-right">
-            <!-- Notification Bell -->
-            <div class="notification-icon" id="notification-bell">
-                <i class="fas fa-bell"></i>
-                <span class="notification-badge" id="notification-count">3</span>
-                <div class="notification-dropdown" id="notification-dropdown">
-                    <div class="notification-header">
-                        <h4>Notifications</h4>
-                        <button class="mark-all-read" id="mark-all-read">Mark all as read</button>
-                    </div>
-                    <div class="notification-list" id="notification-list">
-                        <div class="notification-item unread">
-                            <div class="notification-icon-small">
-                                <i class="fas fa-check-circle" style="color: #28a745;"></i>
-                            </div>
-                            <div class="notification-content">
-                                <p><strong>Item Claimed!</strong></p>
-                                <p>Your lost wallet has been claimed by John Doe</p>
-                                <span class="notification-time">2 minutes ago</span>
-                            </div>
-                        </div>
-                        <div class="notification-item unread">
-                            <div class="notification-icon-small">
-                                <i class="fas fa-search" style="color: #007bff;"></i>
-                            </div>
-                            <div class="notification-content">
-                                <p><strong>New Found Item</strong></p>
-                                <p>A phone was found in Main Building</p>
-                                <span class="notification-time">1 hour ago</span>
-                            </div>
-                        </div>
-                        <div class="notification-item">
-                            <div class="notification-icon-small">
-                                <i class="fas fa-heart" style="color: #dc3545;"></i>
-                            </div>
-                            <div class="notification-content">
-                                <p><strong>Post Liked</strong></p>
-                                <p>Someone liked your lost item post</p>
-                                <span class="notification-time">3 hours ago</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="notification-footer">
-                        <a href="#" class="view-all-notifications">View all notifications</a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Announcement Icon -->
-            <div class="announcement-icon" id="announcement-icon">
-                <i class="fas fa-bullhorn"></i>
-                <div class="announcement-dropdown" id="announcement-dropdown">
-                    <div class="announcement-header">
-                        <h4>Announcements</h4>
-                    </div>
-                    <div class="announcement-list" id="announcement-list">
-                        <div class="announcement-item">
-                            <div class="announcement-content">
-                                <p><strong>System Maintenance</strong></p>
-                                <p>iFind will undergo maintenance on Sunday, 2:00 AM - 4:00 AM</p>
-                                <span class="announcement-time">1 day ago</span>
-                            </div>
-                        </div>
-                        <div class="announcement-item">
-                            <div class="announcement-content">
-                                <p><strong>New Feature: Image Search</strong></p>
-                                <p>You can now search for items using image recognition!</p>
-                                <span class="announcement-time">3 days ago</span>
-                            </div>
-                        </div>
-                        <div class="announcement-item">
-                            <div class="announcement-content">
-                                <p><strong>Campus Security Update</strong></p>
-                                <p>New security measures implemented in all buildings</p>
-                                <span class="announcement-time">1 week ago</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <!-- Navbar content -->
         </div>
     </div>
 
     <!-- Content Wrapper -->
     <div class="content-wrapper">
-        <!-- Sidebar - Below navbar -->
+        <!-- Sidebar -->
         <div class="sidebar" id="sidebar">
             <div class="sidebar-content">
                 <div class="nav-item" id="nav-profile">
@@ -133,206 +533,193 @@
 
         <!-- Main Content -->
         <div class="main-content">
-            <!-- Content Area -->
             <div class="content-area">
-                <!-- Search Section - Always Visible -->
-                <div class="search-section">
-                    <div class="search-container">
-                        <i class="fas fa-search search-icon"></i>
-                        <input type="text" class="search-input" id="search-input" placeholder="Type in search">
-                        <button class="filter-btn" id="filter-btn">
-                            <i class="fas fa-sliders-h"></i>
-                        </button>
-                    </div>
-                </div>
-
                 <!-- Feed -->
                 <div class="feed" id="feed">
-                    <div class="empty-state" id="empty-state">
-                        <i class="fas fa-search"></i>
-                        <h3>No posts yet</h3>
-                        <p>Be the first to post about a lost or found item!</p>
+                    <!-- Sample Post -->
+                    <div class="post">
+                        <div class="post-header">
+                            <div class="post-user">
+                                <div class="profile-pic">
+                                    <div class="default-avatar">JD</div>
+                                </div>
+                                <div class="post-user-info">
+                                    <div class="post-user-name">John Doe</div>
+                                    <div class="post-user-meta">Student • Main Building</div>
+                                    <div class="post-time">2 hours ago</div>
+                                </div>
+                            </div>
+                            <div class="post-options" onclick="toggleDropdown(this)">
+                                <i class="fas fa-ellipsis-h"></i>
+                                <div class="post-options-dropdown">
+                                    <button class="dropdown-item">
+                                        <i class="fas fa-edit"></i>
+                                        <span>Edit Post</span>
+                                    </button>
+                                    <button class="dropdown-item">
+                                        <i class="fas fa-check-circle"></i>
+                                        <span>Mark as Claimed</span>
+                                    </button>
+                                    <button class="dropdown-item" onclick="showDeleteModal(event)">
+                                        <i class="fas fa-trash"></i>
+                                        <span>Delete Post</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="post-content">
+                            <div class="post-tag lost">Lost</div>
+                            <div class="post-text">
+                                Lost my black wallet near the library. It contains my student ID and some cash. Please contact me if found!
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Another Sample Post -->
+                    <div class="post">
+                        <div class="post-header">
+                            <div class="post-user">
+                                <div class="profile-pic">
+                                    <div class="default-avatar">MS</div>
+                                </div>
+                                <div class="post-user-info">
+                                    <div class="post-user-name">Maria Santos</div>
+                                    <div class="post-user-meta">Faculty • Annex Building</div>
+                                    <div class="post-time">5 hours ago</div>
+                                </div>
+                            </div>
+                            <div class="post-options" onclick="toggleDropdown(this)">
+                                <i class="fas fa-ellipsis-h"></i>
+                                <div class="post-options-dropdown">
+                                    <button class="dropdown-item">
+                                        <i class="fas fa-edit"></i>
+                                        <span>Edit Post</span>
+                                    </button>
+                                    <button class="dropdown-item">
+                                        <i class="fas fa-check-circle"></i>
+                                        <span>Mark as Claimed</span>
+                                    </button>
+                                    <button class="dropdown-item" onclick="showDeleteModal(event)">
+                                        <i class="fas fa-trash"></i>
+                                        <span>Delete Post</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="post-content">
+                            <div class="post-tag found">Found</div>
+                            <div class="post-text">
+                                Found a set of keys with a blue keychain in the parking lot. They're at the security office.
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <button class="floating-add-btn" id="add-post-btn">
-        <i class="fas fa-plus"></i>
-        <span>Add new post</span>
-    </button>
-
-    <!-- Filter Modal -->
-    <div class="modal" id="filter-modal">
-        <div class="modal-content filter-modal-content">
-            <div class="modal-header">
-                <div class="modal-title">Filter Posts</div>
-                <button class="close-modal" id="close-filter-modal">&times;</button>
+    <!-- Custom Delete Confirmation Modal -->
+    <div class="delete-modal" id="delete-modal">
+        <div class="delete-modal-content">
+            <div class="delete-modal-header">
+                <div class="delete-modal-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="delete-modal-title">Delete Post</div>
+                <div class="delete-modal-message">Are you sure you want to delete this post?</div>
             </div>
-            <div class="modal-body">
-                <div class="filter-options">
-                    <div class="filter-section">
-                        <div class="filter-title">
-                            <i class="fas fa-filter"></i>
-                            <span>Post Type</span>
-                        </div>
-                        <div class="filter-option">
-                            <input type="checkbox" id="filter-found" class="filter-checkbox" data-type="found">
-                            <label for="filter-found">Found</label>
-                        </div>
-                        <div class="filter-option">
-                            <input type="checkbox" id="filter-lost" class="filter-checkbox" data-type="lost">
-                            <label for="filter-lost">Lost</label>
-                        </div>
-                        <div class="filter-option">
-                            <input type="checkbox" id="filter-claimed" class="filter-checkbox" data-type="claimed">
-                            <label for="filter-claimed">Claimed</label>
-                        </div>
-                    </div>
-
-                    <div class="filter-section">
-                        <div class="filter-title">
-                            <i class="fas fa-map-marker-alt"></i>
-                            <span>Campuses</span>
-                        </div>
-                        <div class="filter-option">
-                            <input type="checkbox" id="filter-main" class="filter-checkbox" data-location="Main Building">
-                            <label for="filter-main">Main Building</label>
-                        </div>
-                        <div class="filter-option">
-                            <input type="checkbox" id="filter-annex" class="filter-checkbox" data-location="Annex Building">
-                            <label for="filter-annex">Annex Building</label>
-                        </div>
-                        <div class="filter-option">
-                            <input type="checkbox" id="filter-annex2" class="filter-checkbox" data-location="Annex II Building">
-                            <label for="filter-annex2">Annex II Building</label>
-                        </div>
-                    </div>
-                </div>
-                <div class="filter-actions">
-                    <button class="btn btn-secondary" id="clear-filters">Clear All</button>
-                    <button class="btn btn-primary" id="apply-filters">Apply Filters</button>
-                </div>
+            <div class="delete-modal-footer">
+                <button class="delete-btn delete-btn-cancel" onclick="hideDeleteModal()">Cancel</button>
+                <button class="delete-btn delete-btn-confirm" onclick="confirmDelete()">OK</button>
             </div>
         </div>
     </div>
 
-    <!-- Add Post Modal -->
-    <div class="modal" id="post-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="modal-title">Add New Post</h2>
-                <button class="close-modal" id="close-modal">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <form id="post-form">
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label class="form-label" for="post-type">Type</label>
-                        <select class="form-select" id="post-type" required>
-                            <option value="">Select type</option>
-                            <option value="found">Found</option>
-                            <option value="lost">Lost</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label" for="post-location">Campuses</label>
-                        <select class="form-select" id="post-location" required>
-                            <option value="">Select Campuses</option>
-                            <option value="Main Building">Main Building</option>
-                            <option value="Annex Building">Annex Building</option>
-                            <option value="Annex II Building">Annex II Building</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label" for="post-description">Description</label>
-                        <textarea class="form-textarea" id="post-description" placeholder="Describe the item in detail..." required></textarea>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">Image (Optional)</label>
-                        <div class="file-input-wrapper">
-                            <label class="file-input-label" for="post-image">
-                                <i class="fas fa-camera"></i>
-                                <span>Choose Image</span>
-                            </label>
-                            <input type="file" class="file-input" id="post-image" accept="image/*">
-                        </div>
-                        <div class="file-name" id="file-name"></div>
-                        <div class="image-preview" id="image-preview"></div>
-                    </div>
-                </div>
+    <script>
+        let currentPostToDelete = null;
+
+        // Toggle dropdown menu
+        function toggleDropdown(element) {
+            const dropdown = element.querySelector('.post-options-dropdown');
+            const isVisible = dropdown.style.display === 'block';
+            
+            // Close all other dropdowns
+            document.querySelectorAll('.post-options-dropdown').forEach(d => {
+                d.style.display = 'none';
+            });
+            
+            // Toggle current dropdown
+            dropdown.style.display = isVisible ? 'none' : 'block';
+        }
+
+        // Show delete confirmation modal
+        function showDeleteModal(event) {
+            event.stopPropagation();
+            
+            // Find the post element
+            currentPostToDelete = event.target.closest('.post');
+            
+            // Close the dropdown
+            const dropdown = event.target.closest('.post-options-dropdown');
+            dropdown.style.display = 'none';
+            
+            // Show the custom modal
+            const modal = document.getElementById('delete-modal');
+            modal.classList.add('active');
+        }
+
+        // Hide delete confirmation modal
+        function hideDeleteModal() {
+            const modal = document.getElementById('delete-modal');
+            modal.classList.remove('active');
+            currentPostToDelete = null;
+        }
+
+        // Confirm delete action
+        function confirmDelete() {
+            if (currentPostToDelete) {
+                // Add fade out animation
+                currentPostToDelete.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                currentPostToDelete.style.opacity = '0';
+                currentPostToDelete.style.transform = 'translateY(-20px)';
                 
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" id="cancel-post">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Post</button>
-                </div>
-            </form>
-        </div>
-    </div>
+                // Remove the post after animation
+                setTimeout(() => {
+                    currentPostToDelete.remove();
+                }, 300);
+            }
+            
+            hideDeleteModal();
+        }
 
-    <!-- Edit Post Modal -->
-    <div class="modal" id="edit-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="modal-title">Edit Post</h2>
-                <button class="close-modal" id="close-edit-modal">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <form id="edit-form">
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label class="form-label" for="edit-type">Type</label>
-                        <select class="form-select" id="edit-type" required>
-                            <option value="">Select type</option>
-                            <option value="found">Found</option>
-                            <option value="lost">Lost</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label" for="edit-location">Campuses</label>
-                        <select class="form-select" id="edit-location" required>
-                            <option value="">Select Campuses</option>
-                            <option value="Main Building">Main Building</option>
-                            <option value="Annex Building">Annex Building</option>
-                            <option value="Annex II Building">Annex II Building</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label" for="edit-description">Description</label>
-                        <textarea class="form-textarea" id="edit-description" placeholder="Describe the item in detail..." required></textarea>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">Image (Optional)</label>
-                        <div class="current-image" id="current-image"></div>
-                        <div class="file-input-wrapper">
-                            <label class="file-input-label" for="edit-image">
-                                <i class="fas fa-camera"></i>
-                                <span>Change Image</span>
-                            </label>
-                            <input type="file" class="file-input" id="edit-image" accept="image/*">
-                        </div>
-                        <div class="file-name" id="edit-file-name"></div>
-                        <div class="image-preview" id="edit-image-preview"></div>
-                    </div>
-                </div>
-                
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" id="cancel-edit">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Update Post</button>
-                </div>
-            </form>
-        </div>
-    </div>
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            if (!event.target.closest('.post-options')) {
+                document.querySelectorAll('.post-options-dropdown').forEach(dropdown => {
+                    dropdown.style.display = 'none';
+                });
+            }
+        });
 
-    <script src="../js/main.js"></script>
+        // Close modal when clicking outside
+        document.getElementById('delete-modal').addEventListener('click', function(event) {
+            if (event.target === this) {
+                hideDeleteModal();
+            }
+        });
+
+        // Handle escape key to close modal
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                hideDeleteModal();
+            }
+        });
+
+        // Hamburger menu toggle
+        document.getElementById('hamburger-menu').addEventListener('click', function() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('active');
+        });
+    </script>
 </body>
 </html>
