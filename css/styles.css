@@ -671,64 +671,105 @@ body {
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
-  .sign-in,
-  .sign-up {
-    width: 100%;
-    padding: 20px 10px;
+  /* Mobile layout - toggle at TOP, forms below */
+  .container {
+    flex-direction: column; /* Stack vertically */
+    padding: 0;
   }
 
+  /* Toggle panel (BOTTOM section - 100% height) */
   .toggle-container {
-    top: 0;
+    position: relative;
+    width: 100%;
+    height: 30%;
+    order: 2; /* Forces to bottom in column layout */
     left: 0;
+    transform: none !important;
+    border-radius: 0;
+    z-index: 1;
+  }
+
+  /* Forms container (TOP section - 100% height) */
+  .form-container {
     width: 100%;
     height: 100%;
-    transform: translateY(0);
-    border-radius: 0;
+    order: 1; /* Forces to top */
+    position: relative;
+    padding: 20px;
   }
 
-  .container.active .toggle-container {
-    transform: translateY(-100%);
+  /* Show only sign-in by default */
+  .sign-in {
+    display: flex;
+  }
+  
+  /* Hide sign-up unless active */
+  .sign-up {
+    display: none;
   }
 
-  .toggle {
-    left: 0;
-    width: 100%;
-    height: 200%;
-    transform: translateY(0);
-  }
-
-  .container.active .toggle {
-    transform: translateY(50%);
-  }
-
-  .toggle-panel {
-    width: 100%;
-    height: 50%;
-    padding: 20px 10px;
-    text-align: center;
+  /* Show toggle-right by default */
+  .toggle-right {
+    display: flex;
   }
 
   .toggle-left {
-    transform: translateY(-200%);
+    display: none;
+  }
+  
+  /* When sign-up is active */
+  .container.active .sign-in {
+    display: none;
   }
 
-  .container.active .toggle-left {
-    transform: translateY(0);
-  }
-
-  .toggle-right {
-    top: auto;
-    bottom: 0;
-    transform: translateY(0);
+  .container.active .sign-up {
+    display: flex;
   }
 
   .container.active .toggle-right {
-    transform: translateY(200%);
+    display: none;
+  }
+  
+  .container.active .toggle-left {
+    display: flex;
   }
 
-  .container.active .sign-in,
-  .container.active .sign-up {
-    transform: translateY(100%);
+  /* Disable animations on mobile */
+  .toggle,
+  .toggle-panel,
+  .form-container {
+    transform: none !important;
+    transition: none !important;
+  }
+
+  /* Adjust toggle content */
+  .toggle-panel {
+    width: 100%;
+    height: 100%;
+    padding: 20px;
+  }
+
+  /* Ensure forms are scrollable if needed */
+  .form-container form {
+    max-height: 100%;
+    overflow-y: auto;
+  }
+  
+  .toggle-right .login-link,
+  .toggle-left .login-link {
+    align-self: flex-end;
+    text-align: center;
+    margin-top: 0px;
+  }
+
+  .toggle-panel h1 {
+    font-size: 40px;
+  }
+
+  .toggle-foundleft,
+  .toggle-foundright {
+    text-align: right;
+    align-self: flex-end;
   }
 
   .welcome-modal {
@@ -761,12 +802,11 @@ body {
     width: 100px;
     height: 100px;
   }
+
 }
 
 @media (max-width: 430px) {
-  .toggle-panel h1 {
-    font-size: 50px;
-  }
+  
 
   .welcome-modal {
     padding: 25px 30px;
