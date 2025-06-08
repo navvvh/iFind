@@ -5,7 +5,7 @@ const welcomeModal = document.getElementById("welcome-modal")
 const errorModal = document.getElementById("error-modal")
 
 // Toggle between sign up and sign in
-registerBtn.addEventListener("click", (e) => {
+registerBtn.addEventListener("click", (e) => { 
   e.preventDefault()
   container.classList.add("active")
 })
