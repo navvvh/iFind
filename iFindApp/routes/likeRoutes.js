@@ -1,14 +1,11 @@
-const express = require("express")
-const router = express.Router()
-const { getPostLikes, addLike, removeLike } = require("../controllers/likeController")
-
-// GET /api/likes/post/:postId - Get likes for a post
-router.get("/post/:postId", getPostLikes)
+const express = require("express");
+const router = express.Router();
+const { addLike, removeLike } = require("../controllers/likeController");
 
 // POST /api/likes - Add like
-router.post("/", addLike)
+router.post("/", addLike);
 
-// DELETE /api/likes - Remove like
-router.delete("/", removeLike)
+// DELETE /api/likes/post/:postId/user/:userId - Remove like
+router.delete("/post/:postId/user/:userId", removeLike);
 
 module.exports = router;
