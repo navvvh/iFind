@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>iFind</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Fredoka:wght@600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="icon" href="../assets/android-chrome-192x192.png" sizes="32x32" type="image/png">
+</head>
+<body>
+  <div class="container" id="container">
+    <!-- Sign Up Form -->
+    <div class="form-container sign-up">
+      <form id="signup-form">
+        <div class="form-title">
+          <img src="../assets/iFind.png" alt="iFind Logo" class="logo-img" />
+        </div>
+        <h2 class="form-subtitle">SIGN UP</h2>
+
+        <div class="input-field">
+          <input type="text" id="signup-username" placeholder="Username*" required />
+          <i class="fa-solid fa-user"></i>
+        </div>
+
+        <div class="input-field">
+          <input type="email" id="signup-email" placeholder="Email*" required />
+          <i class="fa-solid fa-envelope"></i>
+        </div>
+
+        <div class="input-field">
+          <input type="password" id="signup-password" placeholder="Password*" required />
+          <i class="fa-solid fa-lock"></i>
+        </div>
+
+        <button type="submit">SIGN UP</button>
+      </form>
+    </div>
+
+    <!-- Sign In Form -->
+    <div class="form-container sign-in">
+      <form id="login-form">
+        <div class="form-title">
+          <img src="../assets/iFind.png" alt="iFind Logo" class="logo-img" />
+        </div>
+        <h2 class="form-subtitle">LOG IN</h2>
+
+        <div class="input-field">
+          <input type="email" id="login-email" placeholder="Email*" required />
+          <i class="fa-solid fa-envelope"></i>
+        </div>
+
+        <div class="input-field">
+          <input type="password" id="login-password" placeholder="Password*" required />
+          <i class="fa-solid fa-lock"></i>
+        </div>
+
+        <button type="submit">LOG IN</button>
+      </form>
+    </div>
+
+    <!-- Toggle Container -->
+    <div class="toggle-container">
+      <div class="toggle">
+        <div class="toggle-panel toggle-left">
+          <h1 class="toggle-foundright">Found something?<br />Finding something?</h1>
+          <div class="login-link">
+            <span>Already have an account?</span>
+            <a href="#" id="login"><br />LOG IN NOW</a>
+          </div>
+        </div>
+
+        <div class="toggle-panel toggle-right">
+          <h1 class="toggle-foundleft">Found something?<br />Finding something?</h1>
+          <div class="login-link">
+            <span>Don't have an account?</span>
+            <a href="#" id="register"><br />SIGN UP NOW</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Welcome Modal -->
+  <div class="welcome-modal-overlay" id="welcome-modal">
+    <div class="welcome-modal">
+      <h1>WELCOME!</h1>
+      <p>Your account has been created successfully</p>
+      <button class="setup-btn" onclick="proceedToSetup()">SETUP</button>
+    </div>
+  </div>
+
+  <!-- Error Modal -->
+  <div class="error-modal-overlay" id="error-modal">
+    <div class="error-modal">
+      <button class="error-close-btn" onclick="closeErrorModal()">&times;</button>
+      <div class="error-content">
+        <div class="error-top-section">
+          <div class="sad-cloud">
+            <div class="cloud-body">
+              <div class="cloud-eyes">
+                <div class="eye"></div>
+                <div class="eye"></div>
+              </div>
+              <div class="cloud-mouth"></div>
+            </div>
+          </div>
+        </div>
+        <div class="error-bottom-section">
+          <h2 class="error-title">ERROR!</h2>
+          <p class="error-message">Invalid username or password</p>
+          <button class="try-again-btn" onclick="closeErrorModal()">Try again</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ✅ Scripts loaded in correct order -->
+  <!-- 1. SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <!-- 2. Define API_URL FIRST -->
+  <script src="../js/api-service.js"></script>
+
+  <!-- 3. Main script that depends on API_URL -->
+  <script src="../js/script.js"></script>
+</body>
+</html>

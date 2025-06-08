@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iFind - A smarter way to recover lost items</title>
+    <link rel="stylesheet" href="../css/about.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="/js/api-service.js"></script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="hamburger" id="hamburger-menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <div class="logo">
+                <img src="../assets/iFind.png" alt="iFind">
+            </div>
+        </div>
+    </nav>
+
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-content">
+            <div class="nav-item" id="nav-profile">
+                <i class="fas fa-user"></i>
+                <span>Profile</span>
+            </div>
+            <div class="nav-item" id="nav-feed">
+                <i class="fas fa-stream"></i>
+                <span>Feed</span>
+            </div>
+            <div class="nav-item active" id="nav-about">
+                <i class="fas fa-info-circle"></i>
+                <span>About</span>
+            </div>
+            <div class="nav-item" id="nav-claimed">
+                <i class="fas fa-check-circle"></i>
+                <span>Claimed</span>
+            </div>
+        </div>
+        <div class="sidebar-footer">
+            <div class="nav-item" id="nav-logout">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Log Out</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-container">
+            <div class="hero-content">
+                <h1 class="hero-title">A smarter way to <br>recover lost items</h1>
+                <p class="hero-description">
+                    <span style="margin-left: 30px;">iFind</span> is a web-based platform designed to help students, faculty, and staff easily report and recover lost or found items within the campus.
+                </p>
+            </div>
+            <div class="hero-image">
+                <img src="../assets/cat.png" alt="Cat mascot" class="cat-image">
+            </div>
+        </div>
+    </section>
+
+    <!-- Post Section -->
+    <section class="content-section">
+        <div class="section-grid">
+            <div class="section-content">
+                <h2>Post</h2>
+                <p>Users can create posts for lost or found items. Each post includes details like item name, description, photo, and where it was seen or found on campus.</p>
+            </div>
+            <div class="mockup post-mockup">
+                <div class="post-header">
+                    <div class="user-avatar">
+                        <img src="../assets/pokemon (2).png" alt="Hajj" class="avatar-img">
+                    </div>
+                    <div class="user-details">
+                        <h4>Hajj</h4>
+                        <span class="username">@H4jj</span>
+                        <span class="user-type">STUDENT</span>
+                    </div>
+                    <button class="close-btn">×</button>
+                </div>
+                <div class="post-input-area">
+                    <textarea placeholder="Write in your posting!" class="post-textarea"></textarea>
+                    <div class="post-tools">
+                        <div class="tool-icons">
+                            <button class="tool-btn">📎</button>
+                        </div>
+                        <button class="post-submit-btn">POST</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Comment Section -->
+    <section class="content-section">
+        <div class="section-grid">
+            <div class="comment-mockup">
+                <div class="interaction-buttons">
+                    <button class="interaction-btn">
+                        <span class="heart-icon">♡</span>
+                        <span>Heart</span>
+                    </button>
+                    <button class="interaction-btn active">
+                        <span class="comment-icon">💬</span>
+                        <span>COMMENT</span>
+                    </button>
+                    <button class="interaction-btn">
+                        <span class="share-icon">↗</span>
+                        <span>SHARE</span>
+                    </button>
+                </div>
+                <div class="comment-input-section">
+                    <div class="comment-avatar">
+                        <img src="../assets/pokemon (2).png" alt="User" class="comment-avatar-img">
+                    </div>
+                    <div class="comment-input-wrapper">
+                        <input type="text" placeholder="Write your comment.." class="comment-input">
+                        <button class="send-comment-btn">▶</button>
+                    </div>
+                </div>
+            </div>
+            <div class="section-content">
+                <h2>Comment</h2>
+                <p>Community members can leave comments on posts for updates, or ask questions. Comments make it easier to clarify details and reconnect items with their rightful owners.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Search Section -->
+    <section class="content-section">
+        <div class="search-grid">
+            <div class="search-content">
+                <h2>Search</h2>
+                <p>Easily browse or search for items using keywords or filters. iFind helps you quickly check if your lost item has already been found or reported.</p>
+            </div>
+            <div class="search-mockup">
+                <div class="search-input-wrapper">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" placeholder="Type in search" class="search-input" readonly>
+                    <button class="filter-btn">☰</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <hr style="width: 100%; height: 2px; background-color: black; border: none;">
+
+    <!-- Team Section -->
+    <section class="team-section">
+        <div class="content-section">
+            <h2>Meet the team</h2>
+            <div class="team-grid">
+                <div class="team-member">
+                    <div class="team-avatar">
+                        <img src="../assets/hajj.jpg" alt="Vhan Hajj Macaria">
+                    </div>
+                    <div class="team-name">Vhan Hajj Macaria</div>
+                </div>
+                <div class="team-member">
+                    <div class="team-avatar">
+                        <img src="../assets/hajj.jpg" alt="Patrick Mandrilla">
+                    </div>
+                    <div class="team-name">Patrick Mandrilla</div>
+                </div>
+                <div class="team-member">
+                    <div class="team-avatar">
+                        <img src="../assets/ronald.jpg" alt="Denese Manuel">
+                    </div>
+                    <div class="team-name">Denese Manuel</div>
+                </div>
+                <div class="team-member">
+                    <div class="team-avatar">
+                        <img src="../assets/ronald.jpg" alt="Ronald Rafael Sena">
+                    </div>
+                    <div class="team-name">Ronald Rafael Sena</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Updated Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-main">
+                <h2 class="footer-title">Helping the NU-Manila community,<br>one find at a time.</h2>
+                <p class="footer-description">Report lost or found items and get notified when matches are posted. Join our growing community of honest finders and responsible owners.</p>
+            </div>
+            <div class="footer-divider"></div>
+            <div class="footer-bottom">
+                <div class="footer-social">
+                    <a href="#" class="social-link" aria-label="Facebook">
+                        <i class="fab fa-facebook-f"></i>
+                    </a>
+                    <a href="#" class="social-link" aria-label="Email">
+                        <i class="fas fa-envelope"></i>
+                    </a>
+                </div>
+                <div class="footer-copyright">
+                    <p>iFind 2025 © All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../js/about.js"></script>
+    
+</body>
+</html>

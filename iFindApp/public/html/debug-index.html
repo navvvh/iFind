@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>iFind Debug</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Fredoka:wght@600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <!-- SweetAlert2 CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="icon" href="../assets/android-chrome-192x192.png" sizes="32x32" type="image/png">
+  <style>
+    /* Debug styles */
+    .debug-panel {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(0,0,0,0.8);
+      color: #00ff00;
+      font-family: monospace;
+      padding: 10px;
+      max-height: 200px;
+      overflow-y: auto;
+      z-index: 9999;
+    }
+    .debug-panel h3 {
+      margin: 0 0 10px 0;
+      color: #fff;
+    }
+    .debug-log {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    .debug-log li {
+      margin-bottom: 5px;
+      border-bottom: 1px solid #333;
+      padding-bottom: 5px;
+    }
+    .debug-log .error {
+      color: #ff5555;
+    }
+    .debug-log .success {
+      color: #55ff55;
+    }
+    .debug-log .warning {
+      color: #ffff55;
+    }
+    .debug-log .info {
+      color: #5555ff;
+    }
+    .debug-controls {
+      margin-top: 10px;
+      display: flex;
+      gap: 10px;
+    }
+    .debug-controls button {
+      background: #333;
+      color: #fff;
+      border: 1px solid #555;
+      padding: 5px 10px;
+      cursor: pointer;
+    }
+    .debug-controls button:hover {
+      background: #444;
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="container">
+    <!-- Sign Up Form -->
+    <div class="form-container sign-up">
+      <form id="signup-form">
+        <div class="form-title">
+          <img src="../assets/iFind.png" alt="iFind Logo" class="logo-img" />
+        </div>
+        <h2 class="form-subtitle">SIGN UP</h2>
+
+        <div class="input-field">
+          <input type="text" id="signup-username" placeholder="Username*" required />
+          <i class="fa-solid fa-user"></i>
+        </div>
+
+        <div class="input-field">
+          <input type="email" id="signup-email" placeholder="Email*" required />
+          <i class="fa-solid fa-envelope"></i>
+        </div>
+
+        <div class="input-field">
+          <input type="password" id="signup-password" placeholder="Password*" required />
+          <i class="fa-solid fa-lock"></i>
+        </div>
+
+        <button type="submit" id="signup-button">SIGN UP</button>
+      </form>
+    </div>
+
+    <!-- Sign In Form -->
+    <div class="form-container sign-in">
+      <form id="login-form">
+        <div class="form-title">
+          <img src="../assets/iFind.png" alt="iFind Logo" class="logo-img" />
+        </div>
+        <h2 class="form-subtitle">LOG IN</h2>
+
+        <div class="input-field">
+          <input type="email" id="login-email" placeholder="Email*" required />
+          <i class="fa-solid fa-envelope"></i>
+        </div>
+
+        <div class="input-field">
+          <input type="password" id="login-password" placeholder="Password*" required />
+          <i class="fa-solid fa-lock"></i>
+        </div>
+
+        <button type="submit">LOG IN</button>
+      </form>
+    </div>
+
+    <!-- Toggle Container -->
+    <div class="toggle-container">
+      <div class="toggle">
+        <div class="toggle-panel toggle-left">
+          <h1 class="toggle-foundright">Found something?<br />Finding something?</h1>
+          <div class="login-link">
+            <span>Already have an account?</span>
+            <a href="#" id="login"><br />LOG IN NOW</a>
+          </div>
+        </div>
+
+        <div class="toggle-panel toggle-right">
+          <h1 class="toggle-foundleft">Found something?<br />Finding something?</h1>
+          <div class="login-link">
+            <span>Don't have an account?</span>
+            <a href="#" id="register"><br />SIGN UP NOW</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Welcome Modal -->
+  <div class="welcome-modal-overlay" id="welcome-modal">
+    <div class="welcome-modal">
+      <h1>WELCOME!</h1>
+      <p>Your account has been created successfully</p>
+      <button class="setup-btn" onclick="proceedToSetup()">SETUP</button>
+    </div>
+  </div>
+
+  <!-- Error Modal -->
+  <div class="error-modal-overlay" id="error-modal">
+    <div class="error-modal">
+      <button class="error-close-btn" onclick="closeErrorModal()">&times;</button>
+      <div class="error-content">
+        <div class="error-top-section">
+          <div class="sad-cloud">
+            <div class="cloud-body">
+              <div class="cloud-eyes">
+                <div class="eye"></div>
+                <div class="eye"></div>
+              </div>
+              <div class="cloud-mouth"></div>
+            </div>
+          </div>
+        </div>
+        <div class="error-bottom-section">
+          <h2 class="error-title">ERROR!</h2>
+          <p class="error-message">Invalid username or password</p>
+          <button class="try-again-btn" onclick="closeErrorModal()">Try again</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Debug Panel -->
+  <div class="debug-panel">
+    <h3>Debug Console</h3>
+    <ul class="debug-log" id="debug-log"></ul>
+    <div class="debug-controls">
+      <button onclick="testAPIConnection()">Test API</button>
+      <button onclick="testFormSubmission()">Test Form</button>
+      <button onclick="clearDebugLog()">Clear Log</button>
+      <button onclick="toggleDebugPanel()">Hide Panel</button>
+    </div>
+  </div>
+
+  <!-- Load scripts in correct order -->
+  <!-- 1. SweetAlert2 first -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  
+  <!-- 2. Debug script -->
+  <script>
+    // Debug utilities
+    const debugLog = document.getElementById('debug-log');
+    
+    function logDebug(message, type = 'normal') {
+      const entry = document.createElement('li');
+      entry.className = type;
+      const timestamp = new Date().toLocaleTimeString();
+      entry.textContent = `[${timestamp}] ${message}`;
+      debugLog.appendChild(entry);
+      console.log(`[${type}] ${message}`);
+      
+      // Auto-scroll to bottom
+      debugLog.scrollTop = debugLog.scrollHeight;
+    }
+    
+    function clearDebugLog() {
+      debugLog.innerHTML = '';
+      logDebug('Debug log cleared', 'info');
+    }
+    
+    function toggleDebugPanel() {
+      const panel = document.querySelector('.debug-panel');
+      if (panel.style.display === 'none') {
+        panel.style.display = 'block';
+      } else {
+        panel.style.display = 'none';
+      }
+    }
+    
+    // Test API connection
+    async function testAPIConnection() {
+      logDebug('Testing API connection...', 'info');
+      try {
+        const response = await fetch('http://localhost:3001/api/health');
+        const data = await response.json();
+        logDebug(`API connection successful: ${JSON.stringify(data)}`, 'success');
+        return true;
+      } catch (error) {
+        logDebug(`API connection failed: ${error.message}`, 'error');
+        return false;
+      }
+    }
+    
+    // Test form submission
+    function testFormSubmission() {
+      logDebug('Testing form submission...', 'info');
+      
+      const form = document.getElementById('signup-form');
+      if (!form) {
+        logDebug('Signup form not found!', 'error');
+        return;
+      }
+      
+      // Fill form with test data
+      document.getElementById('signup-username').value = 'TestUser' + Date.now();
+      document.getElementById('signup-email').value = `test${Date.now()}@example.com`;
+      document.getElementById('signup-password').value = 'password123';
+      
+      logDebug('Form filled with test data', 'info');
+      
+      // Trigger submit event
+      const submitEvent = new Event('submit');
+      form.dispatchEvent(submitEvent);
+      
+      logDebug('Submit event dispatched', 'info');
+    }
+    
+    // Log page load
+    window.addEventListener('load', () => {
+      logDebug('Page loaded', 'info');
+      
+      // Check for required elements
+      const elements = [
+        'container', 'signup-form', 'login-form', 'register', 'login',
+        'signup-username', 'signup-email', 'signup-password', 'signup-button'
+      ];
+      
+      elements.forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+          logDebug(`Element found: #${id}`, 'success');
+        } else {
+          logDebug(`Element missing: #${id}`, 'error');
+        }
+      });
+      
+      // Check for script loading
+      if (typeof Swal !== 'undefined') {
+        logDebug('SweetAlert2 loaded successfully', 'success');
+      } else {
+        logDebug('SweetAlert2 not loaded!', 'error');
+      }
+      
+      // Test API connection on page load
+      testAPIConnection();
+    });
+    
+    // Monitor form submissions
+    document.addEventListener('submit', (event) => {
+      const formId = event.target.id;
+      logDebug(`Form submitted: #${formId}`, 'info');
+    });
+    
+    // Monitor button clicks
+    document.addEventListener('click', (event) => {
+      if (event.target.tagName === 'BUTTON') {
+        logDebug(`Button clicked: ${event.target.textContent}`, 'info');
+      }
+    });
+    
+    // Monitor JavaScript errors
+    window.addEventListener('error', (event) => {
+      logDebug(`JavaScript error: ${event.message} at ${event.filename}:${event.lineno}`, 'error');
+    });
+  </script>
+  
+  <!-- 3. API service -->
+  <script src="../js/api-service.js"></script>
+  
+  <!-- 4. Inline debug script -->
+  <script>
+    // Check if API service loaded
+    if (typeof API_URL !== 'undefined') {
+      logDebug(`API_URL loaded: ${API_URL}`, 'success');
+    } else {
+      logDebug('API_URL not defined!', 'error');
+    }
+    
+    if (typeof window.iFindAPI !== 'undefined') {
+      logDebug('iFindAPI object loaded', 'success');
+    } else {
+      logDebug('iFindAPI object not defined!', 'error');
+    }
+  </script>
+  
+  <!-- 5. Super simple direct script -->
+  <script>
+    // Direct script for signup
+    document.addEventListener('DOMContentLoaded', () => {
+      logDebug('Setting up direct signup handler', 'info');
+      
+      const signupForm = document.getElementById('signup-form');
+      if (signupForm) {
+        signupForm.addEventListener('submit', async (event) => {
+          event.preventDefault();
+          logDebug('Signup form submitted directly!', 'success');
+          
+          const username = document.getElementById('signup-username').value.trim();
+          const email = document.getElementById('signup-email').value.trim();
+          const password = document.getElementById('signup-password').value;
+          
+          logDebug(`Form data: username=${username}, email=${email}, password length=${password.length}`, 'info');
+          
+          // Basic validation
+          if (!username || !email || !password) {
+            logDebug('Validation failed: Missing fields', 'error');
+            alert('Please fill in all fields');
+            return;
+          }
+          
+          try {
+            logDebug('Making direct API call...', 'info');
+            
+            const response = await fetch('http://localhost:3001/api/users', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                full_name: username,
+                email: email,
+                password: password,
+                user_type: 'Student',
+              }),
+            });
+            
+            logDebug(`API response status: ${response.status}`, 'info');
+            
+            const data = await response.json();
+            logDebug(`API response: ${JSON.stringify(data)}`, 'info');
+            
+            if (data.success) {
+              logDebug('User created successfully!', 'success');
+              alert('Account created successfully!');
+              
+              // Store user data
+              localStorage.setItem('ifindUserData', JSON.stringify({
+                id: data.data.id,
+                name: data.data.full_name,
+                email: data.data.email,
+                role: data.data.user_type.toLowerCase(),
+                username: data.data.username,
+                completedSetup: data.data.completed_setup,
+              }));
+              
+              // Reset form
+              signupForm.reset();
+            } else {
+              logDebug(`API error: ${data.error}`, 'error');
+              alert(`Error: ${data.error || 'Failed to create account'}`);
+            }
+          } catch (error) {
+            logDebug(`Error: ${error.message}`, 'error');
+            alert(`An error occurred: ${error.message}`);
+          }
+        });
+        
+        logDebug('Direct signup handler attached', 'success');
+      } else {
+        logDebug('Could not find signup form for direct handler', 'error');
+      }
+    });
+  </script>
+</body>
+</html>
