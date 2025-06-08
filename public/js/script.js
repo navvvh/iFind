@@ -1,274 +1,155 @@
-const container = document.getElementById("container")
-const registerBtn = document.getElementById("register")
-const loginBtn = document.getElementById("login")
-const welcomeModal = document.getElementById("welcome-modal")
-const errorModal = document.getElementById("error-modal")
-const Swal = window.Swal // Declare the Swal variable
+console.log("🔧 Fixed script.js loaded");
 
-// Toggle between sign up and sign in
-registerBtn.addEventListener("click", (e) => {
-  e.preventDefault()
-  container.classList.add("active")
-})
+//const API_URL = "http://127.0.0.1:3001";
+const container = document.getElementById("container");
+const registerBtn = document.getElementById("register");
+const loginBtn = document.getElementById("login");
 
-loginBtn.addEventListener("click", (e) => {
-  e.preventDefault()
-  container.classList.remove("active")
-})
+document.addEventListener("DOMContentLoaded", () => {
+  console.log("DOM loaded");
 
-// Error modal functions
-function showErrorModal(message = "Invalid username or password") {
-  const errorMessage = document.querySelector(".error-message")
-  errorMessage.textContent = message
-  errorModal.classList.add("show")
-}
+  const signupForm = document.getElementById("signup-form");
+  const loginForm = document.getElementById("login-form");
 
-function closeErrorModal() {
-  errorModal.classList.remove("show")
-}
-
-// Close error modal when clicking outside
-errorModal.addEventListener("click", (event) => {
-  if (event.target === errorModal) {
-    closeErrorModal()
-  }
-})
-
-// Add the syncUserData function to script.js
-function syncUserData(updatedData = {}) {
-  // Get current data from all sources
-  const userProfile = JSON.parse(localStorage.getItem("userProfile")) || {}
-  const ifindUserData = JSON.parse(localStorage.getItem("ifindUserData")) || {}
-  const mockUser = JSON.parse(localStorage.getItem("mockUser")) || {}
-  const userData = JSON.parse(localStorage.getItem("userData")) || {}
-  const sessionData = JSON.parse(localStorage.getItem("userSession")) || {}
-
-  // Create updated userProfile (main source of truth)
-  const newUserProfile = {
-    ...userProfile,
-    ...updatedData,
-    name:
-      updatedData.name ||
-      userProfile.name ||
-      ifindUserData.name ||
-      mockUser.username ||
-      userData.username ||
-      sessionData.username,
-    username:
-      updatedData.username ||
-      userProfile.username ||
-      ifindUserData.name?.toLowerCase().replace(/\s+/g, "") ||
-      mockUser.username ||
-      userData.username ||
-      sessionData.username,
-    email: updatedData.email || userProfile.email || mockUser.email || userData.email || sessionData.email,
-    role: updatedData.role || userProfile.role || ifindUserData.role?.toUpperCase() || mockUser.role,
-    avatar: updatedData.avatar !== undefined ? updatedData.avatar : userProfile.avatar || mockUser.avatar,
-    avatarId:
-      updatedData.avatarId !== undefined
-        ? updatedData.avatarId
-        : userProfile.avatarId || ifindUserData.avatarId || mockUser.avatarId,
-    avatarEmoji:
-      updatedData.avatarEmoji !== undefined ? updatedData.avatarEmoji : userProfile.avatarEmoji || ifindUserData.avatar,
-    completedSetup:
-      updatedData.completedSetup !== undefined
-        ? updatedData.completedSetup
-        : userProfile.completedSetup || Boolean(ifindUserData.name && ifindUserData.role),
-    lastUpdated: new Date().toISOString(),
+  if (!signupForm && !loginForm) {
+    console.error("❌ No forms found. Check HTML.");
+    return;
   }
 
-  // Generate initials if name exists
-  if (newUserProfile.name) {
-    newUserProfile.initials = newUserProfile.name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .substring(0, 2)
+  testAPIConnection();
+
+  if (registerBtn) {
+    registerBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      container.classList.add("active");
+    });
   }
 
-  // Format username with @ if needed
-  if (newUserProfile.username && !newUserProfile.username.startsWith("@")) {
-    newUserProfile.username = "@" + newUserProfile.username
+  if (loginBtn) {
+    loginBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      container.classList.remove("active");
+    });
   }
 
-  // Update userProfile (main source of truth)
-  localStorage.setItem("userProfile", JSON.stringify(newUserProfile))
-
-  // Update ifindUserData
-  const newIfindUserData = {
-    ...ifindUserData,
-    name: newUserProfile.name,
-    role: newUserProfile.role?.toLowerCase(),
-    avatar: newUserProfile.avatarEmoji,
-    avatarId: newUserProfile.avatarId,
-    uploadedImage: newUserProfile.avatar,
-  }
-  localStorage.setItem("ifindUserData", JSON.stringify(newIfindUserData))
-
-  // Update mockUser
-  const newMockUser = {
-    ...mockUser,
-    username: newUserProfile.username.replace("@", ""),
-    email: newUserProfile.email,
-    role: newUserProfile.role,
-    avatar: newUserProfile.avatar,
-    avatarId: newUserProfile.avatarId,
-    avatarEmoji: newUserProfile.avatarEmoji,
-  }
-  localStorage.setItem("mockUser", JSON.stringify(newMockUser))
-
-  // Update userData
-  const newUserData = {
-    ...userData,
-    username: newUserProfile.username.replace("@", ""),
-    email: newUserProfile.email,
-  }
-  localStorage.setItem("userData", JSON.stringify(newUserData))
-
-  // Update userSession
-  const newSessionData = {
-    ...sessionData,
-    username: newUserProfile.username.replace("@", ""),
-    email: newUserProfile.email,
-    profileComplete: true,
-    lastUpdated: new Date().toISOString(),
-  }
-  localStorage.setItem("userSession", JSON.stringify(newSessionData))
-
-  // Update all existing posts with new user information
-  const allPosts = JSON.parse(localStorage.getItem("userPosts")) || []
-  const updatedPosts = allPosts.map((post) => {
-    if (post.userId === "current_user") {
-      return {
-        ...post,
-        userName: newUserProfile.name,
-        userHandle: newUserProfile.username,
-        userRole: newUserProfile.role,
-        userInitials: newUserProfile.initials,
-        avatar: newUserProfile.avatar,
-        avatarId: newUserProfile.avatarId,
-        avatarEmoji: newUserProfile.avatarEmoji,
-      }
-    }
-    return post
-  })
-  localStorage.setItem("userPosts", JSON.stringify(updatedPosts))
-
-  // Dispatch storage event to notify other pages
-  window.dispatchEvent(new Event("storage"))
-
-  return newUserProfile
-}
-
-// Update the signup form handler to use SweetAlert2 with centered position
-document.getElementById("signup-form").addEventListener("submit", async (event) => {
-  event.preventDefault()
-
-  const username = document.getElementById("signup-username").value.trim()
-  const email = document.getElementById("signup-email").value.trim()
-  const password = document.getElementById("signup-password").value
-
-  // Basic validation
-  if (!username || !email || !password) {
-    showErrorModal("Please fill in all fields")
-    return
+  if (signupForm) {
+    signupForm.addEventListener("submit", handleSignup);
   }
 
-  if (password.length < 6) {
-    showErrorModal("Password must be at least 6 characters long")
-    return
+  if (loginForm) {
+    loginForm.addEventListener("submit", handleLogin);
   }
+});
 
-  // Email validation
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  if (!emailRegex.test(email)) {
-    showErrorModal("Please enter a valid email address")
-    return
-  }
-
-  // Store user data using the centralized function
-  syncUserData({
-    username: username,
-    email: email,
-    completedSetup: false,
-    signupDate: new Date().toISOString(),
-  })
-
-  // Also store password in userData for login verification
-  const userData = JSON.parse(localStorage.getItem("userData")) || {}
-  userData.password = password
-  localStorage.setItem("userData", JSON.stringify(userData))
-
-  // Show SweetAlert2 success notification - CENTERED
-  await Swal.fire({
-    icon: "success",
-    title: "Registered successfully!",
-    showConfirmButton: false,
-    timer: 1500,
-    background: "#fff",
-    color: "#0a2342",
-    iconColor: "#28a745",
-    customClass: {
-      popup: "centered-success-popup",
-    },
-  })
-
-  // Switch to login form after the alert
-  container.classList.remove("active")
-
-  // Clear signup form
-  document.getElementById("signup-form").reset()
-})
-
-// Login form handler
-document.getElementById("login-form").addEventListener("submit", (event) => {
-  event.preventDefault()
-
-  const email = document.getElementById("login-email").value.trim()
-  const password = document.getElementById("login-password").value
-
-  // Basic validation - only show error modal for actual validation issues
-  if (!email || !password) {
-    showErrorModal("Please fill in all fields")
-    return
-  }
-
-  // Get stored user data
-  const storedUserData = localStorage.getItem("userData")
-
-  if (storedUserData) {
-    const userData = JSON.parse(storedUserData)
-
-    if (email === userData.email && password === userData.password) {
-      // Successful login - show welcome modal
-      showWelcomeModal()
-      // Clear login form
-      document.getElementById("login-form").reset()
-    } else {
-      // Show error modal only for wrong credentials
-      showErrorModal("Invalid username or password")
-    }
+function showError(message) {
+  const Swal = window.Swal;
+  if (Swal) {
+    Swal.fire({ icon: "error", title: "Oops...", text: message });
   } else {
-    // Show error modal for no account found
-    showErrorModal("No account found. Please sign up first.")
+    alert("Error: " + message);
   }
-})
-
-// Show welcome modal function
-function showWelcomeModal() {
-  welcomeModal.classList.add("show")
 }
 
-// Proceed to setup/main application
-function proceedToSetup() {
-  // Redirect to setup page
-  window.location.href = "../html/setup.html"
+function showSuccess(message) {
+  const Swal = window.Swal;
+  if (Swal) {
+    Swal.fire({ icon: "success", title: "Success!", text: message });
+  } else {
+    alert("Success: " + message);
+  }
 }
 
-// Hide welcome modal if clicked outside
-welcomeModal.addEventListener("click", (event) => {
-  if (event.target === welcomeModal) {
-    welcomeModal.classList.remove("show")
+async function testAPIConnection() {
+  try {
+    const res = await fetch(`${API_URL}/health`);
+    if (!res.ok) throw new Error(`Status: ${res.status}`);
+    const data = await res.json();
+    console.log("✅ API Health Check:", data);
+    return true;
+  } catch (err) {
+    console.error("❌ API not reachable:", err);
+    showError("Cannot connect to API server on port 3001.");
+    return false;
   }
-})
+}
+
+
+async function handleSignup(event) {
+  event.preventDefault();
+  const username = document.getElementById("signup-username").value.trim();
+  const email = document.getElementById("signup-email").value.trim();
+  const password = document.getElementById("signup-password").value;
+
+  if (!username || !email || !password) return showError("All fields required.");
+  if (password.length < 6) return showError("Password must be at least 6 characters.");
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return showError("Invalid email address.");
+
+  try {
+    const res = await fetch(`${API_URL}/users`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        full_name: username,
+        email,
+        password,
+        user_type: "Student",
+      }),
+    });
+
+    const data = await res.json();
+    console.log("Signup response:", data);
+
+    if (data.success) {
+      localStorage.setItem("ifindUserData", JSON.stringify(data.data));
+      showSuccess("Account created!");
+      container.classList.remove("active");
+      document.getElementById("signup-form").reset();
+    } else {
+      showError(data.error || "Could not create user.");
+    }
+  } catch (err) {
+    console.error("Signup error:", err);
+    showError("Something went wrong. Try again.");
+  }
+}
+
+async function handleLogin(event) {
+  event.preventDefault();
+  const email = document.getElementById("login-email").value.trim();
+  const password = document.getElementById("login-password").value;
+
+  if (!email || !password) return showError("All fields required.");
+
+  try {
+    const res = await fetch(`${API_URL}/users/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
+
+    const data = await res.json();
+    console.log("Login response:", data);
+
+    if (!data.success) return showError(data.error || "Invalid login credentials.");
+
+    const user = data.data;
+    const userData = {
+      id: user.user_id,
+      name: user.full_name,
+      email: user.email,
+      role: user.user_type.toLowerCase(),
+      username: user.username || "",
+      completedSetup: user.completed_setup || false,
+    };
+
+    localStorage.setItem("ifindUserData", JSON.stringify(userData));
+    showSuccess("Login successful!");
+
+    setTimeout(() => {
+      window.location.href = userData.completedSetup ? "main.html" : "setup.html";
+    }, 1500);
+  } catch (err) {
+    console.error("Login error:", err);
+    showError("Login failed. Please try again.");
+  }
+}

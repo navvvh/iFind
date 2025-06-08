@@ -6,8 +6,6 @@
   <title>iFind</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Fredoka:wght@600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-  <!-- SweetAlert2 CSS -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
   <link rel="stylesheet" href="../css/styles.css">
   <link rel="icon" href="../assets/android-chrome-192x192.png" sizes="32x32" type="image/png">
 </head>
@@ -118,8 +116,14 @@
     </div>
   </div>
 
-  <!-- SweetAlert2 JS -->
+  <!-- ✅ Scripts loaded in correct order -->
+  <!-- 1. SweetAlert2 -->
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <!-- 2. Define API_URL FIRST -->
+  <script src="../js/api-service.js"></script>
+
+  <!-- 3. Main script that depends on API_URL -->
   <script src="../js/script.js"></script>
 </body>
 </html>
