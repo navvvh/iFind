@@ -1,9 +1,11 @@
-const API_URL = "http://localhost:3001/api";
+// --- START OF CORRECTED api-service.js ---
+
+const API_URL = "http://localhost:3001/api"; // This is the correct variable
 
 const UserAPI = {
   loginUser: async (credentials) => {
     try {
-      // ✅ CORRECTED
+      // ✅ FIX: Changed API_BASE_URL to API_URL
       const response = await fetch(`${API_URL}/users/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -18,7 +20,7 @@ const UserAPI = {
 
   createUser: async (userData) => {
     try {
-      // ✅ CORRECTED
+      // ✅ FIX: Changed API_BASE_URL to API_URL
       const response = await fetch(`${API_URL}/users`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -33,7 +35,8 @@ const UserAPI = {
 
   getUserById: async (userId) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/users/${userId}`);
+      // ✅ FIX: Changed API_BASE_URL to API_URL
+      const response = await fetch(`${API_URL}/users/${userId}`);
       return await response.json();
     } catch (error) {
       console.error(`Error fetching user ${userId}:`, error);
@@ -43,7 +46,8 @@ const UserAPI = {
 
   updateUser: async (userId, userData) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/users/${userId}`, {
+      // ✅ FIX: Changed API_BASE_URL to API_URL
+      const response = await fetch(`${API_URL}/users/${userId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(userData),
@@ -66,7 +70,8 @@ const PostAPI = {
       if (filters.campus) queryParams.append("campus", filters.campus);
       if (filters.post_type) queryParams.append("post_type", filters.post_type);
 
-      const url = `${API_BASE_URL}/posts${queryParams.toString() ? "?" + queryParams.toString() : ""}`;
+      // ✅ FIX: Changed API_BASE_URL to API_URL
+      const url = `${API_URL}/posts${queryParams.toString() ? "?" + queryParams.toString() : ""}`;
       const response = await fetch(url);
       return await response.json();
     } catch (error) {
@@ -77,7 +82,8 @@ const PostAPI = {
 
   createPost: async (postData) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/posts`, {
+      // ✅ FIX: Changed API_BASE_URL to API_URL
+      const response = await fetch(`${API_URL}/posts`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(postData),
@@ -91,7 +97,8 @@ const PostAPI = {
 
   getPostById: async (postId) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/posts/${postId}`);
+      // ✅ FIX: Changed API_BASE_URL to API_URL
+      const response = await fetch(`${API_URL}/posts/${postId}`);
       return await response.json();
     } catch (error) {
       console.error(`Error fetching post ${postId}:`, error);
@@ -101,7 +108,8 @@ const PostAPI = {
 
   updatePost: async (postId, postData) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/posts/${postId}`, {
+      // ✅ FIX: Changed API_BASE_URL to API_URL
+      const response = await fetch(`${API_URL}/posts/${postId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(postData),
@@ -115,7 +123,8 @@ const PostAPI = {
 
   deletePost: async (postId) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/posts/${postId}`, {
+      // ✅ FIX: Changed API_BASE_URL to API_URL
+      const response = await fetch(`${API_URL}/posts/${postId}`, {
         method: "DELETE",
       });
       return await response.json();
@@ -132,7 +141,8 @@ const PostAPI = {
 const CommentAPI = {
   getCommentsForPost: async (postId) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/comments/post/${postId}`);
+      // ✅ FIX: Changed API_BASE_URL to API_URL
+      const response = await fetch(`${API_URL}/comments/post/${postId}`);
       return await response.json();
     } catch (error) {
       console.error(`Error fetching comments for post ${postId}:`, error);
@@ -142,7 +152,8 @@ const CommentAPI = {
 
   addComment: async (commentData) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/comments`, {
+      // ✅ FIX: Changed API_BASE_URL to API_URL
+      const response = await fetch(`${API_URL}/comments`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(commentData),

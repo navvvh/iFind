@@ -1,6 +1,6 @@
 const express = require("express")
 const router = express.Router()
-const { getUserNotifications, createNotification, markAsRead } = require("../../controllers/notificationController")
+const { getUserNotifications, createNotification, markAsRead } = require("../controllers/notificationController")
 
 // GET /api/notifications/user/:userId - Get user notifications
 router.get("/user/:userId", getUserNotifications)
