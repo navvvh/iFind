@@ -1,4 +1,4 @@
-const { getConnection, sql } = require("../iFindApp/db")
+const { getConnection, sql } = require("../db")
 
 // Get all comments for a post
 const getCommentsByPost = async (req, res) => {

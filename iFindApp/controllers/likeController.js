@@ -1,4 +1,4 @@
-const { getConnection, sql } = require("../iFindApp/db")
+const { getConnection, sql } = require("../db")
 
 // Get likes for a post
 const getPostLikes = async (req, res) => {
