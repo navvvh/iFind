@@ -1,72 +1,79 @@
-const sql = require("mssql");
-require("dotenv").config();
+const sql = require("mssql")
+require("dotenv").config()
 
+// Database configuration
 const config = {
   user: process.env.DB_USER,
   password: process.env.DB_PASS,
   server: process.env.DB_SERVER,
   database: process.env.DB_NAME,
-  port: Number(process.env.DB_PORT) || 1433,
   options: {
-    encrypt: false,
-    trustServerCertificate: true,
+    encrypt: false, // Set to true if using Azure SQL
+    trustServerCertificate: true, // Set to true for local dev / self-signed certs
+    enableArithAbort: true,
+    connectionTimeout: 30000,
+    requestTimeout: 30000,
   },
   pool: {
     max: 10,
     min: 0,
     idleTimeoutMillis: 30000,
   },
-};
+}
 
-let poolPromise;
+// Debug: Log configuration (without password)
+console.log("Database Config:", {
+  user: config.user,
+  server: config.server,
+  database: config.database,
+  passwordSet: !!config.password,
+})
 
-const getConnection = async () => {
+let pool
+
+async function getConnection() {
   try {
-    if (!poolPromise) {
-      poolPromise = sql.connect(config);
+    if (!pool) {
+      pool = await sql.connect(config)
+      console.log("✅ Database connected successfully")
     }
-    return await poolPromise;
+    return pool
   } catch (error) {
-    console.error("❌ Database connection failed:", error.message);
-    throw error;
+    console.error("❌ Database connection error:", error.message)
+    throw error
   }
-};
+}
 
-const testConnection = async () => {
+async function testConnection() {
   try {
-    const pool = await getConnection();
-    const result = await pool.request().query("SELECT 1 as test");
-    console.log("✅ Database connection successful!");
-    return true;
-  } catch (error) {
-    console.error("❌ Test query failed:", error.message);
-    return false;
-  }
-};
+    console.log("🔍 Testing database connection...")
 
-const closeConnection = async () => {
-  try {
-    if (poolPromise) {
-      const pool = await poolPromise;
-      await pool.close();
-      poolPromise = null;
-      console.log("Database connection closed");
+    // Check if required environment variables are set
+    if (!process.env.DB_USER) {
+      throw new Error("DB_USER environment variable is not set")
     }
-  } catch (error) {
-    console.error("Error closing database connection:", error.message);
-  }
-};
+    if (!process.env.DB_PASS) {
+      throw new Error("DB_PASS environment variable is not set")
+    }
+    if (!process.env.DB_SERVER) {
+      throw new Error("DB_SERVER environment variable is not set")
+    }
+    if (!process.env.DB_NAME) {
+      throw new Error("DB_NAME environment variable is not set")
+    }
 
-console.log("ENV VALUES:", {
-  DB_USER: process.env.DB_USER,
-  DB_PASS: process.env.DB_PASS,
-  DB_SERVER: process.env.DB_SERVER,
-  DB_NAME: process.env.DB_NAME,
-});
+    const pool = await getConnection()
+    const result = await pool.request().query("SELECT 1 as test")
+    console.log("✅ Test query successful:", result.recordset)
+    return true
+  } catch (error) {
+    console.error("❌ Test query failed:", error.message)
+    return false
+  }
+}
 
 module.exports = {
-  sql,
   getConnection,
   testConnection,
-  closeConnection,
-};
+  sql,
+}

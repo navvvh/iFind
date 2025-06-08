@@ -1,4 +1,4 @@
-const { getConnection, sql } = require("../iFindApp/db")
+const { getConnection, sql } = require("../db")
 
 // Get all posts with user information
 const getAllPosts = async (req, res) => {

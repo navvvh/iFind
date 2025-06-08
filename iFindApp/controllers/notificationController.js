@@ -1,4 +1,5 @@
-const { getConnection, sql } = require("../iFindApp/db")
+const { getConnection, sql } = require("../db")
+
 
 // Get all notifications for a user
 const getUserNotifications = async (req, res) => {

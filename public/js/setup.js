@@ -11,6 +11,9 @@ const cancelBtn = document.querySelector(".cancel-btn")
 const saveBtn = document.querySelector(".save-btn")
 const avatarOptions = document.querySelectorAll(".avatar-option")
 
+// API URL
+const API_URL = "http://localhost:3001/api"
+
 // Setup Data - track user interactions separately
 const setupData = {
   name: "",
@@ -30,6 +33,21 @@ const userInteractions = {
 // Progress Tracking
 let progress = 0
 updateProgress()
+
+// Get current user data
+function getCurrentUserData() {
+  const ifindUserData = JSON.parse(localStorage.getItem("ifindUserData")) || {}
+  const userData = JSON.parse(localStorage.getItem("userData")) || {}
+  const sessionData = JSON.parse(localStorage.getItem("userSession")) || {}
+
+  return {
+    id: ifindUserData.id || null,
+    name: ifindUserData.name || userData.username || sessionData.username || "",
+    email: ifindUserData.email || userData.email || sessionData.email || "",
+    role: ifindUserData.role || "",
+    completedSetup: ifindUserData.completedSetup || false,
+  }
+}
 
 // Scroll Animation Implementation
 document.addEventListener("DOMContentLoaded", () => {
@@ -111,21 +129,18 @@ nameInput.addEventListener("input", function () {
   saveProgressData()
 })
 
-// Enhanced avatar click handler - Fixed to prevent immediate closing
+// Enhanced avatar click handler
 profileAvatar.addEventListener("click", (e) => {
   e.preventDefault()
   e.stopPropagation()
 
-  // Add a small delay to prevent immediate closing
   setTimeout(() => {
-    // Clear any previous selections
     avatarOptions.forEach((opt) => {
       opt.classList.remove("selected")
       opt.style.transform = ""
       opt.style.borderColor = ""
     })
 
-    // Show modal
     avatarModal.classList.add("active")
     document.body.style.overflow = "hidden"
   }, 100)
@@ -151,13 +166,12 @@ avatarModal.addEventListener("click", (e) => {
   }
 })
 
-// Avatar option selection - Fixed to maintain selection
+// Avatar option selection
 avatarOptions.forEach((option) => {
   option.addEventListener("click", function (e) {
     e.preventDefault()
     e.stopPropagation()
 
-    // Update selection - ensure only one is selected
     avatarOptions.forEach((opt) => {
       opt.classList.remove("selected")
       opt.style.transform = ""
@@ -168,7 +182,6 @@ avatarOptions.forEach((option) => {
     this.style.transform = "scale(1.1)"
     this.style.borderColor = "#4CAF50"
 
-    // Store temporary selection
     setupData.tempAvatar = this.textContent
     setupData.tempAvatarId = this.dataset.avatar
   })
@@ -183,7 +196,6 @@ saveBtn.addEventListener("click", (e) => {
   const avatarBase = profileAvatar.querySelector(".avatar-base")
 
   if (selectedAvatar) {
-    // User selected an emoji avatar
     avatarBase.innerHTML = selectedAvatar.textContent
     setupData.avatar = selectedAvatar.textContent
     setupData.avatarId = selectedAvatar.dataset.avatar
@@ -192,18 +204,14 @@ saveBtn.addEventListener("click", (e) => {
     updateProgress()
     closeModal()
   } else {
-    // No selection made, just close modal
     closeModal()
   }
 })
 
-// Role selection - NO DEFAULT SELECTION, track user confirmation
+// Role selection
 roleOptions.forEach((option) => {
   option.addEventListener("click", function () {
-    // Remove selected class from all options
     roleOptions.forEach((opt) => opt.classList.remove("selected"))
-
-    // Add selected class to clicked option
     this.classList.add("selected")
 
     setupData.role = this.dataset.role
@@ -226,7 +234,6 @@ function updateProgress() {
   progress = 0
   let completedSteps = 0
 
-  // Only count progress for actual user interactions
   if (userInteractions.nameChanged || (setupData.name && setupData.name !== getOriginalUserName())) {
     progress += 33.33
     completedSteps++
@@ -242,24 +249,19 @@ function updateProgress() {
     completedSteps++
   }
 
-  // Update vertical progress bar
   const progressBar = document.getElementById("progressBar")
   if (progressBar) {
     progressBar.style.height = `${progress}%`
   }
 
-  // Update progress text with exact percentage
   const progressText = document.getElementById("progressText")
   if (progressText) {
-    // Round to nearest 25% increment to match the image
     const displayProgress = Math.round(progress / 25) * 25
     progressText.textContent = `${displayProgress}%`
   }
 
-  // Update step indicators
   updateStepIndicators(completedSteps)
 
-  // Enable next button when user has made at least one change
   const hasAnyInteraction =
     userInteractions.nameChanged || userInteractions.avatarChanged || userInteractions.roleConfirmed
   nextBtn.disabled = !hasAnyInteraction
@@ -299,210 +301,123 @@ function loadProgressData() {
   }
 }
 
-// Get original username from signup/login data
 function getOriginalUserName() {
-  const userData = JSON.parse(localStorage.getItem("userData")) || {}
-  const sessionData = JSON.parse(localStorage.getItem("userSession")) || {}
-  return userData.username || sessionData.username || ""
+  const currentUserData = getCurrentUserData()
+  return currentUserData.name || ""
 }
 
-// Pre-fill name from signup data
 function prefillUserData() {
   const originalName = getOriginalUserName()
 
   if (originalName && !setupData.name) {
     nameInput.value = originalName
     setupData.name = originalName
-    // Don't mark as changed since this is just pre-filling
     userInteractions.nameChanged = false
   }
 }
 
-// Enhanced completeSetup function with proper completion message
+// Enhanced completeSetup function with API integration
 async function completeSetup() {
-  const existingSession = JSON.parse(localStorage.getItem("userSession")) || {}
-  const existingUserData = JSON.parse(localStorage.getItem("userData")) || {}
+  const currentUserData = getCurrentUserData()
 
-  const completeUserProfile = {
-    name: setupData.name,
-    username: existingSession.username || existingUserData.username || setupData.name.toLowerCase().replace(/\s+/g, ""),
-    email: existingSession.email || existingUserData.email || "",
-    role: setupData.role.toUpperCase(),
-    avatar: setupData.uploadedImage,
-    avatarId: setupData.avatarId,
-    avatarEmoji: setupData.avatar,
-    contact: `fb.com/${(existingSession.username || existingUserData.username || setupData.name.toLowerCase().replace(/\s+/g, "")).toLowerCase()}`,
-    completedSetup: true,
-    setupDate: new Date().toISOString(),
-    initials: setupData.name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .substring(0, 2),
+  if (!currentUserData.id) {
+    alert("User ID not found. Please log in again.")
+    window.location.href = "login.html"
+    return
   }
 
-  // Use the centralized data synchronization function
-  syncUserData(completeUserProfile)
+  try {
+    // Update user in database
+    const response = await fetch(`${API_URL}/users/${currentUserData.id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        full_name: setupData.name,
+        user_type: setupData.role,
+        completed_setup: true,
+      }),
+    })
 
-  if (!localStorage.getItem("userPosts")) {
-    localStorage.setItem("userPosts", JSON.stringify([]))
-  }
+    const data = await response.json()
 
-  // Show simplified setup completion message
-  await Swal.fire({
-    title: "Setup Complete!",
-    icon: "success",
-    confirmButtonText: "Continue to iFind",
-    confirmButtonColor: "#4CAF50",
-    customClass: {
-      popup: "custom-setup-complete-popup",
-      title: "custom-setup-title",
-      confirmButton: "custom-confirm-button",
-    },
-    width: 400,
-    padding: "2em",
-    background: "#fff",
-    backdrop: "rgba(5, 35, 77, 0.8)",
-  })
-
-  // Redirect to main page
-  window.location.href = "main.html"
-}
-
-// Add the syncUserData function to setup.js
-function syncUserData(updatedData = {}) {
-  // Get current data from all sources
-  const userProfile = JSON.parse(localStorage.getItem("userProfile")) || {}
-  const ifindUserData = JSON.parse(localStorage.getItem("ifindUserData")) || {}
-  const mockUser = JSON.parse(localStorage.getItem("mockUser")) || {}
-  const userData = JSON.parse(localStorage.getItem("userData")) || {}
-  const sessionData = JSON.parse(localStorage.getItem("userSession")) || {}
-
-  // Create updated userProfile (main source of truth)
-  const newUserProfile = {
-    ...userProfile,
-    ...updatedData,
-    name:
-      updatedData.name ||
-      userProfile.name ||
-      ifindUserData.name ||
-      mockUser.username ||
-      userData.username ||
-      sessionData.username,
-    username:
-      updatedData.username ||
-      userProfile.username ||
-      ifindUserData.name?.toLowerCase().replace(/\s+/g, "") ||
-      mockUser.username ||
-      userData.username ||
-      sessionData.username,
-    email: updatedData.email || userProfile.email || mockUser.email || userData.email || sessionData.email,
-    role: updatedData.role || userProfile.role || ifindUserData.role?.toUpperCase() || mockUser.role,
-    avatar: updatedData.avatar !== undefined ? updatedData.avatar : userProfile.avatar || mockUser.avatar,
-    avatarId:
-      updatedData.avatarId !== undefined
-        ? updatedData.avatarId
-        : userProfile.avatarId || ifindUserData.avatarId || mockUser.avatarId,
-    avatarEmoji:
-      updatedData.avatarEmoji !== undefined ? updatedData.avatarEmoji : userProfile.avatarEmoji || ifindUserData.avatar,
-    completedSetup:
-      updatedData.completedSetup !== undefined
-        ? updatedData.completedSetup
-        : userProfile.completedSetup || Boolean(ifindUserData.name && ifindUserData.role),
-    lastUpdated: new Date().toISOString(),
-  }
-
-  // Generate initials if name exists
-  if (newUserProfile.name) {
-    newUserProfile.initials = newUserProfile.name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .substring(0, 2)
-  }
-
-  // Format username with @ if needed
-  if (newUserProfile.username && !newUserProfile.username.startsWith("@")) {
-    newUserProfile.username = "@" + newUserProfile.username
-  }
-
-  // Update userProfile (main source of truth)
-  localStorage.setItem("userProfile", JSON.stringify(newUserProfile))
-
-  // Update ifindUserData
-  const newIfindUserData = {
-    ...ifindUserData,
-    name: newUserProfile.name,
-    role: newUserProfile.role?.toLowerCase(),
-    avatar: newUserProfile.avatarEmoji,
-    avatarId: newUserProfile.avatarId,
-    uploadedImage: newUserProfile.avatar,
-  }
-  localStorage.setItem("ifindUserData", JSON.stringify(newIfindUserData))
-
-  // Update mockUser
-  const newMockUser = {
-    ...mockUser,
-    username: newUserProfile.username.replace("@", ""),
-    email: newUserProfile.email,
-    role: newUserProfile.role,
-    avatar: newUserProfile.avatar,
-    avatarId: newUserProfile.avatarId,
-    avatarEmoji: newUserProfile.avatarEmoji,
-  }
-  localStorage.setItem("mockUser", JSON.stringify(newMockUser))
-
-  // Update userData
-  const newUserData = {
-    ...userData,
-    username: newUserProfile.username.replace("@", ""),
-    email: newUserProfile.email,
-  }
-  localStorage.setItem("userData", JSON.stringify(newUserData))
-
-  // Update userSession
-  const newSessionData = {
-    ...sessionData,
-    username: newUserProfile.username.replace("@", ""),
-    email: newUserProfile.email,
-    profileComplete: true,
-    lastUpdated: new Date().toISOString(),
-  }
-  localStorage.setItem("userSession", JSON.stringify(newSessionData))
-
-  // Update all existing posts with new user information
-  const allPosts = JSON.parse(localStorage.getItem("userPosts")) || []
-  const updatedPosts = allPosts.map((post) => {
-    if (post.userId === "current_user") {
-      return {
-        ...post,
-        userName: newUserProfile.name,
-        userHandle: newUserProfile.username,
-        userRole: newUserProfile.role,
-        userInitials: newUserProfile.initials,
-        avatar: newUserProfile.avatar,
-        avatarId: newUserProfile.avatarId,
-        avatarEmoji: newUserProfile.avatarEmoji,
+    if (data.success) {
+      // Update localStorage with new data
+      const updatedUserData = {
+        id: data.data.id,
+        name: data.data.full_name,
+        email: data.data.email,
+        role: data.data.user_type.toLowerCase(),
+        username: data.data.username,
+        completedSetup: data.data.completed_setup,
+        avatar: setupData.uploadedImage,
+        avatarId: setupData.avatarId,
+        avatarEmoji: setupData.avatar,
       }
+
+      // Store in multiple localStorage keys for compatibility
+      localStorage.setItem("ifindUserData", JSON.stringify(updatedUserData))
+
+      const userProfile = {
+        name: updatedUserData.name,
+        username: `@${updatedUserData.username}`,
+        email: updatedUserData.email,
+        role: updatedUserData.role.toUpperCase(),
+        avatar: updatedUserData.avatar,
+        avatarId: updatedUserData.avatarId,
+        avatarEmoji: updatedUserData.avatarEmoji,
+        contact: `fb.com/${updatedUserData.username.toLowerCase()}`,
+        completedSetup: true,
+        setupDate: new Date().toISOString(),
+        initials: updatedUserData.name
+          .split(" ")
+          .map((n) => n[0])
+          .join("")
+          .toUpperCase()
+          .substring(0, 2),
+      }
+
+      localStorage.setItem("userProfile", JSON.stringify(userProfile))
+
+      // Initialize empty posts array if it doesn't exist
+      if (!localStorage.getItem("userPosts")) {
+        localStorage.setItem("userPosts", JSON.stringify([]))
+      }
+
+      // Show setup completion message
+      const Swal = window.Swal // Declare Swal variable
+      if (Swal) {
+        await Swal.fire({
+          title: "Setup Complete!",
+          icon: "success",
+          confirmButtonText: "Continue to iFind",
+          confirmButtonColor: "#4CAF50",
+          customClass: {
+            popup: "custom-setup-complete-popup",
+            title: "custom-setup-title",
+            confirmButton: "custom-confirm-button",
+          },
+          width: 400,
+          padding: "2em",
+          background: "#fff",
+          backdrop: "rgba(5, 35, 77, 0.8)",
+        })
+      } else {
+        alert("Setup Complete!")
+      }
+
+      // Redirect to main page
+      window.location.href = "main.html"
+    } else {
+      console.error("Failed to complete setup:", data.error)
+      alert("Failed to complete setup: " + data.error)
     }
-    return post
-  })
-  localStorage.setItem("userPosts", JSON.stringify(updatedPosts))
-
-  // Dispatch storage event to notify other pages
-  window.dispatchEvent(new Event("storage"))
-
-  return newUserProfile
-}
-
-// Enhance the storage event listener to use the new syncUserData function
-window.addEventListener("storage", (e) => {
-  if (e.key === "userProfile" || e.key === "ifindUserData") {
-    loadExistingData()
+  } catch (error) {
+    console.error("Error completing setup:", error)
+    alert("An error occurred while completing setup. Please try again.")
   }
-})
+}
 
 function loadExistingData() {
   prefillUserData()
@@ -515,7 +430,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Enhanced role selection functionality
   roleOptions.forEach((option) => {
-    // Enhanced hover effects
     option.addEventListener("mouseenter", function () {
       if (!this.classList.contains("selected")) {
         this.style.transform = "translateY(-8px) scale(1.05)"
@@ -539,4 +453,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Load existing data
   loadExistingData()
+})
+
+// Storage event listener to handle setup data changes
+window.addEventListener("storage", (e) => {
+  if (e.key === "userProfile" || e.key === "ifindUserData") {
+    loadExistingData()
+  }
 })

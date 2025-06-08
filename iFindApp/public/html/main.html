@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iFind - Lost and Found App</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/main.css">
+    
+    <!-- ✅ SCRIPTS LOADED CORRECTLY IN HEAD WITH DEFER -->
+    <script src="../js/api-service.js" defer></script>
+    <script src="../js/main.js" defer></script>
+</head>
+<body>
+    <div class="top-navbar">
+        <button class="hamburger-menu" id="hamburger-menu">
+            <div class="profile-pic">
+                <!-- This will be populated by main.js -->
+            </div>
+        </button>
+        <div class="logo-container">
+            <img src="../assets/iFind.png" alt="iFind Logo" class="logo-image">
+        </div>
+        <div class="navbar-right">
+            <!-- Notification Bell -->
+            <div class="notification-icon" id="notification-bell">
+                <i class="fas fa-bell"></i>
+                <span class="notification-badge" id="notification-count" style="display: none;">0</span>
+                <div class="notification-dropdown" id="notification-dropdown">
+                    <div class="notification-header">
+                        <h4>Notifications</h4>
+                        <button class="mark-all-read" id="mark-all-read">Mark all as read</button>
+                    </div>
+                    <div class="notification-list" id="notification-list">
+                        <!-- Notifications will be populated by main.js -->
+                    </div>
+                    <div class="notification-footer">
+                        <a href="#" class="view-all-notifications">View all notifications</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Announcement Icon -->
+            <div class="announcement-icon" id="announcement-icon">
+                <i class="fas fa-bullhorn"></i>
+                <div class="announcement-dropdown" id="announcement-dropdown">
+                    <div class="announcement-header">
+                        <h4>Announcements</h4>
+                    </div>
+                    <div class="announcement-list" id="announcement-list">
+                        <!-- Announcements can be hardcoded or loaded via JS -->
+                        <div class="announcement-item">
+                            <div class="announcement-content">
+                                <p><strong>System Maintenance</strong></p>
+                                <p>iFind will undergo maintenance on Sunday, 2:00 AM - 4:00 AM</p>
+                                <span class="announcement-time">1 day ago</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Content Wrapper -->
+    <div class="content-wrapper">
+        <!-- Sidebar - Below navbar -->
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-content">
+                <div class="nav-item" id="nav-profile">
+                    <i class="fas fa-user"></i>
+                    <span>Profile</span>
+                </div>
+                <div class="nav-item active" id="nav-feed">
+                    <i class="fas fa-stream"></i>
+                    <span>Feed</span>
+                </div>
+                <div class="nav-item" id="nav-about">
+                    <i class="fas fa-info-circle"></i>
+                    <span>About iFind</span>
+                </div>
+                <div class="nav-item" id="nav-claimed">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Claimed</span>
+                </div>
+            </div>
+            <div class="sidebar-footer">
+                <div class="nav-item" id="nav-logout">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Log Out</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Content Area -->
+            <div class="content-area">
+                <!-- Search Section - Always Visible -->
+                <div class="search-section">
+                    <div class="search-container">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" class="search-input" id="search-input" placeholder="Search by description or campus...">
+                        <button class="filter-btn" id="filter-btn">
+                            <i class="fas fa-sliders-h"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Feed -->
+                <div class="feed" id="feed">
+                    <div class="empty-state" id="empty-state" style="display: none;">
+                        <i class="fas fa-search"></i>
+                        <h3>No posts found</h3>
+                        <p>Try adjusting your search or be the first to post!</p>
+                    </div>
+                    <!-- Posts will be populated by main.js -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button class="floating-add-btn" id="add-post-btn">
+        <i class="fas fa-plus"></i>
+        <span>Add new post</span>
+    </button>
+
+    <!-- Filter Modal -->
+    <div class="modal" id="filter-modal">
+        <div class="modal-content filter-modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Filter Posts</div>
+                <button class="close-modal" id="close-filter-modal">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="filter-options">
+                    <!-- Filter options can be added here if needed -->
+                </div>
+                <div class="filter-actions">
+                    <button class="btn btn-secondary" id="clear-filters">Clear All</button>
+                    <button class="btn btn-primary" id="apply-filters">Apply Filters</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Post Modal -->
+    <div class="modal" id="post-modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Add New Post</h2>
+                <button class="close-modal" id="close-modal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="post-form">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="form-label" for="post-type">Type</label>
+                        <select class="form-select" id="post-type" required>
+                            <option value="">Select type</option>
+                            <option value="found">Found</option>
+                            <option value="lost">Lost</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="post-location">Campuses</label>
+                        <select class="form-select" id="post-location" required>
+                            <option value="">Select Campuses</option>
+                            <option value="Main Building">Main Building</option>
+                            <option value="Annex Building">Annex Building</option>
+                            <option value="Annex II Building">Annex II Building</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="post-description">Description</label>
+                        <textarea class="form-textarea" id="post-description" placeholder="Describe the item in detail..." required></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Image (Optional)</label>
+                        <div class="file-input-wrapper">
+                            <label class="file-input-label" for="post-image">
+                                <i class="fas fa-camera"></i>
+                                <span>Choose Image</span>
+                            </label>
+                            <input type="file" class="file-input" id="post-image" accept="image/*">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="cancel-post" onclick="document.getElementById('post-modal').style.display='none'">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Post</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Post Modal -->
+    <div class="modal" id="edit-modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Edit Post</h2>
+                <button class="close-modal" id="close-edit-modal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="edit-form">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="form-label" for="edit-type">Type</label>
+                        <select class="form-select" id="edit-type" required>
+                            <option value="">Select type</option>
+                            <option value="found">Found</option>
+                            <option value="lost">Lost</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="edit-location">Campuses</label>
+                        <select class="form-select" id="edit-location" required>
+                            <option value="">Select Campuses</option>
+                            <option value="Main Building">Main Building</option>
+                            <option value="Annex Building">Annex Building</option>
+                            <option value="Annex II Building">Annex II Building</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="edit-description">Description</label>
+                        <textarea class="form-textarea" id="edit-description" placeholder="Describe the item in detail..." required></textarea>
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="cancel-edit" onclick="document.getElementById('edit-modal').style.display='none'">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Update Post</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</body>
+</html>
