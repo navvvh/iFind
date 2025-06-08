@@ -1,3 +1,5 @@
+// <<-- SIMULA NG BUONG CODE -->>
+
 // DOM Elements
 const hamburgerMenu = document.getElementById("hamburger-menu")
 const sidebar = document.getElementById("sidebar")
@@ -198,18 +200,7 @@ function initializeUserAvatar() {
       hamburgerProfilePic.innerHTML = `<div class="default-avatar" style="font-size: 20px; display: flex; align-items: center; justify-content: center;">${currentUser.avatarEmoji}</div>`
     } else if (currentUser.avatarId) {
       const avatarEmojis = [
-        "👨‍💼",
-        "👩‍💼",
-        "👨‍🎓",
-        "👩‍🎓",
-        "👨‍🏫",
-        "👩‍🏫",
-        "👨‍💻",
-        "👩‍💻",
-        "👨‍🔬",
-        "👩‍🔬",
-        "👨‍🎨",
-        "👩‍🎨",
+        "👨‍💼", "👩‍💼", "👨‍🎓", "👩‍🎓", "👨‍🏫", "👩‍🏫", "👨‍💻", "👩‍💻", "👨‍🔬", "👩‍🔬", "👨‍🎨", "👩‍🎨",
       ]
       const avatarIndex = Number.parseInt(currentUser.avatarId) - 1
       const emoji = avatarEmojis[avatarIndex] || "👤"
@@ -280,7 +271,9 @@ function displayPosts(posts) {
   }
 }
 
-// Create post element (keep existing function but update for API data)
+// =================================================================
+// ETO ANG FUNCTION NA INAYOS. TAMA NA ITO NGAYON.
+// =================================================================
 function createPostElement(postData, index) {
   const postElement = document.createElement("div")
   postElement.className = "post"
@@ -288,7 +281,7 @@ function createPostElement(postData, index) {
   postElement.dataset.location = postData.location
   postElement.dataset.postId = postData.id
 
-  // Enhanced avatar display
+  // Enhanced avatar display (PARA LANG SA HEADER)
   let avatarHTML = ""
   if (postData.avatar) {
     avatarHTML = `<img src="${postData.avatar}" alt="${postData.userName}" style="width: 100%; height: 100%; object-fit: cover;">`
@@ -296,18 +289,7 @@ function createPostElement(postData, index) {
     avatarHTML = `<div class="default-avatar" style="font-size: 20px; display: flex; align-items: center; justify-content: center;">${postData.avatarEmoji}</div>`
   } else if (postData.avatarId) {
     const avatarEmojis = [
-      "👨‍💼",
-      "👩‍💼",
-      "👨‍🎓",
-      "👩‍🎓",
-      "👨‍🏫",
-      "👩‍🏫",
-      "👨‍💻",
-      "👩‍💻",
-      "👨‍🔬",
-      "👩‍🔬",
-      "👨‍🎨",
-      "👩‍🎨",
+      "👨‍💼", "👩‍💼", "👨‍🎓", "👩‍🎓", "👨‍🏫", "👩‍🏫", "👨‍💻", "👩‍💻", "👨‍🔬", "👩‍🔬", "👨‍🎨", "👩‍🎨",
     ]
     const avatarIndex = Number.parseInt(postData.avatarId) - 1
     const emoji = avatarEmojis[avatarIndex] || "👤"
@@ -342,18 +324,7 @@ function createPostElement(postData, index) {
     currentUserAvatarHTML = `<div class="default-avatar" style="font-size: 16px; display: flex; align-items: center; justify-content: center;">${currentUser.avatarEmoji}</div>`
   } else if (currentUser.avatarId) {
     const avatarEmojis = [
-      "👨‍💼",
-      "👩‍💼",
-      "👨‍🎓",
-      "👩‍🎓",
-      "👨‍🏫",
-      "👩‍🏫",
-      "👨‍💻",
-      "👩‍💻",
-      "👨‍🔬",
-      "👩‍🔬",
-      "👨‍🎨",
-      "👩‍🎨",
+      "👨‍💼", "👩‍💼", "👨‍🎓", "👩‍🎓", "👨‍🏫", "👩‍🏫", "👨‍💻", "👩‍💻", "👨‍🔬", "👩‍🔬", "👨‍🎨", "👩‍🎨",
     ]
     const avatarIndex = Number.parseInt(currentUser.avatarId) - 1
     const emoji = avatarEmojis[avatarIndex] || "👤"
@@ -397,6 +368,7 @@ function createPostElement(postData, index) {
         <span class="post-tag ${postData.type}">${postData.type.charAt(0).toUpperCase() + postData.type.slice(1)}</span>
         ${postData.description} — <strong>${postData.location}</strong>
       </div>
+      <!-- ANG FIX AY GINAWA DITO: Inalis ang sobrang 'avatarHTML' sa loob ng post-content -->
       ${imageHTML}
     </div>
     <div class="post-actions">
@@ -431,6 +403,10 @@ function createPostElement(postData, index) {
 
   return postElement
 }
+// =================================================================
+// TAPOS NA ANG PAG-AYOS SA FUNCTION
+// =================================================================
+
 
 // Create comments HTML
 function createCommentsHTML(comments) {
@@ -1115,3 +1091,5 @@ document.addEventListener("DOMContentLoaded", () => {
   loadPostsFromAPI() // Use API instead of localStorage
   updateNotificationBadge()
 })
+
+// <<-- HANGGANG DITO LANG ANG CODE -->>
