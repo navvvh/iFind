@@ -807,7 +807,7 @@ body {
   }
 
   .team-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(4, 1fr);
   }
 
   .hamburger {
@@ -837,13 +837,13 @@ body {
   }
 
   .team-avatar {
-    width: 150px;
-    height: 150px;
+    width: 130px;
+    height: 130px;
   }
 
   .team-avatar img {
-    width: 150px;
-    height: 150px;
+    width: 130px;
+    height: 130px;
   }
 
   /* Footer responsive */
@@ -886,14 +886,8 @@ body {
     height: 250px;
   }
 
-  .team-avatar {
-    width: 130px;
-    height: 130px;
-  }
-
-  .team-avatar img {
-    width: 130px;
-    height: 130px;
+  .team-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 
   .footer-title {
