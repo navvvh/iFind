@@ -836,6 +836,16 @@ body {
     left: -250px;
   }
 
+  .team-avatar {
+    width: 150px;
+    height: 150px;
+  }
+
+  .team-avatar img {
+    width: 150px;
+    height: 150px;
+  }
+
   /* Footer responsive */
   .footer-title {
     font-size: 2rem;
@@ -874,6 +884,16 @@ body {
   .cat-image {
     width: 250px;
     height: 250px;
+  }
+
+  .team-avatar {
+    width: 130px;
+    height: 130px;
+  }
+
+  .team-avatar img {
+    width: 130px;
+    height: 130px;
   }
 
   .footer-title {
