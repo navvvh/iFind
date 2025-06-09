@@ -48,22 +48,25 @@ document.addEventListener("DOMContentLoaded", () => {
       }
   }
 
+  // --- START OF FIX: Updated this function with full navigation ---
+ // In js/claim.js
+
   function attachEventListeners() {
-      document.getElementById("nav-feed").addEventListener("click", () => window.location.href = 'main.html');
-      document.getElementById("nav-logout").addEventListener("click", handleLogout);
-      document.getElementById("nav-claimed").addEventListener("click", () => window.location.reload());
-      document.getElementById("nav-profile").addEventListener("click", () => alert("Profile page not implemented yet."));
-      document.getElementById("nav-about").addEventListener("click", () => alert("About page not implemented yet."));
+    document.getElementById("nav-feed").addEventListener("click", () => window.location.href = 'main.html');
+    document.getElementById("nav-profile").addEventListener("click", () => window.location.href = 'profile.html');
+    // FIX: Changed this line from an alert to a navigation link
+    document.getElementById("nav-about").addEventListener("click", () => window.location.href = 'about.html');
+    document.getElementById("nav-claimed").addEventListener("click", () => window.location.reload());
+    document.getElementById("nav-logout").addEventListener("click", handleLogout);
   }
 
   // --- 2. DATA HANDLING (API Calls) ---
   async function loadClaimedPosts() {
       try {
-          // FIX: Fetch claimed posts WHERE THE AUTHOR IS THE CURRENT USER
           const response = await window.iFindAPI.Post.getAllPosts({
               post_type: 'claimed',
               userId: currentUser.id,
-              authorId: currentUser.id // This is the new filter
+              authorId: currentUser.id 
           });
 
           if (!response.success) throw new Error("Failed to fetch claimed posts");
@@ -82,8 +85,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
   }
 
-  // ... (rest of the file remains the same) ...
-  
   window.deletePost = async (postId) => {
       if (confirm("Are you sure you want to delete this post?")) {
           try {
@@ -191,13 +192,12 @@ document.addEventListener("DOMContentLoaded", () => {
       return postElement;
   }
 
-  // --- 4. MISC UI FUNCTIONS ---
   function handleLogout() {
-      if (confirm("Are you sure you want to log out?")) {
-          localStorage.clear();
-          window.location.href = 'index.html';
-      }
-  }
+    if (confirm("Are you sure you want to log out?")) {
+        localStorage.clear();
+        window.location.href = 'index.html';
+    }
+}
 
   initializeApp();
 });

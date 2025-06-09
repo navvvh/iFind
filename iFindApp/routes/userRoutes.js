@@ -1,16 +1,27 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
+const {
+    getAllUsers,
+    createUser,
+    loginUser,
+    getUserById,
+    updateUser,
+    deleteUser
+} = require("../controllers/userController");
 
-// ✅ FINAL ATTEMPT: Let's assume the controller is in the SAME folder.
-// The path './' means "look in the current directory".
-const userController = require('../controllers/userController'); 
+// --- Route Order is Critical Here ---
 
-// --- Routes ---
-router.post('/', userController.createUser);
-router.post('/login', userController.loginUser);
-router.get('/', userController.getAllUsers);
-router.get('/:id', userController.getUserById);
-router.put('/:id', userController.updateUser);
-router.delete('/:id', userController.deleteUser);
+// 1. Specific routes first
+router.get("/", getAllUsers);
+router.post("/login", loginUser);
+
+// 2. Wildcard routes (with :id) last
+router.get("/:id", getUserById);
+router.put("/:id", updateUser);
+router.delete("/:id", deleteUser);
+
+// This is an alias for the main create user route, often used for registration
+router.post("/", createUser);
+
 
 module.exports = router;

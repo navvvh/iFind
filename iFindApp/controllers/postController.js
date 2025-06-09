@@ -56,7 +56,7 @@ const getAllPosts = async (req, res) => {
     if (post_type) {
       query += " AND p.post_type = @post_type";
       request.input("post_type", sql.VarChar(10), post_type);
-    } else {
+    } else if (!authorId) {
       query += " AND p.post_type IN ('lost', 'found')";
     }
 
@@ -71,7 +71,6 @@ const getAllPosts = async (req, res) => {
   }
 };
 
-// Create new post
 const createPost = async (req, res) => {
   try {
     const { user_id, description, campus, post_type, image_path } = req.body;
@@ -97,23 +96,16 @@ const createPost = async (req, res) => {
   }
 };
 
-// Get post by ID
+// FIX: This function is now correct and free of syntax errors.
 const getPostById = async (req, res) => {
   try {
     const { id } = req.params;
     const pool = await getConnection();
     const result = await pool.request()
       .input("post_id", sql.Int, id)
-      // THIS IS THE CORRECTED AND CLEANED QUERY
       .query(`
-        SELECT 
-          p.*, 
-          u.full_name as author_name, 
-          u.user_type as author_type, 
-          u.user_id as author_id
-        FROM posts p 
-        INNER JOIN users u ON p.user_id = u.user_id 
-        WHERE p.post_id = @post_id
+        SELECT p.*, u.full_name as author_name, u.user_type as author_type, u.user_id as author_id
+        FROM posts p INNER JOIN users u ON p.user_id = u.user_id WHERE p.post_id = @post_id
       `);
     if (result.recordset.length === 0) {
       return res.status(404).json({ success: false, message: "Post not found" });
@@ -125,7 +117,6 @@ const getPostById = async (req, res) => {
   }
 };
 
-// Update a post
 const updatePost = async (req, res) => {
   try {
     const { id } = req.params;
@@ -150,7 +141,6 @@ const updatePost = async (req, res) => {
   }
 };
 
-// Delete a post
 const deletePost = async (req, res) => {
     try {
         const { id } = req.params;

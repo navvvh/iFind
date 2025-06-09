@@ -6,24 +6,22 @@
     <title>Profile - iFind</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../css/profile.css">
-    <script src="../js/api-service.js"></script>
-    <script src="../js/profile.js"></script>
+    <script src="../js/api-service.js" defer></script>
+    <script src="../js/profile.js" defer></script>
 </head>
 <body>
-    <!-- Top Navigation Bar -->
     <div class="profile-nav">
         <button class="hamburger-menu" id="hamburger-menu">
             <i class="fas fa-bars"></i>
         </button>
         <div class="profile-nav-center">
-            <img src="../assets/findme.png" alt="iFind" width="90" height="auto">
+            <img src="../assets/iFind.png" alt="iFind" width="90" height="auto">
         </div>
         <div class="profile-nav-right" id="profile-nav-avatar">
-            <div class="default-avatar-nav">AP</div>
+            <!-- Populated by JS -->
         </div>
     </div>
 
-    <!-- Sidebar -->
     <div class="sidebar" id="sidebar">
         <div class="sidebar-content">
             <div class="nav-item active" id="nav-profile">
@@ -40,7 +38,7 @@
             </div>
             <div class="nav-item" id="nav-claimed">
                 <i class="fas fa-check-circle"></i>
-                <span>Claimed Items</span>
+                <span>Claimed</span>
             </div>
         </div>
         <div class="sidebar-footer">
@@ -52,103 +50,52 @@
     </div>
 
     <div class="profile-page">
-        <!-- Profile Content -->
         <div class="profile-content">
-            <!-- Profile Sidebar -->
             <div class="profile-sidebar">
-                <div class="profile-avatar-large">
-                    <div class="default-avatar-large">AP</div>
-                </div>
-                <h1 class="profile-name-large">Ang Pogi</h1>
-                <div class="profile-username-large">@angpogi</div>
-                <div class="profile-role-large">STUDENT</div>
-                
+                <div class="profile-avatar-large"></div>
+                <h1 class="profile-name-large">Loading...</h1>
+                <div class="profile-username-large"></div>
+                <div class="profile-role-large"></div>
                 <div class="profile-divider"></div>
-                
                 <div class="profile-contact-label">CONTACT</div>
                 <div class="profile-contact-value">
-                    <a href="https://fb.com/username" target="_blank">fb.com/username</a>
+                    <a href="#" target="_blank"></a>
                 </div>
-                
                 <button class="profile-edit-btn" id="edit-profile-btn">
                     <i class="fas fa-pencil-alt"></i> Edit Profile
                 </button>
             </div>
 
-            <!-- Main Content Area -->
             <div class="profile-main">
-                <h2 class="profile-section-title">RECENT POSTS</h2>
+                <h2 class="profile-section-title">MY POSTS</h2>
                 <div class="profile-posts" id="profile-posts">
-                    <!-- Sample Post -->
-                    <div class="post">
-                        <div class="post-header">
-                            <div class="post-user">
-                                <div class="profile-pic">
-                                    <div class="default-avatar">AP</div>
-                                </div>
-                                <div class="post-user-info">
-                                    <div class="post-user-name">Ang Pogi</div>
-                                    <div class="post-user-meta">@angpogi<br>STUDENT</div>
-                                </div>
-                            </div>
-                            <div class="post-options" onclick="togglePostOptions(this)">
-                                <i class="fas fa-ellipsis-h"></i>
-                                <div class="post-options-dropdown">
-                                    <div class="dropdown-item">
-                                        <i class="fas fa-edit"></i>
-                                        <span>Edit</span>
-                                    </div>
-                                    <div class="dropdown-item">
-                                        <i class="fas fa-check"></i>
-                                        <span>Claimed</span>
-                                    </div>
-                                    <div class="dropdown-item">
-                                        <i class="fas fa-trash"></i>
-                                        <span>Delete</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <!-- Posts populated by JS -->
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Edit Profile Modal -->
-    <div class="modal" id="edit-profile-modal">
+    <div class="modal" id="edit-profile-modal" style="display: none;">
         <div class="modal-content">
             <div class="modal-header">
                 <div class="modal-title">Edit Profile</div>
-                <button class="close-modal" id="close-edit-modal">&times;</button>
+                <button class="close-modal" id="close-edit-profile-modal">×</button>
             </div>
             <div class="modal-body">
                 <form class="profile-edit-form" id="profile-edit-form">
-                    <div class="profile-edit-avatar">
-                        <div class="default-avatar">AP</div>
-                    </div>
+                    <div class="profile-edit-avatar"><div class="default-avatar"></div></div>
                     <div class="form-group">
                         <label for="edit-name">Name</label>
-                        <input type="text" id="edit-name" value="Ang Pogi" required>
+                        <input type="text" id="edit-name" required>
                     </div>
                     <div class="form-group">
                         <label for="edit-username">Username</label>
-                        <input type="text" id="edit-username" value="angpogi" required>
+                        <input type="text" id="edit-username" required>
                     </div>
                     <div class="form-group">
-                        <label for="edit-contact">Contact</label>
-                        <input type="text" id="edit-contact" value="fb.com/username" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Profile Picture</label>
-                        <div class="file-input-container">
-                            <label class="file-input-label" for="edit-profile-image">
-                                <i class="fas fa-camera"></i>
-                                <span>Choose Image</span>
-                            </label>
-                            <input type="file" id="edit-profile-image" class="file-input" accept="image/*">
-                        </div>
-                        <div class="file-name" id="edit-profile-file-name"></div>
+                        <label for="edit-contact">Contact (e.g., fb.com/your.name)</label>
+                        <input type="text" id="edit-contact" required>
                     </div>
                     <div class="form-actions">
                         <button type="button" class="btn btn-secondary" id="cancel-edit-profile">Cancel</button>
@@ -159,6 +106,45 @@
         </div>
     </div>
 
-    <script src="../js/profile.js"></script>
+    <!-- Edit Post Modal (Copied from main.html) -->
+    <div class="modal" id="edit-post-modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Edit Post</h2>
+                <button class="close-modal" id="close-edit-post-modal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="edit-post-form">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="form-label" for="edit-type">Type</label>
+                        <select class="form-select" id="edit-type" required>
+                            <option value="">Select type</option>
+                            <option value="found">Found</option>
+                            <option value="lost">Lost</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="edit-location">Campuses</label>
+                        <select class="form-select" id="edit-location" required>
+                            <option value="">Select Campuses</option>
+                            <option value="Main Building">Main Building</option>
+                            <option value="Annex Building">Annex Building</option>
+                            <option value="Annex II Building">Annex II Building</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="edit-description">Description</label>
+                        <textarea class="form-textarea" id="edit-description" placeholder="Describe the item in detail..." required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="cancel-edit-post">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Update Post</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </body>
 </html>

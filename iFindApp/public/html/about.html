@@ -6,10 +6,11 @@
     <title>iFind - A smarter way to recover lost items</title>
     <link rel="stylesheet" href="../css/about.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="/js/api-service.js"></script>
+    <!-- FIX: Corrected script paths and added 'defer' -->
+    <script src="../js/api-service.js" defer></script>
+    <script src="../js/about.js" defer></script>
 </head>
 <body>
-    <!-- Navigation -->
     <nav class="navbar">
         <div class="nav-container">
             <div class="hamburger" id="hamburger-menu">
@@ -23,7 +24,6 @@
         </div>
     </nav>
 
-    <!-- Sidebar -->
     <div class="sidebar" id="sidebar">
         <div class="sidebar-content">
             <div class="nav-item" id="nav-profile">
@@ -185,7 +185,6 @@
         </div>
     </section>
 
-    <!-- Updated Footer -->
     <footer class="footer">
         <div class="footer-container">
             <div class="footer-main">
@@ -195,12 +194,8 @@
             <div class="footer-divider"></div>
             <div class="footer-bottom">
                 <div class="footer-social">
-                    <a href="#" class="social-link" aria-label="Facebook">
-                        <i class="fab fa-facebook-f"></i>
-                    </a>
-                    <a href="#" class="social-link" aria-label="Email">
-                        <i class="fas fa-envelope"></i>
-                    </a>
+                    <a href="#" class="social-link" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" class="social-link" aria-label="Email"><i class="fas fa-envelope"></i></a>
                 </div>
                 <div class="footer-copyright">
                     <p>iFind 2025 © All rights reserved.</p>
@@ -208,8 +203,5 @@
             </div>
         </div>
     </footer>
-
-    <script src="../js/about.js"></script>
-    
 </body>
 </html>

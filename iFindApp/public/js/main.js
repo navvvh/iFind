@@ -60,7 +60,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // UPDATED: Added full navigation
     function attachEventListeners() {
         document.getElementById("add-post-btn").addEventListener("click", () => openPostModal());
         document.getElementById("close-modal").addEventListener("click", () => closePostModal());
@@ -73,14 +72,13 @@ document.addEventListener("DOMContentLoaded", () => {
         // --- Sidebar Navigation ---
         document.getElementById("nav-feed").addEventListener("click", () => window.location.reload());
         document.getElementById("nav-claimed").addEventListener("click", () => window.location.href = 'claim.html');
-        document.getElementById("nav-profile").addEventListener("click", () => alert("Profile page not implemented yet."));
-        document.getElementById("nav-about").addEventListener("click", () => alert("About page not implemented yet."));
+        document.getElementById("nav-profile").addEventListener("click", () => window.location.href = 'profile.html');
+        document.getElementById("nav-about").addEventListener("click", () => window.location.href = 'about.html');
     }
 
     // --- 2. DATA HANDLING (API Calls) ---
     async function loadPosts() {
         try {
-            // Main feed fetches 'lost' and 'found' posts by default (no post_type specified)
             const postsResponse = await window.iFindAPI.Post.getAllPosts({ userId: currentUser.id });
             if (!postsResponse.success) throw new Error("Failed to fetch posts");
             
@@ -292,6 +290,7 @@ document.addEventListener("DOMContentLoaded", () => {
         editModal.style.display = 'flex';
     }
     function closeEditModal() { editModal.style.display = 'none'; editForm.reset(); editingPostId = null; }
+    
     function handleLogout() {
         if (confirm("Are you sure you want to log out?")) {
             localStorage.clear();

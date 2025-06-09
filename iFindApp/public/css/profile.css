@@ -179,6 +179,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0; 
 }
 
 .profile-avatar-large img {
@@ -193,10 +194,17 @@ body {
   font-size: 64px;
 }
 
+.profile-name-large, .profile-username-large, .profile-contact-value {
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: center;
+}
+
 .profile-name-large {
   font-size: 32px;
   font-weight: bold;
-  text-align: center;
   margin-bottom: 8px;
   color: var(--primary-color);
 }
@@ -204,7 +212,6 @@ body {
 .profile-username-large {
   font-size: 18px;
   color: var(--accent-color);
-  text-align: center;
   margin-bottom: 12px;
   font-weight: 500;
 }
@@ -238,6 +245,7 @@ body {
   margin-bottom: 8px;
   text-transform: uppercase;
   letter-spacing: 1px;
+  text-align: center;
 }
 
 .profile-contact-value {
@@ -439,27 +447,16 @@ body {
   background-color: #f8f9fa;
 }
 
-.dropdown-item:first-child {
-  color: #1a73e8;
-}
-
-.dropdown-item:first-child:hover {
+.dropdown-item:first-child:hover,
+.dropdown-item:nth-child(1):hover { /* for edit */
   background-color: rgba(26, 115, 232, 0.1);
 }
 
-.dropdown-item:nth-child(2) {
-  color: #28a745;
-}
-
-.dropdown-item:nth-child(2):hover {
+.dropdown-item:nth-child(2):hover { /* for claimed */
   background-color: rgba(40, 167, 69, 0.1);
 }
 
-.dropdown-item:last-child {
-  color: #dc3545;
-}
-
-.dropdown-item:last-child:hover {
+.dropdown-item:last-child:hover { /* for delete */
   background-color: rgba(220, 53, 69, 0.1);
 }
 
@@ -527,41 +524,8 @@ body {
   background-color: #f8f9fa;
 }
 
-.post-image-container.wide-image .post-image {
-  width: 100%;
-  height: auto;
-  max-height: 400px;
-  object-fit: cover;
-  object-position: center;
-}
-
-.post-image-container.tall-image .post-image {
-  width: auto;
-  height: 100%;
-  max-width: 100%;
-  max-height: 500px;
-  object-fit: contain;
-  object-position: center;
-}
-
 .post-image-container:hover .post-image {
   transform: scale(1.02);
-}
-
-.post-image-container.loading {
-  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-  background-size: 200% 100%;
-  animation: loading 1.5s infinite;
-  min-height: 200px;
-}
-
-@keyframes loading {
-  0% {
-    background-position: 200% 0;
-  }
-  100% {
-    background-position: -200% 0;
-  }
 }
 
 .post-actions {
@@ -590,10 +554,6 @@ body {
 }
 
 .post-action.liked {
-  color: #dc3545;
-}
-
-.post-action.liked i {
   color: #dc3545;
 }
 
@@ -723,7 +683,7 @@ body {
   color: var(--primary-color);
 }
 
-.form-group input {
+.form-group input, .form-group textarea, .form-group select {
   width: 100%;
   padding: 12px;
   border: 2px solid var(--border-color);
@@ -731,47 +691,18 @@ body {
   font-size: 14px;
   outline: none;
   transition: border-color 0.2s;
+  font-family: inherit;
+  background-color: white;
 }
 
-.form-group input:focus {
+.form-group textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.form-group input:focus, .form-group textarea:focus, .form-group select:focus {
   border-color: var(--accent-color);
   box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
-}
-
-.file-input-container {
-  position: relative;
-  display: inline-block;
-  cursor: pointer;
-}
-
-.file-input-label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 16px;
-  background-color: #f8f9fa;
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.file-input-label:hover {
-  background-color: #e9ecef;
-}
-
-.file-input {
-  position: absolute;
-  opacity: 0;
-  width: 100%;
-  height: 100%;
-  cursor: pointer;
-}
-
-.file-name {
-  margin-top: 8px;
-  font-size: 12px;
-  color: var(--gray-text);
 }
 
 .form-actions {
@@ -878,28 +809,12 @@ body {
   font-weight: 700;
   color: var(--username-color);
   margin-bottom: 4px;
-  display: block;
-  position: relative;
-  margin-top: -7px;
 }
 
 .comment-text {
   font-size: 14px;
   color: var(--text-color);
   line-height: 1.4;
-  margin: 0;
-  padding: 0;
-  border: none;
-  background-color: transparent;
-  border-radius: 0;
-}
-
-.comment-time {
-  font-size: 12px;
-  color: var(--gray-text);
-  margin-left: 44px;
-  margin-top: 4px;
-  margin-bottom: 8px;
 }
 
 .comment-input {
@@ -925,14 +840,6 @@ body {
 
 .comment-input-avatar .default-avatar {
   font-size: 12px;
-  font-weight: 600;
-  color: var(--text-color);
-}
-
-.comment-input-avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
 }
 
 .comment-input .comment-text {
@@ -944,17 +851,12 @@ body {
   font-size: 14px;
   background-color: #f0f2f5;
   transition: all 0.2s;
-  font-family: inherit;
 }
 
 .comment-input .comment-text:focus {
   border-color: var(--primary-color);
   background-color: var(--white);
   box-shadow: 0 0 0 2px rgba(10, 31, 68, 0.1);
-}
-
-.comment-input .comment-text::placeholder {
-  color: #8a8d91;
 }
 
 .send-comment {
@@ -966,26 +868,6 @@ body {
   padding: 8px;
   border-radius: 50%;
   transition: all 0.2s;
-  opacity: 0.7;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-}
-
-.send-comment:hover {
-  background-color: rgba(10, 31, 68, 0.1);
-  opacity: 1;
-}
-
-.post-action.active {
-  background-color: rgba(10, 31, 68, 0.1);
-  color: var(--primary-color);
-}
-
-.post-action.active i {
-  color: var(--primary-color);
 }
 
 @media (max-width: 768px) {
@@ -1003,199 +885,4 @@ body {
     padding: 30px 20px;
     height: auto;
   }
-
-  .profile-content {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .profile-avatar-large {
-    width: 140px;
-    height: 140px;
-  }
-
-  .default-avatar-large {
-    font-size: 56px;
-  }
-
-  .profile-name-large {
-    font-size: 28px;
-  }
-
-  .profile-section-title {
-    font-size: 20px;
-  }
-
-  .profile-nav {
-    padding: 12px 20px;
-    height: 60px;
-  }
-
-  .profile-nav-center {
-    font-size: 24px;
-  }
-
-  .profile-page {
-    margin-top: 60px;
-  }
-
-  .sidebar {
-    top: 60px;
-    height: calc(100vh - 60px);
-  }
-
-  .post {
-    margin-bottom: 16px;
-  }
-
-  .post-header {
-    padding: 16px 16px 12px 16px;
-  }
-
-  .post-content {
-    padding: 0 16px 16px 16px;
-  }
-
-  .post-actions {
-    padding: 12px 16px;
-  }
-
-  .post-comments {
-    padding: 16px;
-  }
-
-  .post-image-container {
-    max-height: 350px;
-  }
-
-  .post-user-name {
-    font-size: 16px;
-  }
-
-  .post-text {
-    font-size: 15px;
-  }
-
-  .comment-bubble {
-    max-width: calc(100% - 40px);
-  }
-
-  .comment-time {
-    margin-left: 36px;
-  }
-}
-
-@media (max-width: 480px) {
-  .profile-sidebar {
-    padding: 20px 15px;
-  }
-
-  .profile-main {
-    padding: 20px 15px;
-  }
-
-  .profile-avatar-large {
-    width: 120px;
-    height: 120px;
-  }
-
-  .default-avatar-large {
-    font-size: 48px;
-  }
-
-  .profile-name-large {
-    font-size: 24px;
-  }
-
-  .profile-role-large {
-    font-size: 12px;
-    padding: 6px 12px;
-  }
-
-  .post {
-    margin-bottom: 12px;
-  }
-
-  .post-header {
-    padding: 12px 12px 8px 12px;
-  }
-
-  .post-content {
-    padding: 0 12px 12px 12px;
-  }
-
-  .post-actions {
-    padding: 10px 12px;
-  }
-
-  .post-comments {
-    padding: 12px;
-  }
-
-  .post-image-container {
-    max-height: 300px;
-  }
-
-  .profile-pic {
-    width: 45px;
-    height: 45px;
-  }
-
-  .default-avatar {
-    font-size: 16px;
-  }
-
-  .comment-avatar,
-  .comment-input-avatar {
-    width: 28px;
-    height: 28px;
-  }
-
-  .comment-avatar .default-avatar,
-  .comment-input-avatar .default-avatar {
-    font-size: 10px;
-  }
-
-  .comment-bubble {
-    max-width: calc(100% - 36px);
-    padding: 10px 14px;
-  }
-
-  .comment-time {
-    margin-left: 32px;
-  }
-
-  .comment-text {
-    font-size: 13px;
-  }
-}
-
-.comments-list {
-  transition: all 0.3s ease;
-}
-
-.comments-list[style*="block"] {
-  animation: fadeInComments 0.3s ease;
-}
-
-@keyframes fadeInComments {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.comment-text:focus,
-.post-action:focus {
-  outline: 2px solid var(--primary-color);
-  outline-offset: 2px;
-}
-
-.post-action:focus-visible {
-  outline: 2px solid var(--primary-color);
-  outline-offset: 2px;
 }

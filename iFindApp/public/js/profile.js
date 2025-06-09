@@ -1,893 +1,318 @@
-// API URL
-const API_URL = "http://localhost:3001/api"
+document.addEventListener("DOMContentLoaded", () => {
+  // ... (Global State and DOM elements are the same)
+  let currentUser = {};
+  let userDetails = {};
+  let userPosts = [];
+  let editingPostId = null;
 
-// Current user data
-let currentUser = null
+  const profilePostsContainer = document.getElementById("profile-posts");
+  const sidebar = document.getElementById("sidebar");
+  const hamburgerMenu = document.getElementById("hamburger-menu");
+  const editProfileModal = document.getElementById("edit-profile-modal");
+  const editProfileForm = document.getElementById("profile-edit-form");
+  const editPostModal = document.getElementById("edit-post-modal");
+  const editPostForm = document.getElementById("edit-post-form");
 
-// DOM Elements
-const hamburgerMenu = document.getElementById("hamburger-menu")
-const sidebar = document.getElementById("sidebar")
-const editProfileBtn = document.getElementById("edit-profile-btn")
-const editProfileModal = document.getElementById("edit-profile-modal")
-const closeEditModalBtn = document.getElementById("close-edit-modal")
-const cancelEditProfileBtn = document.getElementById("cancel-edit-profile")
-const profileEditForm = document.getElementById("profile-edit-form")
-const profileImageInput = document.getElementById("edit-profile-image")
-const profileFileNameDisplay = document.getElementById("edit-profile-file-name")
-const navFeed = document.getElementById("nav-feed")
-const navClaimed = document.getElementById("nav-claimed")
+  const AVATAR_EMOJIS = ["👨‍💼", "👩‍💼", "👨‍🎓", "👩‍🎓", "👨‍🏫", "👩‍🏫", "👨‍💻", "👩‍💻", "🧑‍🎨", "👨‍🔬", "👩‍🔬", "👨‍🎨"];
 
-// Get current user data from localStorage
-function getCurrentUserData() {
-  const userProfile = JSON.parse(localStorage.getItem("userProfile")) || {}
-  const ifindUserData = JSON.parse(localStorage.getItem("ifindUserData")) || {}
-  const mockUser = JSON.parse(localStorage.getItem("mockUser")) || {}
-  const userData = JSON.parse(localStorage.getItem("userData")) || {}
-  const sessionData = JSON.parse(localStorage.getItem("userSession")) || {}
-
-  return {
-    id: ifindUserData.id || userProfile.id || mockUser.id || 1,
-    name:
-      userProfile.name ||
-      ifindUserData.name ||
-      mockUser.username ||
-      userData.username ||
-      sessionData.username ||
-      "Ang Pogi",
-    username:
-      userProfile.username ||
-      ifindUserData.name?.toLowerCase().replace(/\s+/g, "") ||
-      mockUser.username ||
-      userData.username ||
-      sessionData.username ||
-      "angpogi",
-    email:
-      userProfile.email ||
-      ifindUserData.email ||
-      mockUser.email ||
-      userData.email ||
-      sessionData.email ||
-      "user@example.com",
-    role: userProfile.role || ifindUserData.role?.toUpperCase() || mockUser.role || "STUDENT",
-    avatar: userProfile.avatar || mockUser.avatar || null,
-    avatarId: userProfile.avatarId || ifindUserData.avatarId || mockUser.avatarId || null,
-    avatarEmoji: userProfile.avatarEmoji || ifindUserData.avatar || null,
-    contact:
-      userProfile.contact ||
-      `fb.com/${(userProfile.username || ifindUserData.name?.toLowerCase().replace(/\s+/g, "") || mockUser.username || userData.username || sessionData.username || "username").toLowerCase()}`,
-    completedSetup: userProfile.completedSetup || Boolean(ifindUserData.name && ifindUserData.role),
-  }
-}
-
-// Load user posts from API
-async function loadUserPostsFromAPI() {
-  try {
-    const response = await fetch(`${API_URL}/posts`)
-    const data = await response.json()
-
-    if (data.success) {
-      // Filter posts by current user
-      const userPosts = data.data
-        .filter((post) => post.user_id === currentUser.id)
-        .map((post) => ({
-          id: post.id.toString(),
-          type: post.post_type.toLowerCase(),
-          location: post.campus,
-          description: post.description,
-          image: post.image_path,
-          userName: post.user_name || currentUser.name,
-          userHandle: `@${post.username || currentUser.username}`,
-          userRole: post.user_type || currentUser.role,
-          userInitials: currentUser.name
-            .split(" ")
-            .map((n) => n[0])
-            .join("")
-            .toUpperCase()
-            .substring(0, 2),
-          timestamp: new Date(post.created_at),
-          userId: post.user_id.toString(),
-          liked: false,
-          likeCount: 0,
-          comments: [],
-          avatar: currentUser.avatar,
-          avatarId: currentUser.avatarId,
-          avatarEmoji: currentUser.avatarEmoji,
-        }))
-
-      // Load comments for each post
-      for (const post of userPosts) {
-        try {
-          const commentsResponse = await fetch(`${API_URL}/comments/post/${post.id}`)
-          const commentsData = await commentsResponse.json()
-
-          if (commentsData.success) {
-            post.comments = commentsData.data.map((comment) => ({
-              id: comment.id.toString(),
-              text: comment.comment_text,
-              author: comment.user_name || "Unknown User",
-              authorHandle: `@${comment.username || "unknown"}`,
-              authorInitials: (comment.user_name || "U")
-                .split(" ")
-                .map((n) => n[0])
-                .join("")
-                .toUpperCase()
-                .substring(0, 2),
-              timestamp: new Date(comment.created_at),
-              avatar: null,
-              avatarId: null,
-              avatarEmoji: null,
-            }))
-          }
-        } catch (error) {
-          console.error(`Error loading comments for post ${post.id}:`, error)
-          post.comments = []
-        }
+  async function initializeApp() {
+      currentUser = getCurrentUserFromStorage();
+      if (!currentUser.id) {
+          alert("Could not identify user. Please log in again.");
+          window.location.href = 'index.html';
+          return;
       }
 
-      displayUserPosts(userPosts)
-    } else {
-      console.error("Failed to load posts:", data.error)
-      // Fallback to localStorage
-      loadUserPostsFromStorage()
-    }
-  } catch (error) {
-    console.error("Error loading posts from API:", error)
-    // Fallback to localStorage
-    loadUserPostsFromStorage()
-  }
-}
+      await Promise.all([
+          loadUserProfile(),
+          loadUserPosts()
+      ]);
 
-// Fallback to localStorage
-function loadUserPostsFromStorage() {
-  const allPosts = JSON.parse(localStorage.getItem("userPosts")) || []
-  const userPosts = allPosts.filter((post) => post.userId === "current_user")
-  displayUserPosts(userPosts)
-}
-
-// Display user posts in profile
-function displayUserPosts(posts) {
-  const profilePostsContainer = document.getElementById("profile-posts")
-  profilePostsContainer.innerHTML = ""
-
-  if (posts.length === 0) {
-    profilePostsContainer.innerHTML = `
-      <div class="no-posts">
-        <p>You haven't posted anything yet.</p>
-      </div>
-    `
-    return
+      attachEventListeners();
   }
 
-  posts.forEach((post) => {
-    const postElement = createProfilePostElement(post)
-    profilePostsContainer.appendChild(postElement)
-  })
-}
-
-// Create profile post element
-function createProfilePostElement(postData) {
-  const postElement = document.createElement("div")
-  postElement.className = "post"
-  postElement.dataset.postId = postData.id
-
-  // Enhanced avatar display
-  let avatarHTML = ""
-  if (postData.avatar) {
-    avatarHTML = `<img src="${postData.avatar}" alt="${postData.userName}" style="width: 100%; height: 100%; object-fit: cover;">`
-  } else if (postData.avatarEmoji && postData.avatarEmoji !== "👤") {
-    avatarHTML = `<div class="default-avatar" style="font-size: 20px;">${postData.avatarEmoji}</div>`
-  } else if (postData.avatarId) {
-    const avatarEmojis = [
-      "👨‍💼",
-      "👩‍💼",
-      "👨‍🎓",
-      "👩‍🎓",
-      "👨‍🏫",
-      "👩‍🏫",
-      "👨‍💻",
-      "👩‍💻",
-      "👨‍🔬",
-      "👩‍🔬",
-      "👨‍🎨",
-      "👩‍🎨",
-    ]
-    const emoji = avatarEmojis[postData.avatarId - 1] || "👤"
-    avatarHTML = `<div class="default-avatar" style="font-size: 20px;">${emoji}</div>`
-  } else {
-    avatarHTML = `<div class="default-avatar">${postData.userInitials}</div>`
+  function getCurrentUserFromStorage() {
+      const data = JSON.parse(localStorage.getItem("ifindUserData")) || {};
+      return {
+          id: data.id,
+          name: data.name,
+          initials: data.name ? data.name.split(" ").map(n => n[0]).join("").toUpperCase().substring(0, 2) : "??",
+          avatarId: data.avatarId,
+      };
   }
-
-  // Create image HTML
-  let imageHTML = ""
-  if (postData.image) {
-    imageHTML = `
-      <div class="post-image-container loading" id="profile-image-container-${postData.id}">
-        <img src="${postData.image}" 
-             alt="${postData.type} item" 
-             class="post-image"
-             onload="handleProfileImageLoad(this, '${postData.id}')"
-             onerror="handleProfileImageError(this, '${postData.id}')">
-      </div>
-    `
-  }
-
-  // Create comments HTML
-  let commentsHTML = ""
-  const commentCount = (postData.comments && postData.comments.length) || 0
-  if (postData.comments && postData.comments.length > 0) {
-    commentsHTML = `
-      <div class="comments-list" style="display: none;">
-        ${postData.comments
-          .map((comment) => {
-            let commentAvatarHTML = ""
-            if (comment.avatar) {
-              commentAvatarHTML = `<img src="${comment.avatar}" alt="${comment.author}" style="width: 100%; height: 100%; object-fit: cover;">`
-            } else if (comment.avatarEmoji && comment.avatarEmoji !== "👤") {
-              commentAvatarHTML = `<div class="default-avatar" style="font-size: 12px;">${comment.avatarEmoji}</div>`
-            } else {
-              commentAvatarHTML = `<div class="default-avatar" style="font-size: 12px;">${comment.authorInitials}</div>`
-            }
-
-            return `
-            <div class="comment">
-              <div class="comment-avatar">
-                ${commentAvatarHTML}
-              </div>
-              <div class="comment-bubble">
-                <div class="comment-author">${comment.author}</div>
-                <div class="comment-text">${comment.text}</div>
-              </div>
-            </div>
-            <div class="comment-time">${formatPostTime(comment.timestamp)}</div>
-          `
-          })
-          .join("")}
-      </div>
-    `
-  }
-
-  // Get current user for comment input avatar
-  let currentUserAvatarHTML = ""
-  if (currentUser.avatar) {
-    currentUserAvatarHTML = `<img src="${currentUser.avatar}" alt="${currentUser.name}" style="width: 100%; height: 100%; object-fit: cover;">`
-  } else if (currentUser.avatarEmoji && currentUser.avatarEmoji !== "👤") {
-    currentUserAvatarHTML = `<div class="default-avatar" style="font-size: 12px;">${currentUser.avatarEmoji}</div>`
-  } else if (currentUser.avatarId) {
-    const avatarEmojis = [
-      "👨‍💼",
-      "👩‍💼",
-      "👨‍🎓",
-      "👩‍🎓",
-      "👨‍🏫",
-      "👩‍🏫",
-      "👨‍💻",
-      "👩‍💻",
-      "👨‍🔬",
-      "👩‍🔬",
-      "👨‍🎨",
-      "👩‍🎨",
-    ]
-    const avatarIndex = Number.parseInt(currentUser.avatarId) - 1
-    const emoji = avatarEmojis[avatarIndex] || "👤"
-    currentUserAvatarHTML = `<div class="default-avatar" style="font-size: 12px;">${emoji}</div>`
-  } else {
-    currentUserAvatarHTML = `<div class="default-avatar" style="font-size: 12px;">${currentUser.name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .substring(0, 2)}</div>`
-  }
-
-  postElement.innerHTML = `
-    <div class="post-header">
-      <div class="post-user">
-        <div class="profile-pic">
-          ${avatarHTML}
-        </div>
-        <div class="post-user-info">
-          <div class="post-user-name">${postData.userName}</div>
-          <div class="post-user-meta">${postData.userHandle}<br>${postData.userRole}</div>
-        </div>
-      </div>
-      <div class="post-options" onclick="togglePostOptions(this)">
-        <i class="fas fa-ellipsis-h"></i>
-        <div class="post-options-dropdown">
-          <div class="dropdown-item" onclick="editPost('${postData.id}')">
-            <i class="fas fa-edit"></i>
-            <span>Edit</span>
-          </div>
-          <div class="dropdown-item" onclick="markAsClaimed('${postData.id}')">
-            <i class="fas fa-check"></i>
-            <span>Claimed</span>
-          </div>
-          <div class="dropdown-item" onclick="deletePost('${postData.id}')">
-            <i class="fas fa-trash"></i>
-            <span>Delete</span>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="post-content">
-      <div class="post-text">
-        <span class="post-tag ${postData.type}">${postData.type.charAt(0).toUpperCase() + postData.type.slice(1)}</span>
-        ${postData.description} — <strong>${postData.location}</strong>
-      </div>
-      ${imageHTML}
-    </div>
-    <div class="post-actions">
-      <div class="post-action ${postData.liked ? "liked" : ""}" onclick="toggleHeart('${postData.id}', this)">
-        <i class="${postData.liked ? "fas" : "far"} fa-heart" ${postData.liked ? 'style="color: #dc3545;"' : ""}></i>
-        <span ${postData.liked ? 'style="color: #dc3545;"' : ""}>Heart</span>
-      </div>
-      <div class="post-action" onclick="toggleComments('${postData.id}', this)">
-        <i class="far fa-comment"></i>
-        <span>COMMENT${commentCount > 0 ? ` (${commentCount})` : ""}</span>
-      </div>
-      <div class="post-action">
-        <i class="fas fa-share"></i>
-        <span>SHARE</span>
-      </div>
-    </div>
-    <div class="post-comments">
-      ${commentsHTML}
-      <div class="comment-input">
-        <div class="comment-input-avatar">
-          ${currentUserAvatarHTML}
-        </div>
-        <input type="text" class="comment-text" placeholder="Write your comment..." onkeypress="handleCommentKeypress(event, '${postData.id}', this)">
-        <button class="send-comment" onclick="handleCommentSubmit('${postData.id}', this)">
-          <i class="fas fa-paper-plane"></i>
-        </button>
-      </div>
-    </div>
-  `
-
-  return postElement
-}
-
-// Delete post using API
-async function deletePost(postId) {
-  if (confirm("Are you sure you want to delete this post?")) {
-    try {
-      const response = await fetch(`${API_URL}/posts/${postId}`, {
-        method: "DELETE",
-      })
-
-      const data = await response.json()
-
-      if (data.success) {
-        loadUserPostsFromAPI()
-        alert("Post deleted successfully!")
-      } else {
-        console.error("Failed to delete post:", data.error)
-        alert("Failed to delete post: " + data.error)
-      }
-    } catch (error) {
-      console.error("Error deleting post:", error)
-      alert("An error occurred while deleting your post.")
-    }
-  }
-}
-
-// Mark as claimed using API
-async function markAsClaimed(postId) {
-  try {
-    const response = await fetch(`${API_URL}/posts/${postId}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        post_type: "claimed",
-      }),
-    })
-
-    const data = await response.json()
-
-    if (data.success) {
-      loadUserPostsFromAPI()
-      alert("Item marked as claimed!")
-    } else {
-      console.error("Failed to mark as claimed:", data.error)
-      alert("Failed to mark as claimed: " + data.error)
-    }
-  } catch (error) {
-    console.error("Error marking as claimed:", error)
-    alert("An error occurred while marking the item as claimed.")
-  }
-}
-
-function editPost(postId) {
-  localStorage.setItem("editPostId", postId)
-  window.location.href = "main.html?edit=" + postId
-}
-
-// Update profile display
-function updateProfileDisplay() {
-  const profileNavAvatar = document.getElementById("profile-nav-avatar")
-  if (profileNavAvatar) {
-    if (currentUser.avatar) {
-      profileNavAvatar.innerHTML = `<img src="${currentUser.avatar}" alt="${currentUser.name}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`
-    } else if (currentUser.avatarEmoji && currentUser.avatarEmoji !== "👤") {
-      profileNavAvatar.innerHTML = `<div class="default-avatar-nav" style="font-size: 20px;">${currentUser.avatarEmoji}</div>`
-    } else if (currentUser.avatarId) {
-      const avatarEmojis = [
-        "👨‍💼",
-        "👩‍💼",
-        "👨‍🎓",
-        "👩‍🎓",
-        "👨‍🏫",
-        "👩‍🏫",
-        "👨‍💻",
-        "👩‍💻",
-        "👨‍🔬",
-        "👩‍🔬",
-        "👨‍🎨",
-        "👩‍🎨",
-      ]
-      const emoji = avatarEmojis[currentUser.avatarId - 1] || "👤"
-      profileNavAvatar.innerHTML = `<div class="default-avatar-nav" style="font-size: 20px;">${emoji}</div>`
-    } else {
-      const initials = currentUser.name
-        .split(" ")
-        .map((n) => n[0])
-        .join("")
-      profileNavAvatar.innerHTML = `<div class="default-avatar-nav">${initials}</div>`
-    }
-  }
-
-  const profileAvatarLarge = document.querySelector(".profile-avatar-large")
-  if (profileAvatarLarge) {
-    if (currentUser.avatar) {
-      profileAvatarLarge.innerHTML = `<img src="${currentUser.avatar}" alt="${currentUser.name}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`
-    } else if (currentUser.avatarEmoji && currentUser.avatarEmoji !== "👤") {
-      profileAvatarLarge.innerHTML = `<div class="default-avatar-large" style="font-size: 60px;">${currentUser.avatarEmoji}</div>`
-    } else if (currentUser.avatarId) {
-      const avatarEmojis = [
-        "👨‍💼",
-        "👩‍💼",
-        "👨‍🎓",
-        "👩‍🎓",
-        "👨‍🏫",
-        "👩‍🏫",
-        "👨‍💻",
-        "👩‍💻",
-        "👨‍🔬",
-        "👩‍🔬",
-        "👨‍🎨",
-        "👩‍🎨",
-      ]
-      const emoji = avatarEmojis[currentUser.avatarId - 1] || "👤"
-      profileAvatarLarge.innerHTML = `<div class="default-avatar-large" style="font-size: 60px;">${emoji}</div>`
-    } else {
-      const initials = currentUser.name
-        .split(" ")
-        .map((n) => n[0])
-        .join("")
-      profileAvatarLarge.innerHTML = `<div class="default-avatar-large">${initials}</div>`
-    }
-  }
-
-  const profileNameLarge = document.querySelector(".profile-name-large")
-  if (profileNameLarge) {
-    profileNameLarge.textContent = currentUser.name
-  }
-
-  const profileUsernameLarge = document.querySelector(".profile-username-large")
-  if (profileUsernameLarge) {
-    const username = currentUser.username.startsWith("@") ? currentUser.username : "@" + currentUser.username
-    profileUsernameLarge.textContent = username
-  }
-
-  const profileRoleLarge = document.querySelector(".profile-role-large")
-  if (profileRoleLarge) {
-    profileRoleLarge.textContent = currentUser.role
-  }
-
-  const profileContactValue = document.querySelector(".profile-contact-value a")
-  if (profileContactValue) {
-    profileContactValue.textContent = currentUser.contact
-    profileContactValue.href = `https://${currentUser.contact}`
-  }
-
-  // Update edit form values
-  if (document.getElementById("edit-name")) {
-    document.getElementById("edit-name").value = currentUser.name
-  }
-  if (document.getElementById("edit-username")) {
-    document.getElementById("edit-username").value = currentUser.username.replace("@", "")
-  }
-  if (document.getElementById("edit-contact")) {
-    document.getElementById("edit-contact").value = currentUser.contact
-  }
-
-  const profileEditAvatar = document.querySelector(".profile-edit-avatar")
-  if (profileEditAvatar) {
-    if (currentUser.avatar) {
-      profileEditAvatar.innerHTML = `<img src="${currentUser.avatar}" alt="${currentUser.name}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`
-    } else if (currentUser.avatarEmoji && currentUser.avatarEmoji !== "👤") {
-      profileEditAvatar.innerHTML = `<div class="default-avatar" style="font-size: 40px;">${currentUser.avatarEmoji}</div>`
-    } else if (currentUser.avatarId) {
-      const avatarEmojis = [
-        "👨‍💼",
-        "👩‍💼",
-        "👨‍🎓",
-        "👩‍🎓",
-        "👨‍🏫",
-        "👩‍🏫",
-        "👨‍💻",
-        "👩‍💻",
-        "👨‍🔬",
-        "👩‍🔬",
-        "👨‍🎨",
-        "👩‍🎨",
-      ]
-      const emoji = avatarEmojis[currentUser.avatarId - 1] || "👤"
-      profileEditAvatar.innerHTML = `<div class="default-avatar" style="font-size: 40px;">${emoji}</div>`
-    } else {
-      const initials = currentUser.name
-        .split(" ")
-        .map((n) => n[0])
-        .join("")
-      profileEditAvatar.innerHTML = `<div class="default-avatar">${initials}</div>`
-    }
-  }
-}
-
-// Format timestamp for posts
-function formatPostTime(timestamp) {
-  const now = new Date()
-  const postTime = new Date(timestamp)
-  const diffInSeconds = Math.floor((now - postTime) / 1000)
-  const diffInMinutes = Math.floor(diffInSeconds / 60)
-  const diffInHours = Math.floor(diffInMinutes / 60)
-  const diffInDays = Math.floor(diffInHours / 24)
-
-  if (diffInSeconds < 60) {
-    return "Just now"
-  } else if (diffInMinutes < 60) {
-    return `${diffInMinutes}m ago`
-  } else if (diffInHours < 24) {
-    return `${diffInHours}h ago`
-  } else if (diffInDays === 1) {
-    return "Yesterday"
-  } else if (diffInDays < 7) {
-    return `${diffInDays}d ago`
-  } else {
-    return postTime.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: postTime.getFullYear() !== now.getFullYear() ? "numeric" : undefined,
-    })
-  }
-}
-
-// Global functions for profile image handling
-window.handleProfileImageLoad = (img, postId) => {
-  const container = document.getElementById(`profile-image-container-${postId}`)
-  if (container) {
-    container.classList.remove("loading")
-    const aspectRatio = img.naturalWidth / img.naturalHeight
-    if (aspectRatio > 2) {
-      container.classList.add("wide-image")
-    } else if (aspectRatio < 0.75) {
-      container.classList.add("tall-image")
-    }
-  }
-}
-
-window.handleProfileImageError = (img, postId) => {
-  const container = document.getElementById(`profile-image-container-${postId}`)
-  if (container) {
-    container.classList.remove("loading")
-    container.innerHTML = `
-      <div style="padding: 40px; text-align: center; color: #666;">
-        <i class="fas fa-image" style="font-size: 48px; margin-bottom: 16px;"></i>
-        <p>Image could not be loaded</p>
-      </div>
-    `
-  }
-}
-
-// Setup event listeners
-function setupEventListeners() {
-  if (editProfileBtn) {
-    editProfileBtn.addEventListener("click", () => {
-      editProfileModal.classList.add("active")
-      document.body.style.overflow = "hidden"
-    })
-  }
-
-  function closeModal() {
-    editProfileModal.classList.remove("active")
-    document.body.style.overflow = "auto"
-  }
-
-  if (closeEditModalBtn) {
-    closeEditModalBtn.addEventListener("click", closeModal)
-  }
-  if (cancelEditProfileBtn) {
-    cancelEditProfileBtn.addEventListener("click", closeModal)
-  }
-
-  if (editProfileModal) {
-    editProfileModal.addEventListener("click", (e) => {
-      if (e.target === editProfileModal) {
-        closeModal()
-      }
-    })
-  }
-
-  // Profile form submission with API integration
-  if (profileEditForm) {
-    profileEditForm.addEventListener("submit", async (e) => {
-      e.preventDefault()
-
-      const newName = document.getElementById("edit-name").value.trim()
-      const newUsername = document.getElementById("edit-username").value.replace("@", "").trim()
-      const newContact = document.getElementById("edit-contact").value.trim()
-
-      // Validation
-      if (!newName) {
-        alert("Name is required")
-        return
-      }
-
-      if (!newUsername) {
-        alert("Username is required")
-        return
-      }
-
-      if (!newContact) {
-        alert("Contact is required")
-        return
-      }
-
+  
+  async function loadUserProfile() {
       try {
-        // Update user in database
-        const response = await fetch(`${API_URL}/users/${currentUser.id}`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            full_name: newName,
-            username: newUsername,
-          }),
-        })
-
-        const data = await response.json()
-
-        if (data.success) {
-          // Update localStorage
-          const updatedUserData = {
-            ...currentUser,
-            name: newName,
-            username: newUsername,
-            contact: newContact,
-          }
-
-          localStorage.setItem("ifindUserData", JSON.stringify(updatedUserData))
-          localStorage.setItem(
-            "userProfile",
-            JSON.stringify({
-              ...JSON.parse(localStorage.getItem("userProfile") || "{}"),
-              name: newName,
-              username: `@${newUsername}`,
-              contact: newContact,
-            }),
-          )
-
-          // Update current user object
-          currentUser = getCurrentUserData()
-          updateProfileDisplay()
-          loadUserPostsFromAPI()
-          closeModal()
-          alert("Profile updated successfully!")
-        } else {
-          alert("Failed to update profile: " + data.error)
-        }
+          const response = await window.iFindAPI.User.getUserById(currentUser.id);
+          if (!response.success) throw new Error("Failed to fetch user profile");
+          userDetails = response.data;
+          populateProfileUI(userDetails);
       } catch (error) {
-        console.error("Error updating profile:", error)
-        alert("An error occurred while updating your profile.")
+          console.error("Error loading user profile:", error);
+          // This alert shows when the API call fails.
+          alert("Could not load your profile data. Please check the console for errors.");
       }
-    })
   }
 
-  // Profile image input handler
-  if (profileImageInput) {
-    profileImageInput.addEventListener("change", (e) => {
-      const file = e.target.files[0]
+  async function loadUserPosts() {
+      try {
+          const response = await window.iFindAPI.Post.getAllPosts({
+              authorId: currentUser.id,
+              userId: currentUser.id
+          });
+          if (!response.success) throw new Error("Failed to fetch user posts");
 
-      if (file) {
-        if (!file.type.startsWith("image/")) {
-          alert("Please select a valid image file.")
-          e.target.value = ""
-          profileFileNameDisplay.textContent = ""
-          return
-        }
+          const postsWithComments = await Promise.all(response.data.map(async (post) => {
+              const commentsResponse = await window.iFindAPI.Comment.getCommentsForPost(post.post_id);
+              post.comments = commentsResponse.success ? commentsResponse.data : [];
+              return post;
+          }));
 
-        if (file.size > 5 * 1024 * 1024) {
-          alert("File size must be less than 5MB.")
-          e.target.value = ""
-          profileFileNameDisplay.textContent = ""
-          return
-        }
+          userPosts = postsWithComments;
+          displayPosts(userPosts);
+      } catch (error) {
+          console.error("Error loading user posts:", error);
+      }
+  }
 
-        profileFileNameDisplay.textContent = file.name
+  // START OF FIX: This function now safely handles missing (null) data.
+  function populateProfileUI(user) {
+      // Safely get initials, providing a fallback.
+      const initials = user.full_name ? user.full_name.split(" ").map(n => n[0]).join("").toUpperCase().substring(0, 2) : "??";
+      const avatarHtml = getAvatarHtml(user.avatar_id, initials);
+      
+      document.querySelector('.profile-avatar-large').innerHTML = avatarHtml.replace('font-size: 20px', 'font-size: 64px');
+      document.querySelector('.profile-name-large').innerText = user.full_name || "Unknown User";
+      document.querySelector('.profile-username-large').innerText = user.username ? `@${user.username}` : "No username";
+      document.querySelector('.profile-role-large').innerText = user.user_type || "No Role";
+      
+      const contactLink = document.querySelector('.profile-contact-value a');
+      contactLink.innerText = user.contact_url || "Not set";
+      contactLink.href = user.contact_url ? `https://${user.contact_url}` : '#';
 
-        const reader = new FileReader()
-        reader.onload = (e) => {
-          const profileEditAvatar = document.querySelector(".profile-edit-avatar")
-          if (profileEditAvatar) {
-            profileEditAvatar.innerHTML = `<img src="${e.target.result}" alt="Preview" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`
+      document.getElementById('profile-nav-avatar').innerHTML = avatarHtml.replace('font-size: 20px', 'font-size: 18px');
+  }
+  // END OF FIX
+
+  // ... (The rest of the file is correct and unchanged)
+  function displayPosts(posts) {
+      profilePostsContainer.innerHTML = '';
+      if (!posts || posts.length === 0) {
+          profilePostsContainer.innerHTML = '<div class="no-posts"><p>You haven\'t made any posts yet.</p></div>';
+          return;
+      }
+      posts.forEach(post => {
+          profilePostsContainer.appendChild(createPostElement(post));
+      });
+  }
+
+  function attachEventListeners() {
+      hamburgerMenu.addEventListener("click", () => sidebar.classList.toggle("active"));
+      document.addEventListener("click", (e) => {
+          if (!sidebar.contains(e.target) && !hamburgerMenu.contains(e.target)) {
+              sidebar.classList.remove("active");
           }
-        }
-        reader.readAsDataURL(file)
-      } else {
-        profileFileNameDisplay.textContent = ""
-        updateProfileDisplay()
+      });
+
+      document.getElementById("nav-feed").addEventListener("click", () => window.location.href = 'main.html');
+      document.getElementById("nav-claimed").addEventListener("click", () => window.location.href = 'claim.html');
+      document.getElementById("nav-profile").addEventListener("click", () => window.location.reload());
+      document.getElementById("nav-logout").addEventListener("click", handleLogout);
+      document.getElementById("nav-about").addEventListener("click", () => window.location.href = 'about.html');
+
+      document.getElementById("edit-profile-btn").addEventListener("click", openEditProfileModal);
+      document.getElementById("close-edit-profile-modal").addEventListener("click", closeEditProfileModal);
+      document.getElementById("cancel-edit-profile").addEventListener("click", closeEditProfileModal);
+      editProfileForm.addEventListener("submit", handleProfileUpdate);
+
+      document.getElementById("close-edit-post-modal").addEventListener("click", closeEditPostModal);
+      document.getElementById("cancel-edit-post").addEventListener("click", closeEditPostModal);
+      editPostForm.addEventListener("submit", handleEditPostSubmit);
+  }
+
+  window.toggleLike = async (postId) => {
+      const post = userPosts.find(p => p.post_id === postId);
+      if (!post) return;
+      try {
+          const response = post.has_liked
+              ? await window.iFindAPI.Like.removeLike(postId, currentUser.id)
+              : await window.iFindAPI.Like.addLike(postId, currentUser.id);
+
+          if (response.success) await loadUserPosts();
+          else console.error("Failed to toggle like:", response.error);
+      } catch (error) { console.error("Error toggling like:", error); }
+  };
+
+  window.handleCommentSubmit = async (postId, button) => {
+      const input = button.previousElementSibling;
+      const commentText = input.value.trim();
+      if (!commentText) return;
+      const commentData = { post_id: postId, user_id: currentUser.id, comment_text: commentText };
+      try {
+          const response = await window.iFindAPI.Comment.addComment(commentData);
+          if (response.success) await loadUserPosts();
+          else alert("Error adding comment: " + (response.error || "Unknown error"));
+      } catch (error) { alert("An error occurred while commenting."); }
+  }
+
+  window.markAsClaimed = async (postId) => {
+      const post = userPosts.find(p => p.post_id === postId);
+      if (!post) return;
+      const postData = { description: post.description, campus: post.campus, post_type: 'claimed' };
+      try {
+          const response = await window.iFindAPI.Post.updatePost(postId, postData);
+          if (response.success) await loadUserPosts();
+          else alert("Error marking as claimed: " + (response.error || "Unknown error"));
+      } catch (error) { alert("An error occurred while updating the post."); }
+  }
+
+  window.deletePost = async (postId) => {
+      if (confirm("Are you sure you want to delete this post?")) {
+          try {
+              const response = await window.iFindAPI.Post.deletePost(postId);
+              if (response.success) await loadUserPosts();
+              else alert("Error deleting post: " + (response.error || "Unknown error"));
+          } catch (error) { alert("An error occurred while deleting the post."); }
       }
-    })
-  }
-}
-
-// Navigation
-if (hamburgerMenu) {
-  hamburgerMenu.addEventListener("click", () => {
-    sidebar.classList.toggle("active")
-  })
-}
-
-if (navFeed) {
-  navFeed.addEventListener("click", () => {
-    window.location.href = "main.html"
-  })
-}
-
-if (navClaimed) {
-  navClaimed.addEventListener("click", () => {
-    window.location.href = "claim.html"
-  })
-}
-
-// Close sidebar when clicking outside on mobile
-document.addEventListener("click", (event) => {
-  if (window.innerWidth <= 768) {
-    if (!sidebar.contains(event.target) && !hamburgerMenu.contains(event.target)) {
-      sidebar.classList.remove("active")
-    }
-  }
-})
-
-// Toggle post options dropdown
-function togglePostOptions(element) {
-  const dropdown = element.querySelector(".post-options-dropdown")
-  const isVisible = dropdown.style.display === "block"
-
-  document.querySelectorAll(".post-options-dropdown").forEach((d) => {
-    d.style.display = "none"
-  })
-
-  dropdown.style.display = isVisible ? "none" : "block"
-}
-
-// Close dropdowns when clicking outside
-document.addEventListener("click", (event) => {
-  if (!event.target.closest(".post-options")) {
-    document.querySelectorAll(".post-options-dropdown").forEach((dropdown) => {
-      dropdown.style.display = "none"
-    })
-  }
-})
-
-// Toggle comments visibility
-function toggleComments(postId, element) {
-  const post = document.querySelector(`[data-post-id="${postId}"]`)
-  if (!post) return
-
-  const commentsList = post.querySelector(".comments-list")
-  const commentInput = post.querySelector(".comment-input")
-
-  if (commentsList) {
-    const isHidden = commentsList.style.display === "none"
-    commentsList.style.display = isHidden ? "block" : "none"
-
-    if (isHidden) {
-      element.classList.add("active")
-      setTimeout(() => {
-        const input = commentInput?.querySelector(".comment-text")
-        if (input) input.focus()
-      }, 100)
-    } else {
-      element.classList.remove("active")
-    }
-  }
-}
-
-// Handle comment keypress (Enter to submit)
-function handleCommentKeypress(event, postId, input) {
-  if (event.key === "Enter") {
-    event.preventDefault()
-    submitComment(postId, input.value, input)
-  }
-}
-
-// Handle comment submit button click
-function handleCommentSubmit(postId, button) {
-  const input = button.previousElementSibling
-  submitComment(postId, input.value, input)
-}
-
-// Submit comment using API
-async function submitComment(postId, commentText, commentInput) {
-  if (!commentText.trim()) return
-
-  try {
-    const response = await fetch(`${API_URL}/comments`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        post_id: Number.parseInt(postId),
-        user_id: currentUser.id,
-        comment_text: commentText.trim(),
-      }),
-    })
-
-    const data = await response.json()
-
-    if (data.success) {
-      commentInput.value = ""
-      // Refresh the posts to show the new comment
-      loadUserPostsFromAPI()
-    } else {
-      console.error("Failed to add comment:", data.error)
-      alert("Failed to add comment: " + data.error)
-    }
-  } catch (error) {
-    console.error("Error adding comment:", error)
-    alert("An error occurred while adding your comment.")
-  }
-}
-
-function toggleHeart(postId, element) {
-  // For now, just update the UI locally
-  // You can implement like functionality in the API later
-  const icon = element.querySelector("i")
-  const span = element.querySelector("span")
-
-  if (icon.classList.contains("far")) {
-    icon.classList.remove("far")
-    icon.classList.add("fas")
-    icon.style.color = "#dc3545"
-    span.style.color = "#dc3545"
-    element.classList.add("liked")
-  } else {
-    icon.classList.remove("fas")
-    icon.classList.add("far")
-    icon.style.color = ""
-    span.style.color = ""
-    element.classList.remove("liked")
-  }
-}
-
-// Initialize profile page
-function init() {
-  currentUser = getCurrentUserData()
-
-  // Check if user has completed setup
-  if (!currentUser.completedSetup) {
-    window.location.href = "setup.html"
-    return
   }
 
-  updateProfileDisplay()
-  setupEventListeners()
-  loadUserPostsFromAPI()
-}
+  function openEditProfileModal() {
+      const initials = userDetails.full_name ? userDetails.full_name.split(" ").map(n => n[0]).join("").toUpperCase().substring(0, 2) : "??";
+      document.querySelector("#edit-profile-modal .default-avatar").innerHTML = getAvatarHtml(userDetails.avatar_id, initials).replace('font-size: 20px', 'font-size: 48px');
+      document.getElementById("edit-name").value = userDetails.full_name || '';
+      document.getElementById("edit-username").value = userDetails.username || '';
+      document.getElementById("edit-contact").value = userDetails.contact_url || '';
+      editProfileModal.style.display = 'flex';
+  }
 
-// Initialize when DOM is loaded
-document.addEventListener("DOMContentLoaded", init)
+  function closeEditProfileModal() { editProfileModal.style.display = 'none'; }
+  
+  window.openEditPostModal = (postId) => {
+      editingPostId = postId;
+      const post = userPosts.find(p => p.post_id === postId);
+      if (!post) return;
+      document.getElementById("edit-type").value = post.post_type;
+      document.getElementById("edit-location").value = post.campus;
+      document.getElementById("edit-description").value = post.description;
+      editPostModal.style.display = 'flex';
+  }
+
+  function closeEditPostModal() {
+      editPostModal.style.display = 'none';
+      editingPostId = null;
+  }
+
+  async function handleProfileUpdate(event) {
+      event.preventDefault();
+      const updatedData = {
+          full_name: document.getElementById("edit-name").value,
+          username: document.getElementById("edit-username").value,
+          contact_url: document.getElementById("edit-contact").value,
+      };
+      try {
+          const response = await window.iFindAPI.User.updateUser(currentUser.id, updatedData);
+          if (response.success) {
+              const localData = JSON.parse(localStorage.getItem("ifindUserData"));
+              localData.name = updatedData.full_name;
+              localStorage.setItem("ifindUserData", JSON.stringify(localData));
+              alert("Profile updated successfully!");
+              closeEditProfileModal();
+              window.location.reload();
+          } else { throw new Error(response.error || "Failed to update profile"); }
+      } catch (error) { alert(`Error: ${error.message}`); }
+  }
+  
+  async function handleEditPostSubmit(event) {
+      event.preventDefault();
+      if (!editingPostId) return;
+      const postData = {
+          description: document.getElementById("edit-description").value,
+          campus: document.getElementById("edit-location").value,
+          post_type: document.getElementById("edit-type").value,
+      };
+      try {
+          const response = await window.iFindAPI.Post.updatePost(editingPostId, postData);
+          if (response.success) {
+              closeEditPostModal();
+              await loadUserPosts();
+          } else { alert("Error updating post: " + (response.error || "Unknown error")); }
+      } catch (error) { alert("An error occurred while updating."); }
+  }
+
+  function handleLogout() {
+      if (confirm("Are you sure you want to log out?")) {
+          localStorage.clear();
+          window.location.href = 'index.html';
+      }
+  }
+
+  function getAvatarHtml(avatarId, initials) {
+      const index = parseInt(avatarId) - 1;
+      if (avatarId && index >= 0 && index < AVATAR_EMOJIS.length) {
+          return `<div class="default-avatar" style="font-size: 20px;">${AVATAR_EMOJIS[index]}</div>`;
+      }
+      return `<div class="default-avatar">${initials}</div>`;
+  }
+
+  function createPostElement(post) {
+      const postElement = document.createElement('div');
+      postElement.className = `post ${post.post_type}`;
+      postElement.dataset.postId = post.post_id;
+      
+      const postDate = new Date(post.date_posted).toLocaleDateString();
+      const authorInitials = (post.author_name || 'A').split(" ").map(n => n[0]).join("").toUpperCase().substring(0, 2);
+      const authorAvatarHtml = getAvatarHtml(post.author_avatar_id, authorInitials);
+      
+      const commentsHtml = (post.comments || []).map(c => {
+          const commenterInitials = (c.author_name || 'A').split(" ").map(n=>n[0]).join("").toUpperCase().substring(0,2);
+          return `<div class="comment"><div class="comment-avatar"><div class="default-avatar">${commenterInitials}</div></div><div class="comment-bubble"><div class="comment-author">${c.author_name}</div><div class="comment-text">${c.comment_text}</div></div></div>`
+      }).join('');
+      
+      postElement.innerHTML = `
+          <div class="post-header">
+              <div class="post-user">
+                  <div class="profile-pic">${authorAvatarHtml}</div>
+                  <div class="post-user-info">
+                      <div class="post-user-name">${post.author_name}</div>
+                      <div class="post-user-meta">${post.author_type}</div>
+                      <div class="post-time">${postDate}</div>
+                  </div>
+              </div>
+              <div class="post-options" onclick="this.querySelector('.post-options-dropdown').style.display = 'block'">
+                  <i class="fas fa-ellipsis-h"></i>
+                  <div class="post-options-dropdown" style="display:none;" onmouseleave="this.style.display='none'">
+                      <button class="dropdown-item" onclick="openEditPostModal(${post.post_id})"><i class="fas fa-edit"></i> Edit</button>
+                      <button class="dropdown-item" onclick="markAsClaimed(${post.post_id})"><i class="fas fa-check"></i> Mark as Claimed</button>
+                      <button class="dropdown-item" onclick="deletePost(${post.post_id})"><i class="fas fa-trash"></i> Delete</button>
+                  </div>
+              </div>
+          </div>
+          <div class="post-content">
+              <div class="post-text">
+                  <span class="post-tag ${post.post_type}">${post.post_type}</span> ${post.description} — <strong>${post.campus}</strong>
+              </div>
+              ${post.image_path ? `<div class="post-image-container"><img src="${post.image_path}" class="post-image"></div>` : ''}
+          </div>
+          <div class="post-actions">
+              <div class="post-action like-btn ${post.has_liked ? 'liked' : ''}" onclick="toggleLike(${post.post_id})">
+                  <i class="${post.has_liked ? 'fas' : 'far'} fa-heart"></i>
+                  <span>Heart (${post.like_count || 0})</span>
+              </div>
+              <div class="post-action" onclick="this.closest('.post').querySelector('.comments-list').style.display='block'">
+                  <i class="far fa-comment"></i>
+                  <span>Comment (${(post.comments || []).length})</span>
+              </div>
+          </div>
+          <div class="post-comments">
+              <div class="comments-list" style="display:none;">${commentsHtml}</div>
+              <div class="comment-input">
+                  <div class="comment-input-avatar">${getAvatarHtml(currentUser.avatarId, currentUser.initials)}</div>
+                  <input type="text" class="comment-text" placeholder="Write a comment...">
+                  <button class="send-comment" onclick="handleCommentSubmit(${post.post_id}, this)"><i class="fas fa-paper-plane"></i></button>
+              </div>
+          </div>`;
+      return postElement;
+  }
+
+  initializeApp();
+});

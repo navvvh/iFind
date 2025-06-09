@@ -61,7 +61,11 @@ const getUserById = async (req, res) => {
     try {
         const { id } = req.params;
         const pool = await getConnection();
-        const result = await pool.request().input('user_id', sql.Int, id).query('SELECT user_id, full_name, email, user_type, date_registered, completed_setup, avatar_id FROM users WHERE user_id = @user_id');
+        // FIX: Changed 'contact' to 'contact_url' to match your database schema.
+        const result = await pool.request()
+            .input('user_id', sql.Int, id)
+            .query('SELECT user_id, full_name, username, email, user_type, contact_url, date_registered, completed_setup, avatar_id FROM users WHERE user_id = @user_id');
+        
         if (result.recordset.length === 0) {
             return res.status(404).json({ success: false, message: "User not found" });
         }
@@ -73,26 +77,45 @@ const getUserById = async (req, res) => {
 
 const updateUser = async (req, res) => {
     const { id } = req.params;
-    const { full_name, user_type, completed_setup, avatar_id } = req.body;
+    // FIX: Changed 'contact' to 'contact_url' here as well.
+    const { full_name, user_type, completed_setup, avatar_id, username, contact_url } = req.body;
 
-    if (!full_name || !user_type || completed_setup === undefined) {
-        return res.status(400).json({ success: false, error: 'Missing required fields.' });
-    }
     try {
         const pool = await getConnection();
-        const request = pool.request()
-            .input('user_id', sql.Int, id)
-            .input('full_name', sql.VarChar, full_name)
-            .input('user_type', sql.VarChar, user_type)
-            .input('completed_setup', sql.Bit, completed_setup);
-
-        let setClauses = "full_name = @full_name, user_type = @user_type, completed_setup = @completed_setup";
+        const request = pool.request().input('user_id', sql.Int, id);
+        
+        const setClauses = [];
+        if (full_name) {
+            request.input('full_name', sql.VarChar, full_name);
+            setClauses.push("full_name = @full_name");
+        }
+        if (user_type) {
+            request.input('user_type', sql.VarChar, user_type);
+            setClauses.push("user_type = @user_type");
+        }
+        if (completed_setup !== undefined) {
+            request.input('completed_setup', sql.Bit, completed_setup);
+            setClauses.push("completed_setup = @completed_setup");
+        }
         if (avatar_id) {
             request.input('avatar_id', sql.Int, avatar_id);
-            setClauses += ", avatar_id = @avatar_id";
+            setClauses.push("avatar_id = @avatar_id");
+        }
+        if (username) {
+            request.input('username', sql.VarChar, username);
+            setClauses.push("username = @username");
+        }
+        // FIX: Check for 'contact_url' and add it to the query.
+        if (contact_url) {
+            request.input('contact_url', sql.VarChar, contact_url);
+            setClauses.push("contact_url = @contact_url");
+        }
+
+        if (setClauses.length === 0) {
+            return res.status(400).json({ success: false, error: 'No fields to update provided.' });
         }
         
-        const sqlQuery = `UPDATE users SET ${setClauses} OUTPUT INSERTED.user_id, INSERTED.full_name, INSERTED.email, INSERTED.user_type, INSERTED.completed_setup, INSERTED.avatar_id WHERE user_id = @user_id`;
+        const sqlQuery = `UPDATE users SET ${setClauses.join(', ')} OUTPUT INSERTED.user_id, INSERTED.full_name, INSERTED.email, INSERTED.user_type, INSERTED.completed_setup, INSERTED.avatar_id WHERE user_id = @user_id`;
         const result = await request.query(sqlQuery);
 
         if (result.recordset.length === 0) {
