@@ -1,32 +1,25 @@
-// --- START OF CORRECTED postRoutes.js ---
-
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 
-// Import all necessary functions from the controller
-const { 
-    getAllPosts, 
-    createPost, 
-    getPostById,
-    updatePost,  // Make sure this is imported
-    deletePost   // Make sure this is imported
-} = require('../controllers/postController');
+// Import the entire controller object
+const postController = require("../controllers/postController");
 
-// GET /api/posts - Get all posts
-router.get('/', getAllPosts);
+// Now we use the functions from the imported object.
+// This is more robust and makes it clear where the functions come from.
 
-// POST /api/posts - Create a new post
-router.post('/', createPost);
+// Route to get all posts
+router.get("/", postController.getAllPosts);
 
-// GET /api/posts/:id - Get a single post by its ID
-router.get('/:id', getPostById);
+// Route to create a new post
+router.post("/", postController.createPost);
 
-// ✅ ADDED THIS ROUTE: Handles updating a post
-// PUT /api/posts/:id
-router.put('/:id', updatePost);
+// Route to get a single post by its ID
+router.get("/:id", postController.getPostById);
 
-// ✅ ADDED THIS ROUTE: Handles deleting a post
-// DELETE /api/posts/:id
-router.delete('/:id', deletePost);
+// Route to update a post by its ID
+router.put("/:id", postController.updatePost);
+
+// Route to delete a post by its ID
+router.delete("/:id", postController.deletePost);
 
 module.exports = router;

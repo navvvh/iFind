@@ -1,14 +1,14 @@
 const express = require("express")
 const router = express.Router()
-const { getUserNotifications, createNotification, markAsRead } = require("../controllers/notificationController")
+const {
+  getNotificationsByUser,
+  markAllAsRead,
+} = require("../controllers/notificationController")
 
-// GET /api/notifications/user/:userId - Get user notifications
-router.get("/user/:userId", getUserNotifications)
+// Get all notifications for a specific user
+router.get("/user/:userId", getNotificationsByUser)
 
-// POST /api/notifications - Create new notification
-router.post("/", createNotification)
+// Mark all notifications for a user as read
+router.put("/user/:userId/mark-read", markAllAsRead)
 
-// PUT /api/notifications/:id/read - Mark notification as read
-router.put("/:id/read", markAsRead)
-
-module.exports = router;
+module.exports = router

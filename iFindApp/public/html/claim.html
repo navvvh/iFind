@@ -5,15 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>iFind - Your Claimed Posts</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="../css/claim.css">
-    <script src="/js/api-service.js"></script>
+    <!-- FIX: Corrected path to CSS -->
+    <link rel="stylesheet" href="../css/claim.css"> 
+    
+    <!-- FIX: Corrected path to JS with defer to ensure it loads properly -->
+    <script src="../js/api-service.js" defer></script>
+    <script src="../js/claim.js" defer></script>
 </head>
 <body>
     <div class="top-navbar">
         <button class="hamburger-menu" id="hamburger-menu">
             <div class="profile-pic">
-                <img src="/placeholder.svg" alt="Profile" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                <div class="default-avatar" style="display: none;">AP</div>
+                <!-- This will be populated by JS -->
             </div>
         </button>
         <div class="logo-container">
@@ -23,26 +26,14 @@
             <!-- Notification Bell -->
             <div class="notification-icon" id="notification-bell">
                 <i class="fas fa-bell"></i>
-                <span class="notification-badge" id="notification-count">0</span>
+                <span class="notification-badge" id="notification-count" style="display: none;">0</span>
                 <div class="notification-dropdown" id="notification-dropdown">
                     <div class="notification-header">
                         <h4>Notifications</h4>
                         <button class="mark-all-read" id="mark-all-read">Mark all as read</button>
                     </div>
                     <div class="notification-list" id="notification-list">
-                        <div class="notification-item">
-                            <div class="notification-icon-small">
-                                <i class="fas fa-check-circle" style="color: #28a745;"></i>
-                            </div>
-                            <div class="notification-content">
-                                <p><strong>Welcome to Claimed Posts!</strong></p>
-                                <p>Here you can view all your claimed items</p>
-                                <span class="notification-time">Just now</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="notification-footer">
-                        <a href="#" class="view-all-notifications">View all notifications</a>
+                        <!-- Notifications will be populated by JS -->
                     </div>
                 </div>
             </div>
@@ -51,25 +42,7 @@
             <div class="announcement-icon" id="announcement-icon">
                 <i class="fas fa-bullhorn"></i>
                 <div class="announcement-dropdown" id="announcement-dropdown">
-                    <div class="announcement-header">
-                        <h4>Announcements</h4>
-                    </div>
-                    <div class="announcement-list" id="announcement-list">
-                        <div class="announcement-item">
-                            <div class="announcement-content">
-                                <p><strong>Claimed Posts Feature</strong></p>
-                                <p>Track all your successfully claimed items in one place!</p>
-                                <span class="announcement-time">Today</span>
-                            </div>
-                        </div>
-                        <div class="announcement-item">
-                            <div class="announcement-content">
-                                <p><strong>System Maintenance</strong></p>
-                                <p>iFind will undergo maintenance on Sunday, 2:00 AM - 4:00 AM</p>
-                                <span class="announcement-time">1 day ago</span>
-                            </div>
-                        </div>
-                    </div>
+                    <!-- Announcements here -->
                 </div>
             </div>
         </div>
@@ -111,22 +84,23 @@
             <div class="content-area">
                 <!-- Page Title -->
                 <div class="page-header">
-                    <h1 class="page-title">Your claimed post</h1>
-                    <p class="page-subtitle">All your successfully claimed items</p>
+                    <h1 class="page-title">Your Claimed Posts</h1>
+                    <p class="page-subtitle">These are items you posted that have been successfully claimed.</p>
                 </div>
 
                 <!-- Claimed Posts Feed -->
                 <div class="feed" id="claimed-feed">
-                    <div class="empty-state" id="empty-state">
+                    <div class="empty-state" id="empty-state" style="display: none;">
                         <i class="fas fa-check-circle"></i>
                         <h3>No claimed posts yet</h3>
                         <p>Items you mark as claimed will appear here!</p>
                     </div>
+                    <!-- Posts will be populated by claim.js -->
                 </div>
             </div>
         </div>
     </div>
-
-    <script src="../js/claim.js"></script>
+    
+    <!-- NOTE: Script tags were moved to the <head> with 'defer' attribute for better performance and reliability -->
 </body>
 </html>

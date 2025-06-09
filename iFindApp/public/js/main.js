@@ -60,6 +60,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    // UPDATED: Added full navigation
     function attachEventListeners() {
         document.getElementById("add-post-btn").addEventListener("click", () => openPostModal());
         document.getElementById("close-modal").addEventListener("click", () => closePostModal());
@@ -68,11 +69,18 @@ document.addEventListener("DOMContentLoaded", () => {
         editForm.addEventListener("submit", handleEditSubmit);
         searchInput.addEventListener("input", () => displayPosts(filterPosts()));
         document.getElementById("nav-logout").addEventListener("click", handleLogout);
+        
+        // --- Sidebar Navigation ---
+        document.getElementById("nav-feed").addEventListener("click", () => window.location.reload());
+        document.getElementById("nav-claimed").addEventListener("click", () => window.location.href = 'claim.html');
+        document.getElementById("nav-profile").addEventListener("click", () => alert("Profile page not implemented yet."));
+        document.getElementById("nav-about").addEventListener("click", () => alert("About page not implemented yet."));
     }
 
     // --- 2. DATA HANDLING (API Calls) ---
     async function loadPosts() {
         try {
+            // Main feed fetches 'lost' and 'found' posts by default (no post_type specified)
             const postsResponse = await window.iFindAPI.Post.getAllPosts({ userId: currentUser.id });
             if (!postsResponse.success) throw new Error("Failed to fetch posts");
             
@@ -211,18 +219,16 @@ document.addEventListener("DOMContentLoaded", () => {
         postElement.dataset.postId = post.post_id;
         
         const postDate = new Date(post.date_posted).toLocaleDateString();
-        const editedDate = post.date_last_edited ? new Date(post.date_last_edited).toLocaleDateString() : null;
-        const timeString = `${postDate} ${editedDate ? `(Edited)` : ''}`;
+        const timeString = `${postDate} ${post.date_last_edited ? `(Edited)` : ''}`;
 
         const authorInitials = (post.author_name || 'A').split(" ").map(n => n[0]).join("").toUpperCase().substring(0, 2);
         const authorAvatarHtml = getAvatarHtml(post.author_avatar_id, authorInitials);
         
-        const commentsHtml = post.comments.map(c => {
+        const commentsHtml = (post.comments || []).map(c => {
             const commenterInitials = (c.author_name || 'A').split(" ").map(n=>n[0]).join("").toUpperCase().substring(0,2);
             return `<div class="comment"><div class="comment-avatar"><div class="default-avatar">${commenterInitials}</div></div><div class="comment-bubble"><div class="comment-author">${c.author_name}</div><div class="comment-text">${c.comment_text}</div></div></div>`
         }).join('');
         
-        // ✅ FINAL FIX: The template literal below is now clean and has no stray variables.
         postElement.innerHTML = `
             <div class="post-header">
                 <div class="post-user">
@@ -255,7 +261,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 </div>
                 <div class="post-action" onclick="this.closest('.post').querySelector('.comments-list').style.display='block'">
                     <i class="far fa-comment"></i>
-                    <span>Comment (${post.comments.length})</span>
+                    <span>Comment (${(post.comments || []).length})</span>
                 </div>
                 <div class="post-action">
                     <i class="fas fa-share"></i>
