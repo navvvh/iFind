@@ -4,66 +4,33 @@ const { getConnection, sql } = require("../db");
 const getAllPosts = async (req, res) => {
   try {
     const { campus, post_type, userId, authorId } = req.query;
-
     if (!userId) {
-      return res.status(400).json({
-        success: false,
-        message: "User ID is required to fetch posts.",
-      });
+      return res.status(400).json({ success: false, message: "User ID is required to fetch posts." });
     }
-
     const pool = await getConnection();
-    
     let query = `
       SELECT 
-        p.post_id,
-        p.description,
-        p.campus,
-        p.post_type,
-        p.image_path,
-        p.date_posted,
-        p.date_last_edited,
-        u.full_name AS author_name,
-        u.user_type AS author_type,
-        u.avatar_id AS author_avatar_id,
+        p.post_id, p.description, p.campus, p.post_type, p.image_path, p.date_posted, p.date_last_edited,
+        u.full_name AS author_name, u.user_type AS author_type, u.avatar_id AS author_avatar_id,
+        u.user_id AS author_id, -- This is crucial for the frontend UI check
         ISNULL(l.like_count, 0) AS like_count,
         CASE WHEN ul.user_id IS NOT NULL THEN 1 ELSE 0 END AS has_liked
-      FROM 
-        posts p
-      INNER JOIN 
-        users u ON p.user_id = u.user_id
-      LEFT JOIN 
-        (SELECT post_id, COUNT(*) AS like_count FROM likes GROUP BY post_id) l ON p.post_id = l.post_id
-      LEFT JOIN 
-        likes ul ON p.post_id = ul.post_id AND ul.user_id = @current_user_id
+      FROM posts p
+      INNER JOIN users u ON p.user_id = u.user_id
+      LEFT JOIN (SELECT post_id, COUNT(*) AS like_count FROM likes GROUP BY post_id) l ON p.post_id = l.post_id
+      LEFT JOIN likes ul ON p.post_id = ul.post_id AND ul.user_id = @current_user_id
       WHERE 1=1
     `;
-
     const request = pool.request();
-    
     request.input("current_user_id", sql.Int, userId);
 
-    if (campus) {
-      query += " AND p.campus = @campus";
-      request.input("campus", sql.VarChar(50), campus);
-    }
+    if (campus) { query += " AND p.campus = @campus"; request.input("campus", sql.VarChar(50), campus); }
+    if (authorId) { query += " AND p.user_id = @authorId"; request.input("authorId", sql.Int, authorId); }
+    if (post_type) { query += " AND p.post_type = @post_type"; request.input("post_type", sql.VarChar(10), post_type); } 
+    else if (!authorId) { query += " AND p.post_type IN ('lost', 'found')"; }
     
-    if (authorId) {
-        query += " AND p.user_id = @authorId";
-        request.input("authorId", sql.Int, authorId);
-    }
-
-    if (post_type) {
-      query += " AND p.post_type = @post_type";
-      request.input("post_type", sql.VarChar(10), post_type);
-    } else if (!authorId) {
-      query += " AND p.post_type IN ('lost', 'found')";
-    }
-
     query += " ORDER BY p.date_posted DESC";
-
     const result = await request.query(query);
-
     res.json({ success: true, data: result.recordset });
   } catch (error) {
     console.error("Error fetching posts:", error);
@@ -96,7 +63,6 @@ const createPost = async (req, res) => {
   }
 };
 
-// FIX: This function is now correct and free of syntax errors.
 const getPostById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -119,21 +85,33 @@ const getPostById = async (req, res) => {
 
 const updatePost = async (req, res) => {
   try {
-    const { id } = req.params;
-    const { description, campus, post_type } = req.body;
-    
+    const { id: postId } = req.params;
+    const { description, campus, post_type, userId } = req.body;
+
+    if (!userId) {
+        return res.status(401).json({ success: false, message: "Authentication required." });
+    }
     const pool = await getConnection();
+    
+    const postResult = await pool.request()
+        .input('post_id', sql.Int, postId)
+        .query('SELECT user_id FROM posts WHERE post_id = @post_id');
+    if (postResult.recordset.length === 0) {
+        return res.status(404).json({ success: false, message: "Post not found." });
+    }
+    if (postResult.recordset[0].user_id !== parseInt(userId)) {
+        return res.status(403).json({ success: false, message: "Forbidden: You do not own this post." });
+    }
+
     await pool.request()
-      .input("post_id", sql.Int, id)
+      .input("post_id", sql.Int, postId)
       .input("description", sql.Text, description)
       .input("campus", sql.VarChar(50), campus)
       .input("post_type", sql.VarChar(10), post_type)
       .query(`
-        UPDATE posts 
-        SET description = @description, campus = @campus, post_type = @post_type, date_last_edited = GETDATE()
+        UPDATE posts SET description = @description, campus = @campus, post_type = @post_type, date_last_edited = GETDATE()
         WHERE post_id = @post_id
       `);
-    
     res.json({ success: true, message: "Post updated successfully" });
   } catch (error) {
     console.error("Error updating post:", error);
@@ -143,12 +121,26 @@ const updatePost = async (req, res) => {
 
 const deletePost = async (req, res) => {
     try {
-        const { id } = req.params;
+        const { id: postId } = req.params;
+        const { userId } = req.body;
+        if (!userId) {
+            return res.status(401).json({ success: false, message: "Authentication required." });
+        }
         const pool = await getConnection();
-        await pool.request()
-            .input("post_id", sql.Int, id)
-            .query('DELETE FROM posts WHERE post_id = @post_id');
+
+        const postResult = await pool.request()
+            .input('post_id', sql.Int, postId)
+            .query('SELECT user_id FROM posts WHERE post_id = @post_id');
+        if (postResult.recordset.length === 0) {
+            return res.status(404).json({ success: false, message: "Post not found." });
+        }
+        if (postResult.recordset[0].user_id !== parseInt(userId)) {
+            return res.status(403).json({ success: false, message: "Forbidden: You do not own this post." });
+        }
         
+        await pool.request()
+            .input("post_id", sql.Int, postId)
+            .query('DELETE FROM posts WHERE post_id = @post_id');
         res.json({ success: true, message: 'Post deleted successfully' });
     } catch (error) {
         console.error('Error deleting post:', error);

@@ -194,13 +194,16 @@ body {
   font-size: 64px;
 }
 
-.profile-name-large, .profile-username-large, .profile-contact-value {
-  width: 100%;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.profile-name-large,
+.profile-username-large,
+.profile-contact-value {
+  width: 100%; /* Take up the full width of the parent */
+  white-space: nowrap; /* Prevent text from wrapping to a new line */
+  overflow: hidden; /* Hide any text that goes beyond the container's boundary */
+  text-overflow: ellipsis; /* Add "..." to indicate the text has been truncated */
   text-align: center;
 }
+/* --- END OF FIX --- */
 
 .profile-name-large {
   font-size: 32px;
@@ -266,6 +269,7 @@ body {
   text-decoration: underline;
 }
 
+/* ... (The rest of the file is unchanged) ... */
 .profile-edit-btn {
   background-color: var(--primary-color);
   border: none;
