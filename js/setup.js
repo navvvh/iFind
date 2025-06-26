@@ -11,6 +11,13 @@ const cancelBtn = document.querySelector(".cancel-btn")
 const saveBtn = document.querySelector(".save-btn")
 const avatarOptions = document.querySelectorAll(".avatar-option")
 
+// New upload elements
+const uploadArea = document.getElementById("uploadArea")
+const imageUpload = document.getElementById("imageUpload")
+const imagePreview = document.getElementById("imagePreview")
+const previewImg = document.getElementById("previewImg")
+const removeImage = document.getElementById("removeImage")
+
 // Setup Data - track user interactions separately
 const setupData = {
   name: "",
@@ -118,18 +125,105 @@ profileAvatar.addEventListener("click", (e) => {
 
   // Add a small delay to prevent immediate closing
   setTimeout(() => {
-    // Clear any previous selections
+    
     avatarOptions.forEach((opt) => {
       opt.classList.remove("selected")
       opt.style.transform = ""
       opt.style.borderColor = ""
     })
 
+    
+    resetUploadArea()
+
     // Show modal
     avatarModal.classList.add("active")
     document.body.style.overflow = "hidden"
   }, 100)
 })
+
+// Upload Area Event Listeners
+uploadArea.addEventListener("click", () => {
+  imageUpload.click()
+})
+
+uploadArea.addEventListener("dragover", (e) => {
+  e.preventDefault()
+  uploadArea.classList.add("dragover")
+})
+
+uploadArea.addEventListener("dragleave", () => {
+  uploadArea.classList.remove("dragover")
+})
+
+uploadArea.addEventListener("drop", (e) => {
+  e.preventDefault()
+  uploadArea.classList.remove("dragover")
+
+  const files = e.dataTransfer.files
+  if (files.length > 0) {
+    handleImageFile(files[0])
+  }
+})
+
+// Image Upload Handler
+imageUpload.addEventListener("change", (e) => {
+  const file = e.target.files[0]
+  if (file) {
+    handleImageFile(file)
+  }
+})
+
+// Remove Image Handler
+removeImage.addEventListener("click", (e) => {
+  e.preventDefault()
+  e.stopPropagation()
+  resetUploadArea()
+  setupData.uploadedImage = null
+})
+
+// Handle Image File Upload
+function handleImageFile(file) {
+  // Validate file type
+  if (!file.type.startsWith("image/")) {
+    alert("Please select a valid image file.")
+    return
+  }
+
+  // Validate file size (5MB limit)
+  if (file.size > 5 * 1024 * 1024) {
+    alert("File size must be less than 5MB.")
+    return
+  }
+
+  // Clear emoji selections
+  avatarOptions.forEach((opt) => {
+    opt.classList.remove("selected")
+    opt.style.transform = ""
+    opt.style.borderColor = ""
+  })
+
+  // Read and preview the file
+  const reader = new FileReader()
+  reader.onload = (e) => {
+    previewImg.src = e.target.result
+    imagePreview.style.display = "block"
+    uploadArea.querySelector(".upload-content").style.display = "none"
+
+    // Store the image data
+    setupData.uploadedImage = e.target.result
+    setupData.avatar = null
+    setupData.avatarId = null
+  }
+  reader.readAsDataURL(file)
+}
+
+// Reset Upload Area
+function resetUploadArea() {
+  imagePreview.style.display = "none"
+  uploadArea.querySelector(".upload-content").style.display = "block"
+  previewImg.src = ""
+  imageUpload.value = ""
+}
 
 // Modal close handlers
 closeModalBtn.addEventListener("click", (e) => {
@@ -157,6 +251,10 @@ avatarOptions.forEach((option) => {
     e.preventDefault()
     e.stopPropagation()
 
+    // Clear uploaded image
+    resetUploadArea()
+    setupData.uploadedImage = null
+
     // Update selection - ensure only one is selected
     avatarOptions.forEach((opt) => {
       opt.classList.remove("selected")
@@ -174,7 +272,7 @@ avatarOptions.forEach((option) => {
   })
 })
 
-// Save button handler
+// Enhanced Save button handler
 saveBtn.addEventListener("click", (e) => {
   e.preventDefault()
   e.stopPropagation()
@@ -182,7 +280,15 @@ saveBtn.addEventListener("click", (e) => {
   const selectedAvatar = document.querySelector(".avatar-option.selected")
   const avatarBase = profileAvatar.querySelector(".avatar-base")
 
-  if (selectedAvatar) {
+  if (setupData.uploadedImage) {
+    // User uploaded an image
+    avatarBase.innerHTML = `<img src="${setupData.uploadedImage}" alt="Profile" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`
+    setupData.avatar = null
+    setupData.avatarId = null
+    userInteractions.avatarChanged = true
+    updateProgress()
+    closeModal()
+  } else if (selectedAvatar) {
     // User selected an emoji avatar
     avatarBase.innerHTML = selectedAvatar.textContent
     setupData.avatar = selectedAvatar.textContent
@@ -219,6 +325,7 @@ nextBtn.addEventListener("click", completeSetup)
 function closeModal() {
   avatarModal.classList.remove("active")
   document.body.style.overflow = "auto"
+  resetUploadArea()
 }
 
 // Progress calculation based on actual user interactions
@@ -242,13 +349,13 @@ function updateProgress() {
     completedSteps++
   }
 
-  // Update vertical progress bar
+  
   const progressBar = document.getElementById("progressBar")
   if (progressBar) {
     progressBar.style.height = `${progress}%`
   }
 
-  // Update progress text with exact percentage
+  
   const progressText = document.getElementById("progressText")
   if (progressText) {
     // Round to nearest 25% increment to match the image
@@ -259,7 +366,7 @@ function updateProgress() {
   // Update step indicators
   updateStepIndicators(completedSteps)
 
-  // Enable next button when user has made at least one change
+  
   const hasAnyInteraction =
     userInteractions.nameChanged || userInteractions.avatarChanged || userInteractions.roleConfirmed
   nextBtn.disabled = !hasAnyInteraction
@@ -296,29 +403,29 @@ function loadProgressData() {
   if (progressData) {
     Object.assign(setupData, progressData.setupData)
     Object.assign(userInteractions, progressData.userInteractions)
-  }
-}
 
-// Get original username from signup/login data
-function getOriginalUserName() {
-  const userData = JSON.parse(localStorage.getItem("userData")) || {}
-  const sessionData = JSON.parse(localStorage.getItem("userSession")) || {}
-  return userData.username || sessionData.username || ""
+    // Restore uploaded image if exists
+    if (setupData.uploadedImage) {
+      const avatarBase = profileAvatar.querySelector(".avatar-base")
+      avatarBase.innerHTML = `<img src="${setupData.uploadedImage}" alt="Profile" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`
+    }
+  }
 }
 
 // Pre-fill name from signup data
 function prefillUserData() {
-  const originalName = getOriginalUserName()
 
-  if (originalName && !setupData.name) {
-    nameInput.value = originalName
-    setupData.name = originalName
-    // Don't mark as changed since this is just pre-filling
-    userInteractions.nameChanged = false
-  }
+  nameInput.value = ""
+  setupData.name = ""
+  userInteractions.nameChanged = false
 }
 
-// Enhanced completeSetup function with proper completion message
+// Get original username from signup/login data
+function getOriginalUserName() {
+  
+}
+
+
 async function completeSetup() {
   const existingSession = JSON.parse(localStorage.getItem("userSession")) || {}
   const existingUserData = JSON.parse(localStorage.getItem("userData")) || {}
@@ -350,6 +457,7 @@ async function completeSetup() {
   }
 
   // Show simplified setup completion message
+  const Swal = window.Swal // Declare Swal variable
   await Swal.fire({
     title: "Setup Complete!",
     icon: "success",
@@ -508,6 +616,40 @@ function loadExistingData() {
   prefillUserData()
   loadProgressData()
 }
+
+document.getElementById("setup-form").addEventListener("submit", (event) => {
+  event.preventDefault()
+
+  // Get user data from form
+  const name = document.getElementById("name-input").value
+  const role = document.querySelector('input[name="role"]:checked').value
+
+  // Get avatar data
+  const avatarId = document.querySelector(".avatar-option.selected")?.dataset.avatarId
+  const avatarEmoji = document.querySelector(".avatar-option.selected")?.textContent
+  const uploadedImage = document.getElementById("profile-image-preview")?.src
+
+  // Create clean setup data object
+  const setupData = {
+    name: name,
+    role: role,
+    avatarId: avatarId,
+    avatar: avatarEmoji,
+    uploadedImage: uploadedImage && uploadedImage.startsWith("data:") ? uploadedImage : null,
+  }
+
+  // Use the clean sync function from main-clean-sync.js
+  if (window.syncUserDataClean) {
+    window.syncUserDataClean(setupData)
+  } else {
+    // Fallback if the function isn't available
+    localStorage.setItem("ifindUserData", JSON.stringify(setupData))
+  }
+
+  // Redirect to main page
+  window.location.href = "claim.html"
+})
+
 
 // Initialize step indicators and add enhanced role selection functionality on page load
 document.addEventListener("DOMContentLoaded", () => {

@@ -671,136 +671,181 @@ body {
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
-  .sign-in,
-  .sign-up {
+  .container {
+    flex-direction: column;
+    padding: 10px;
+  }
+
+  /* Forms take up top 70% of screen */
+  .form-container {
+    position: relative;
     width: 100%;
+    height: 70%;
+    order: 1;
     padding: 20px 10px;
   }
 
-  .toggle-container {
-    top: 0;
-    left: 0;
+  .sign-in,
+  .sign-up {
     width: 100%;
     height: 100%;
-    transform: translateY(0);
-    border-radius: 0;
+    position: relative;
+    left: 0;
+    top: 0;
+    transform: none !important;
+    transition: none;
   }
 
-  .container.active .toggle-container {
-    transform: translateY(-100%);
+  .sign-in {
+    display: flex;
+    visibility: visible;
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .sign-up {
+    display: none;
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .container.active .sign-in {
+    display: none;
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .container.active .sign-up {
+    display: flex;
+    visibility: visible;
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  /* Toggle takes up bottom 30% of screen */
+  .toggle-container {
+    position: relative;
+    width: 100%;
+    height: 30%;
+    order: 2;
+    left: 0;
+    top: 0;
+    transform: none !important;
+    border-radius: 0;
+    z-index: 1;
   }
 
   .toggle {
+    position: relative;
     left: 0;
     width: 100%;
-    height: 200%;
-    transform: translateY(0);
-  }
-
-  .container.active .toggle {
-    transform: translateY(50%);
+    height: 100%;
+    transform: none !important;
+    transition: none;
   }
 
   .toggle-panel {
     width: 100%;
-    height: 50%;
-    padding: 20px 10px;
-    text-align: center;
-  }
-
-  .toggle-left {
-    transform: translateY(-200%);
-  }
-
-  .container.active .toggle-left {
-    transform: translateY(0);
+    height: 100%;
+    position: relative;
+    padding: 15px 20px;
+    transform: none !important;
+    transition: none;
   }
 
   .toggle-right {
-    top: auto;
-    bottom: 0;
-    transform: translateY(0);
+    display: flex;
+    right: auto;
+    transform: none !important;
+  }
+
+  .toggle-left {
+    display: none;
+    transform: none !important;
   }
 
   .container.active .toggle-right {
-    transform: translateY(200%);
+    display: none;
   }
 
-  .container.active .sign-in,
-  .container.active .sign-up {
-    transform: translateY(100%);
+  .container.active .toggle-left {
+    display: flex;
   }
 
-  .welcome-modal {
-    padding: 30px 40px;
-    margin: 20px;
-  }
-
-  .welcome-modal h1 {
-    font-size: 28px;
-  }
-
-  .welcome-modal p {
-    font-size: 16px;
-  }
-
-  .error-modal {
-    padding: 30px 40px;
-    margin: 20px;
-  }
-
-  .error-title {
-    font-size: 28px;
-  }
-
-  .error-message {
-    font-size: 16px;
-  }
-
-  .error-top-section {
-    width: 100px;
-    height: 100px;
-  }
-}
-
-@media (max-width: 430px) {
   .toggle-panel h1 {
-    font-size: 50px;
+    font-size: 40px;
+    margin-bottom: 10px;
   }
 
-  .welcome-modal {
-    padding: 25px 30px;
+  .toggle-foundleft,
+  .toggle-foundright {
+    text-align: center;
+    align-self: center;
+    font-size: 40px;
   }
 
-  .welcome-modal h1 {
-    font-size: 24px;
-  }
-
-  .setup-btn {
-    padding: 12px 40px;
+  .toggle-right .login-link,
+  .toggle-left .login-link {
+    align-self: center;
+    text-align: center;
+    margin-top: 10px;
     font-size: 16px;
   }
 
-  .error-modal {
-    padding: 25px 30px;
+  .container form {
+    padding: 0 20px;
+    max-width: 100%;
+    justify-content: flex-start;
+    padding-top: 20px;
   }
 
-  .error-title {
+  .form-subtitle {
     font-size: 24px;
+    margin: 15px 0;
   }
 
-  .error-message {
+  .logo-img {
+    width: 80px;
+    margin-bottom: 15px;
+  }
+
+  .input-field input {
+    padding: 12px 35px 12px 12px;
     font-size: 14px;
   }
 
+  .container button {
+    padding: 12px 35px;
+    font-size: 16px;
+  }
+
+  .welcome-modal,
+  .error-modal {
+    padding: 30px 40px;
+    margin: 20px;
+  }
+
+  .welcome-modal h1,
+  .error-title {
+    font-size: 28px;
+  }
+
+  .welcome-modal p,
+  .error-message {
+    font-size: 16px;
+  }
+
+  .setup-btn,
   .try-again-btn {
     padding: 12px 40px;
     font-size: 16px;
   }
 
   .error-top-section {
-    width: 80px;
-    height: 80px;
+    width: 100px;
+    height: 100px;
   }
 
   .cloud-body {
@@ -818,5 +863,163 @@ body {
     width: 28px;
     height: 28px;
     top: -15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 5px;
+  }
+
+  .form-container {
+    padding: 15px 5px;
+  }
+
+  .container form {
+    padding: 0 15px;
+    padding-top: 15px;
+  }
+
+  .form-subtitle {
+    font-size: 20px;
+    margin: 10px 0;
+  }
+
+  .logo-img {
+    width: 70px;
+    margin-bottom: 10px;
+  }
+
+  .input-field input {
+    padding: 10px 30px 10px 10px;
+    font-size: 13px;
+  }
+
+  .input-field i {
+    right: 12px;
+    font-size: 16px;
+  }
+
+  .container button {
+    padding: 10px 30px;
+    font-size: 14px;
+  }
+
+  .toggle-container {
+    height: 25%;
+  }
+
+  .toggle-panel {
+    padding: 10px 15px;
+  }
+
+  .toggle-panel h1 {
+    font-size: 32px;
+    margin-bottom: 8px;
+  }
+
+  .toggle-foundleft,
+  .toggle-foundright {
+    font-size: 32px;
+  }
+
+  .toggle-right .login-link,
+  .toggle-left .login-link {
+    font-size: 14px;
+    margin-top: 8px;
+  }
+
+  .welcome-modal,
+  .error-modal {
+    padding: 25px 30px;
+    margin: 15px;
+  }
+
+  .welcome-modal h1,
+  .error-title {
+    font-size: 24px;
+  }
+
+  .welcome-modal p,
+  .error-message {
+    font-size: 14px;
+  }
+
+  .setup-btn,
+  .try-again-btn {
+    padding: 10px 35px;
+    font-size: 14px;
+  }
+
+  .error-top-section {
+    width: 80px;
+    height: 80px;
+  }
+
+  .cloud-body {
+    width: 50px;
+    height: 35px;
+  }
+
+  .cloud-body::before {
+    width: 20px;
+    height: 20px;
+    top: -10px;
+  }
+
+  .cloud-body::after {
+    width: 23px;
+    height: 23px;
+    top: -12px;
+  }
+
+  .cloud-eyes {
+    gap: 8px;
+  }
+
+  .eye {
+    width: 4px;
+    height: 4px;
+  }
+
+  .cloud-mouth {
+    width: 12px;
+    height: 6px;
+  }
+}
+
+@media (max-width: 360px) {
+  .form-container {
+    height: 75%;
+  }
+
+  .toggle-container {
+    height: 25%;
+  }
+
+  .container form {
+    padding: 0 10px;
+    padding-top: 10px;
+  }
+
+  .form-subtitle {
+    font-size: 18px;
+  }
+
+  .logo-img {
+    width: 60px;
+  }
+
+  .toggle-panel h1 {
+    font-size: 28px;
+  }
+
+  .toggle-foundleft,
+  .toggle-foundright {
+    font-size: 28px;
+  }
+
+  .toggle-panel {
+    padding: 8px 12px;
   }
 }

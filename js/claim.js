@@ -1,41 +1,43 @@
-// DOM Elements
-const hamburgerMenu = document.getElementById("hamburger-menu")
-const sidebar = document.getElementById("sidebar")
-const claimedFeed = document.getElementById("claimed-feed")
-const emptyState = document.getElementById("empty-state")
-const navProfile = document.getElementById("nav-profile")
-const navFeed = document.getElementById("nav-feed")
-const navAbout = document.getElementById("nav-about")
-const navClaimed = document.getElementById("nav-claimed")
-const navLogout = document.getElementById("nav-logout")
 
-// Notification and Announcement Elements
-const notificationBell = document.getElementById("notification-bell")
-const notificationDropdown = document.getElementById("notification-dropdown")
-const announcementIcon = document.getElementById("announcement-icon")
-const announcementDropdown = document.getElementById("announcement-dropdown")
-const markAllRead = document.getElementById("mark-all-read")
-const notificationCount = document.getElementById("notification-count")
-
-// Store all posts for filtering
-let allPosts = []
-let claimedPosts = []
-
-// Notification functionality
-let unreadNotifications = 0
-
-// Load posts from localStorage on page load
-function loadPostsFromStorage() {
-  const storedPosts = localStorage.getItem("userPosts")
-  if (storedPosts) {
-    allPosts = JSON.parse(storedPosts)
-    // Filter only claimed posts
-    claimedPosts = allPosts.filter((post) => post.type === "claimed")
-    displayClaimedPosts()
-  }
+const state = {
+  allPosts: [],
+  claimedPosts: [],
+  unreadNotifications: 0,
+  currentDeletePostId: null,
+  currentDeleteCommentData: null,
 }
 
-// Get current user data
+
+
+// Main UI Elements
+const elements = {
+  hamburgerMenu: document.getElementById("hamburger-menu"),
+  sidebar: document.getElementById("sidebar"),
+  claimedFeed: document.getElementById("claimed-feed"),
+  emptyState: document.getElementById("empty-state"),
+
+  // Navigation Elements
+  navProfile: document.getElementById("nav-profile"),
+  navFeed: document.getElementById("nav-feed"),
+  navAbout: document.getElementById("nav-about"),
+  navClaimed: document.getElementById("nav-claimed"),
+  navLogout: document.getElementById("nav-logout"),
+
+  // Notification Elements
+  notificationBell: document.getElementById("notification-bell"),
+  notificationDropdown: document.getElementById("notification-dropdown"),
+  announcementIcon: document.getElementById("announcement-icon"),
+  announcementDropdown: document.getElementById("announcement-dropdown"),
+  markAllRead: document.getElementById("mark-all-read"),
+  notificationCount: document.getElementById("notification-count"),
+}
+
+
+
+/**
+ * Get current user data from various localStorage sources
+ * @returns {Object} User data object
+ */
 function getCurrentUser() {
   const userProfile = JSON.parse(localStorage.getItem("userProfile")) || {}
   const ifindUserData = JSON.parse(localStorage.getItem("ifindUserData")) || {}
@@ -60,10 +62,18 @@ function getCurrentUser() {
     avatarEmoji: userProfile.avatarEmoji || ifindUserData.avatar || null,
     contact:
       userProfile.contact ||
-      `fb.com/${(userProfile.username || ifindUserData.name?.toLowerCase().replace(/\s+/g, "") || mockUser.username || userData.username || sessionData.username || "user").toLowerCase()}`,
+      `fb.com/${(
+        userProfile.username ||
+          ifindUserData.name?.toLowerCase().replace(/\s+/g, "") ||
+          mockUser.username ||
+          userData.username ||
+          sessionData.username ||
+          "user"
+      ).toLowerCase()}`,
     completedSetup: userProfile.completedSetup || Boolean(ifindUserData.name && ifindUserData.role),
   }
 
+  // Generate user initials
   user.initials = user.name
     .split(" ")
     .map((n) => n[0])
@@ -71,6 +81,7 @@ function getCurrentUser() {
     .toUpperCase()
     .substring(0, 2)
 
+  // Ensure username has @ prefix
   if (!user.username.startsWith("@")) {
     user.username = "@" + user.username
   }
@@ -78,43 +89,16 @@ function getCurrentUser() {
   return user
 }
 
-// NEW: Function to update existing comments with new user avatar data
-function updateExistingCommentsAvatar(newUserData) {
-  let postsUpdated = false
 
-  allPosts.forEach((post) => {
-    if (post.comments && post.comments.length > 0) {
-      post.comments.forEach((comment) => {
-        // Update comments made by the current user
-        if (comment.authorHandle === newUserData.username || comment.author === newUserData.name) {
-          comment.author = newUserData.name
-          comment.authorHandle = newUserData.username
-          comment.authorInitials = newUserData.initials
-          comment.avatar = newUserData.avatar
-          comment.avatarId = newUserData.avatarId
-          comment.avatarEmoji = newUserData.avatarEmoji
-          postsUpdated = true
-        }
-      })
-    }
-  })
-
-  if (postsUpdated) {
-    localStorage.setItem("userPosts", JSON.stringify(allPosts))
-    loadPostsFromStorage() // Refresh display
-  }
-}
-
-// Initialize user avatar
 function initializeUserAvatar() {
   const currentUser = getCurrentUser()
-  const hamburgerProfilePic = hamburgerMenu.querySelector(".profile-pic")
+  const hamburgerProfilePic = elements.hamburgerMenu?.querySelector(".profile-pic")
 
   if (hamburgerProfilePic) {
     if (currentUser.avatar) {
       hamburgerProfilePic.innerHTML = `<img src="${currentUser.avatar}" alt="${currentUser.name}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`
     } else if (currentUser.avatarEmoji && currentUser.avatarEmoji !== "👤") {
-      hamburgerProfilePic.innerHTML = `<div class="default-avatar" style="font-size: 20px; display: flex; align-items: center; justify-content: center;">${currentUser.avatarEmoji}</div>`
+      hamburgerProfilePic.innerHTML = `<div class="default-avatar" style="font-size: 16px; display: flex; align-items: center; justify-content: center;">${currentUser.avatarEmoji}</div>`
     } else if (currentUser.avatarId) {
       const avatarEmojis = [
         "👨‍💼",
@@ -132,14 +116,30 @@ function initializeUserAvatar() {
       ]
       const avatarIndex = Number.parseInt(currentUser.avatarId) - 1
       const emoji = avatarEmojis[avatarIndex] || "👤"
-      hamburgerProfilePic.innerHTML = `<div class="default-avatar" style="font-size: 20px; display: flex; align-items: center; justify-content: center;">${emoji}</div>`
+      hamburgerProfilePic.innerHTML = `<div class="default-avatar" style="font-size: 16px; display: flex; align-items: center; justify-content: center;">${emoji}</div>`
     } else {
       hamburgerProfilePic.innerHTML = `<div class="default-avatar" style="display: flex; align-items: center; justify-content: center;">${currentUser.initials}</div>`
     }
   }
 }
 
-// Format timestamp for posts
+
+
+function loadPostsFromStorage() {
+  const storedPosts = localStorage.getItem("userPosts")
+  if (storedPosts) {
+    state.allPosts = JSON.parse(storedPosts)
+    // Filter only claimed posts
+    state.claimedPosts = state.allPosts.filter((post) => post.type === "claimed")
+    displayClaimedPosts()
+  }
+}
+
+/**
+ * Format timestamp for posts
+ * @param {Date|string} timestamp - Post timestamp
+ * @returns {string} Formatted time string
+ */
 function formatPostTime(timestamp) {
   const now = new Date()
   const postTime = new Date(timestamp)
@@ -148,56 +148,53 @@ function formatPostTime(timestamp) {
   const diffInHours = Math.floor(diffInMinutes / 60)
   const diffInDays = Math.floor(diffInHours / 24)
 
-  if (diffInSeconds < 60) {
-    return "Just now"
-  } else if (diffInMinutes < 60) {
-    return `${diffInMinutes}m ago`
-  } else if (diffInHours < 24) {
-    return `${diffInHours}h ago`
-  } else if (diffInDays === 1) {
-    return "Yesterday"
-  } else if (diffInDays < 7) {
-    return `${diffInDays}d ago`
-  } else {
-    return postTime.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: postTime.getFullYear() !== now.getFullYear() ? "numeric" : undefined,
-    })
-  }
+  if (diffInSeconds < 60) return "Just now"
+  if (diffInMinutes < 60) return `${diffInMinutes}m ago`
+  if (diffInHours < 24) return `${diffInHours}h ago`
+  if (diffInDays === 1) return "Yesterday"
+  if (diffInDays < 7) return `${diffInDays}d ago`
+
+  return postTime.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: postTime.getFullYear() !== now.getFullYear() ? "numeric" : undefined,
+  })
 }
 
-// Display claimed posts
+/**
+ * Display claimed posts in the feed
+ */
 function displayClaimedPosts() {
-  const existingPosts = claimedFeed.querySelectorAll(".post")
+  if (!elements.claimedFeed) return
+
+  const existingPosts = elements.claimedFeed.querySelectorAll(".post")
   existingPosts.forEach((post) => post.remove())
 
-  if (claimedPosts.length === 0) {
-    emptyState.style.display = "block"
+  if (state.claimedPosts.length === 0) {
+    if (elements.emptyState) elements.emptyState.style.display = "block"
   } else {
-    emptyState.style.display = "none"
-    claimedPosts.forEach((post, index) => {
+    if (elements.emptyState) elements.emptyState.style.display = "none"
+    state.claimedPosts.forEach((post, index) => {
       const postElement = createPostElement(post, index)
-      claimedFeed.appendChild(postElement)
+      elements.claimedFeed.appendChild(postElement)
     })
   }
 }
 
-// Create post element
-function createPostElement(postData, index) {
-  const postElement = document.createElement("div")
-  postElement.className = "post"
-  postElement.dataset.type = postData.type
-  postElement.dataset.location = postData.location
-  postElement.dataset.postId = postData.id
+/**
+ * Create avatar HTML based on user data
+ * @param {Object} userData - User data object
+ * @param {string} [size="normal"] - Avatar size (normal or small)
+ * @returns {string} Avatar HTML
+ */
+function createAvatarHTML(userData, size = "normal") {
+  const fontSize = size === "small" ? "12px" : "16px"
 
-  // Enhanced avatar display
-  let avatarHTML = ""
-  if (postData.avatar) {
-    avatarHTML = `<img src="${postData.avatar}" alt="${postData.userName}" style="width: 100%; height: 100%; object-fit: cover;">`
-  } else if (postData.avatarEmoji && postData.avatarEmoji !== "👤") {
-    avatarHTML = `<div class="default-avatar" style="font-size: 20px; display: flex; align-items: center; justify-content: center;">${postData.avatarEmoji}</div>`
-  } else if (postData.avatarId) {
+  if (userData.avatar) {
+    return `<img src="${userData.avatar}" alt="${userData.name || userData.author}" style="width: 100%; height: 100%; object-fit: cover;">`
+  } else if (userData.avatarEmoji && userData.avatarEmoji !== "👤") {
+    return `<div class="default-avatar" style="font-size: ${fontSize};">${userData.avatarEmoji}</div>`
+  } else if (userData.avatarId) {
     const avatarEmojis = [
       "👨‍💼",
       "👩‍💼",
@@ -212,28 +209,54 @@ function createPostElement(postData, index) {
       "👨‍🎨",
       "👩‍🎨",
     ]
-    const avatarIndex = Number.parseInt(postData.avatarId) - 1
+    const avatarIndex = Number.parseInt(userData.avatarId) - 1
     const emoji = avatarEmojis[avatarIndex] || "👤"
-    avatarHTML = `<div class="default-avatar" style="font-size: 20px; display: flex; align-items: center; justify-content: center;">${emoji}</div>`
+    return `<div class="default-avatar" style="font-size: ${fontSize};">${emoji}</div>`
   } else {
-    avatarHTML = `<div class="default-avatar" style="display: flex; align-items: center; justify-content: center;">${postData.userInitials}</div>`
+    const initials =
+      userData.userInitials ||
+      userData.authorInitials ||
+      (userData.name || userData.author)
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase()
+        .substring(0, 2)
+    return `<div class="default-avatar" style="font-size: ${fontSize};">${initials}</div>`
   }
+}
 
-  // Create image HTML
+/**
+ * Create post element
+ * @param {Object} postData - Post data
+ * @param {number} index - Post index
+ * @returns {HTMLElement} Post element
+ */
+function createPostElement(postData, index) {
+  const postElement = document.createElement("div")
+  postElement.className = "post"
+  postElement.dataset.type = postData.type
+  postElement.dataset.location = postData.location
+  postElement.dataset.postId = postData.id
+
+  // Create avatar HTML
+  const avatarHTML = createAvatarHTML(postData)
+
+  // Create image HTML if post has an image
   let imageHTML = ""
   if (postData.image) {
     imageHTML = `
-      <div class="post-image-container loading" id="image-container-${postData.id}">
+      <div class="post-image-container loading" id="claim-image-container-${postData.id}" onclick="openImageViewModal('${postData.image}')">
         <img src="${postData.image}" 
              alt="${postData.type} item" 
              class="post-image"
-             onload="handleImageLoad(this, '${postData.id}')"
-             onerror="handleImageError(this, '${postData.id}')">
+             onload="handleClaimImageLoad(this, '${postData.id}')"
+             onerror="handleClaimImageError(this, '${postData.id}')">
       </div>
     `
   }
 
-  // UPDATED: Create comments HTML with current user avatar check
+  // Create comments HTML
   const commentCount = postData.comments ? postData.comments.length : 0
   const commentsHTML =
     postData.comments && postData.comments.length > 0
@@ -242,166 +265,148 @@ function createPostElement(postData, index) {
             const currentUser = getCurrentUser()
             let commentAvatarHTML = ""
 
-            // Check if this comment is from the current user
+            // Check if comment is from current user
             if (comment.authorHandle === currentUser.username || comment.author === currentUser.name) {
-              // Use current user's avatar
-              if (currentUser.avatar) {
-                commentAvatarHTML = `<img src="${currentUser.avatar}" alt="${currentUser.name}" style="width: 100%; height: 100%; object-fit: cover;">`
-              } else if (currentUser.avatarEmoji && currentUser.avatarEmoji !== "👤") {
-                commentAvatarHTML = `<div class="default-avatar" style="font-size: 12px;">${currentUser.avatarEmoji}</div>`
-              } else if (currentUser.avatarId) {
-                const avatarEmojis = [
-                  "👨‍💼",
-                  "👩‍💼",
-                  "👨‍🎓",
-                  "👩‍🎓",
-                  "👨‍🏫",
-                  "👩‍🏫",
-                  "👨‍💻",
-                  "👩‍💻",
-                  "👨‍🔬",
-                  "👩‍🔬",
-                  "👨‍🎨",
-                  "👩‍🎨",
-                ]
-                const avatarIndex = Number.parseInt(currentUser.avatarId) - 1
-                const emoji = avatarEmojis[avatarIndex] || "👤"
-                commentAvatarHTML = `<div class="default-avatar" style="font-size: 12px;">${emoji}</div>`
-              } else {
-                commentAvatarHTML = `<div class="default-avatar" style="font-size: 12px;">${currentUser.initials}</div>`
-              }
+              commentAvatarHTML = createAvatarHTML(currentUser, "small")
             } else {
-              // Use stored comment avatar data
-              if (comment.avatar) {
-                commentAvatarHTML = `<img src="${comment.avatar}" alt="${comment.author}" style="width: 100%; height: 100%; object-fit: cover;">`
-              } else if (comment.avatarEmoji && comment.avatarEmoji !== "👤") {
-                commentAvatarHTML = `<div class="default-avatar" style="font-size: 12px;">${comment.avatarEmoji}</div>`
-              } else {
-                commentAvatarHTML = `<div class="default-avatar" style="font-size: 12px;">${comment.author
-                  .split(" ")
-                  .map((n) => n[0])
-                  .join("")
-                  .toUpperCase()
-                  .substring(0, 2)}</div>`
-              }
+              commentAvatarHTML = createAvatarHTML(comment, "small")
             }
 
             return `
-      <div class="comment">
-        <div class="comment-avatar">
-          ${commentAvatarHTML}
-        </div>
-        <div class="comment-bubble">
-          <div class="comment-author">${comment.author}</div>
-          <div class="comment-text">${comment.text}</div>
-        </div>
-      </div>
-      <div class="comment-time">${formatPostTime(comment.timestamp)}</div>
-    `
+            <div class="comment">
+              <div class="comment-avatar">
+                ${commentAvatarHTML}
+              </div>
+              <div class="comment-bubble">
+                <div class="comment-author">${comment.author}</div>
+                <div class="comment-text">${comment.text}</div>
+                <button class="delete-comment" onclick="deleteComment('${postData.id}', '${comment.id}')">
+                  <i class="fas fa-trash-alt"></i>
+                </button>
+              </div>
+            </div>
+            <div class="comment-time">${formatPostTime(comment.timestamp)}</div>
+          `
           })
           .join("")
       : ""
 
   // Get current user for comment input avatar
   const currentUser = getCurrentUser()
-  let currentUserAvatarHTML = ""
-  if (currentUser.avatar) {
-    currentUserAvatarHTML = `<img src="${currentUser.avatar}" alt="${currentUser.name}" style="width: 100%; height: 100%; object-fit: cover;">`
-  } else if (currentUser.avatarEmoji && currentUser.avatarEmoji !== "👤") {
-    currentUserAvatarHTML = `<div class="default-avatar" style="font-size: 20px; display: flex; align-items: center; justify-content: center;">${currentUser.avatarEmoji}</div>`
-  } else if (currentUser.avatarId) {
-    const avatarEmojis = [
-      "👨‍💼",
-      "👩‍💼",
-      "👨‍🎓",
-      "👩‍🎓",
-      "👨‍🏫",
-      "👩‍🏫",
-      "👨‍💻",
-      "👩‍💻",
-      "👨‍🔬",
-      "👩‍🔬",
-      "👨‍🎨",
-      "👩‍🎨",
-    ]
-    const avatarIndex = Number.parseInt(currentUser.avatarId) - 1
-    const emoji = avatarEmojis[avatarIndex] || "👤"
-    currentUserAvatarHTML = `<div class="default-avatar" style="font-size: 20px; display: flex; align-items: center; justify-content: center;">${emoji}</div>`
-  } else {
-    currentUserAvatarHTML = `<div class="default-avatar" style="display: flex; align-items: center; justify-content: center;">${currentUser.initials}</div>`
-  }
+  const currentUserAvatarHTML = createAvatarHTML(currentUser, "small")
 
+  // Create post HTML
   postElement.innerHTML = `
-        <div class="post-header">
-            <div class="post-user">
-                <div class="profile-pic">
-                    ${avatarHTML}
-                </div>
-                <div class="post-user-info">
-                    <div class="post-user-name">${postData.userName}</div>
-                    <div class="post-user-meta">${postData.userHandle}<br>${postData.userRole}</div>
-                    <div class="post-time">${formatPostTime(postData.timestamp)}</div>
-                </div>
-            </div>
-            <div class="post-options" onclick="togglePostOptions(this)">
-                <i class="fas fa-ellipsis-h"></i>
-                <div class="post-options-dropdown">
-                    <div class="dropdown-item" onclick="editPost('${postData.id}')">
-                        <i class="fas fa-edit"></i>
-                        <span>Edit</span>
-                    </div>
-                    <div class="dropdown-item" onclick="deletePost('${postData.id}')">
-                        <i class="fas fa-trash"></i>
-                        <span>Delete</span>
-                    </div>
-                </div>
-            </div>
+    <div class="post-header">
+      <div class="post-user">
+        <div class="profile-pic">
+          ${avatarHTML}
         </div>
-        <div class="post-content">
-            <div class="post-text">
-                <span class="post-tag ${postData.type}">${postData.type.charAt(0).toUpperCase() + postData.type.slice(1)}</span>
-                ${postData.description} — <strong>${postData.location}</strong>
-            </div>
-            ${imageHTML}
-        </div>
-        <div class="post-actions">
-            <div class="post-action ${postData.liked ? "liked" : ""}" onclick="toggleHeart('${postData.id}', this)">
-                <i class="${postData.liked ? "fas" : "far"} fa-heart" ${postData.liked ? 'style="color: #dc3545;"' : ""}></i>
-                <span ${postData.liked ? 'style="color: #dc3545;"' : ""}>Heart</span>
-            </div>
-            <div class="post-action" onclick="toggleComments('${postData.id}', this)">
-                <i class="far fa-comment"></i>
-                <span>COMMENT${commentCount > 0 ? ` (${commentCount})` : ""}</span>
-            </div>
-            <div class="post-action" onclick="sharePost('${postData.id}')">
-                <i class="fas fa-share"></i>
-                <span>SHARE</span>
-            </div>
-        </div>
-        <div class="post-comments">
-          <div class="comments-list" style="display: none;">
-            ${commentsHTML}
+        <div class="post-user-info">
+          <div class="post-user-name-time">
+            <div class="post-user-name">${postData.userName}</div>
+            <div class="post-time">${formatPostTime(postData.timestamp)}</div>
           </div>
-          <div class="comment-input">
-            <div class="comment-input-avatar">
-              ${currentUserAvatarHTML}
-            </div>
-            <input type="text" class="comment-text" placeholder="Write your comment..." onkeypress="handleCommentKeypress(event, '${postData.id}', this)">
-            <button class="send-comment" onclick="handleCommentSubmit('${postData.id}', this)">
-              <i class="fas fa-paper-plane"></i>
-            </button>
+          <div class="post-user-meta">${postData.userHandle}<br>${postData.userRole}</div>
+        </div>
+      </div>
+      <div class="post-options" onclick="togglePostOptions(this)">
+        <i class="fas fa-ellipsis-h"></i>
+        <div class="post-options-dropdown">
+          <div class="dropdown-item" onclick="editPost('${postData.id}')">
+            <i class="fas fa-edit"></i>
+            <span>Edit</span>
+          </div>
+          <div class="dropdown-item" onclick="deletePost('${postData.id}')">
+            <i class="fas fa-trash"></i>
+            <span>Delete</span>
           </div>
         </div>
-    `
+      </div>
+    </div>
+    <div class="post-content">
+      <div class="post-text">
+        <span class="post-tag ${postData.type}">${postData.type.charAt(0).toUpperCase() + postData.type.slice(1)}</span>
+        ${postData.description.replace(/<[^>]*>/g, "")} — <strong>${postData.location}</strong>
+      </div>
+      ${imageHTML}
+    </div>
+    <div class="post-actions">
+      <div class="post-action ${postData.liked ? "liked" : ""}" onclick="toggleHeart('${postData.id}', this)">
+        <i class="${postData.liked ? "fas" : "far"} fa-heart" ${postData.liked ? 'style="color: #dc2626;"' : ""}></i>
+        <span ${postData.liked ? 'style="color: #dc2626;"' : ""}>HEART</span>
+      </div>
+      <div class="post-action" onclick="toggleComments('${postData.id}', this)">
+        <i class="far fa-comment"></i>
+        <span>COMMENT${commentCount > 0 ? ` (${commentCount})` : ""}</span>
+      </div>
+      <div class="post-action" onclick="sharePost('${postData.id}')">
+        <i class="fas fa-share"></i>
+        <span>SHARE</span>
+      </div>
+    </div>
+    <div class="post-comments">
+      <div class="comments-list" style="display: none;">
+        ${commentsHTML}
+      </div>
+      <div class="comment-input">
+        <div class="comment-input-avatar">
+          ${currentUserAvatarHTML}
+        </div>
+        <input type="text" class="comment-text" placeholder="Write your comment..." onkeypress="handleCommentKeypress(event, '${postData.id}', this)">
+        <button class="send-comment" onclick="handleCommentSubmit('${postData.id}', this)">
+          <i class="fas fa-paper-plane"></i>
+        </button>
+      </div>
+    </div>
+  `
 
   return postElement
 }
 
-// Global functions for image handling
-window.handleImageLoad = (img, postId) => {
-  const container = document.getElementById(`image-container-${postId}`)
+/**
+ * Update existing comments with new user avatar data
+ * @param {Object} newUserData - Updated user data
+ */
+function updateExistingCommentsAvatar(newUserData) {
+  let postsUpdated = false
+
+  state.allPosts.forEach((post) => {
+    if (post.comments && post.comments.length > 0) {
+      post.comments.forEach((comment) => {
+        // Update comments made by the current user
+        if (comment.authorHandle === newUserData.username || comment.author === newUserData.name) {
+          comment.author = newUserData.name
+          comment.authorHandle = newUserData.username
+          comment.authorInitials = newUserData.initials
+          comment.avatar = newUserData.avatar
+          comment.avatarId = newUserData.avatarId
+          comment.avatarEmoji = newUserData.avatarEmoji
+          postsUpdated = true
+        }
+      })
+    }
+  })
+
+  if (postsUpdated) {
+    localStorage.setItem("userPosts", JSON.stringify(state.allPosts))
+    loadPostsFromStorage() // Refresh display
+  }
+}
+
+
+
+/**
+ * Handle image load event
+ * @param {HTMLImageElement} img - Image element
+ * @param {string} postId - Post ID
+ */
+window.handleClaimImageLoad = (img, postId) => {
+  const container = document.getElementById(`claim-image-container-${postId}`)
   if (container) {
     container.classList.remove("loading")
+
+    // Apply appropriate class based on image dimensions
     const aspectRatio = img.naturalWidth / img.naturalHeight
     if (aspectRatio > 2) {
       container.classList.add("wide-image")
@@ -411,8 +416,13 @@ window.handleImageLoad = (img, postId) => {
   }
 }
 
-window.handleImageError = (img, postId) => {
-  const container = document.getElementById(`image-container-${postId}`)
+/**
+ * Handle image error event
+ * @param {HTMLImageElement} img - Image element
+ * @param {string} postId - Post ID
+ */
+window.handleClaimImageError = (img, postId) => {
+  const container = document.getElementById(`claim-image-container-${postId}`)
   if (container) {
     container.classList.remove("loading")
     container.innerHTML = `
@@ -424,9 +434,148 @@ window.handleImageError = (img, postId) => {
   }
 }
 
-// Heart/Like functionality
+/**
+ * Open image view modal
+ * @param {string} imageUrl - Image URL
+ */
+function openImageViewModal(imageUrl) {
+  // Create modal if it doesn't exist
+  if (!document.getElementById("image-view-modal")) {
+    const modalHTML = `
+      <div class="modal" id="image-view-modal">
+        <div class="modal-content image-view-modal-content">
+          <div class="modal-header">
+            <h3 class="modal-title"></h3>
+            <button class="close-modal" id="close-image-view-modal">&times;</button>
+          </div>
+          <div class="modal-body image-view-body" id="image-view-body">
+            <img id="image-view-img" src="/placeholder.svg" alt="Full size image">
+          </div>
+        </div>
+      </div>
+    `
+    document.body.insertAdjacentHTML("beforeend", modalHTML)
+
+    // Add event listener for close button
+    document.getElementById("close-image-view-modal").addEventListener("click", () => {
+      document.getElementById("image-view-modal").classList.remove("active")
+      document.body.style.overflow = "auto"
+    })
+
+    // Close modal when clicking outside content
+    document.getElementById("image-view-modal").addEventListener("click", (e) => {
+      if (e.target.id === "image-view-modal") {
+        document.getElementById("image-view-modal").classList.remove("active")
+        document.body.style.overflow = "auto"
+      }
+    })
+  }
+
+  // Set image source and show modal
+  document.getElementById("image-view-img").src = imageUrl
+  document.getElementById("image-view-modal").classList.add("active")
+  document.body.style.overflow = "hidden"
+}
+
+// Make function available globally
+window.openImageViewModal = openImageViewModal
+
+/**
+ * Inject CSS for image handling
+ */
+function injectImageHandlingCSS() {
+  // Check if style element already exists
+  let styleElement = document.getElementById("claim-image-fixes")
+
+  // If it doesn't exist, create it
+  if (!styleElement) {
+    styleElement = document.createElement("style")
+    styleElement.id = "claim-image-fixes"
+    document.head.appendChild(styleElement)
+  }
+
+  styleElement.textContent = `
+    .post-image-container {
+      width: 100%;
+      max-height: 400px;
+      overflow: hidden;
+      border-radius: 12px;
+      background-color: #f8fafc;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      margin-top: 16px;
+      cursor: pointer;
+      border: 2px solid var(--border-color, #e2e8f0);
+    }
+    
+    .post-image {
+      width: 100%;
+      height: auto;
+      max-height: 400px;
+      object-fit: cover;
+      transition: transform 0.2s ease;
+      border-radius: 10px;
+    }
+    
+    .post-image-container:hover .post-image {
+      transform: scale(1.02);
+    }
+    
+    .post-image-container.loading {
+      background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+      background-size: 200% 100%;
+      animation: loading 1.5s infinite;
+      min-height: 200px;
+    }
+    
+    @keyframes loading {
+      0% {
+        background-position: 200% 0;
+      }
+      100% {
+        background-position: -200% 0;
+      }
+    }
+
+    .post-image-container.wide-image {
+      max-height: 300px;
+    }
+
+    .post-image-container.tall-image {
+      max-height: 500px;
+    }
+
+    .image-view-modal-content {
+      width: auto;
+      max-width: 95vw;
+      max-height: 95vh;
+      background: transparent;
+      border: none;
+      border-radius: 0;
+      box-shadow: none;
+      overflow: visible;
+    }
+
+    .image-view-body img {
+      max-width: 55vw;
+      max-height: 55vh;
+      object-fit: contain;
+      border-radius: 10px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+  `
+}
+
+
+/**
+ * Toggle heart/like on a post
+ * @param {string} postId - Post ID
+ * @param {HTMLElement} element - Heart button element
+ */
 function toggleHeart(postId, element) {
-  const post = allPosts.find((p) => p.id === postId)
+  const post = state.allPosts.find((p) => p.id === postId)
   if (!post) return
 
   const icon = element.querySelector("i")
@@ -437,8 +586,8 @@ function toggleHeart(postId, element) {
     post.likeCount = (post.likeCount || 0) + 1
     icon.classList.remove("far")
     icon.classList.add("fas")
-    icon.style.color = "#dc3545"
-    span.style.color = "#dc3545"
+    icon.style.color = "#dc2626"
+    span.style.color = "#dc2626"
     element.classList.add("liked")
     addNotification("liked", "Post Liked!", "You liked this claimed post")
   } else {
@@ -451,13 +600,16 @@ function toggleHeart(postId, element) {
     element.classList.remove("liked")
   }
 
-  localStorage.setItem("userPosts", JSON.stringify(allPosts))
-
-  // Sync like state across pages
+  localStorage.setItem("userPosts", JSON.stringify(state.allPosts))
   syncLikeStateAcrossPages(postId, post.liked, post.likeCount)
 }
 
-// Add this function after toggleHeart
+/**
+ * Sync like state across pages
+ * @param {string} postId - Post ID
+ * @param {boolean} liked - Liked state
+ * @param {number} likeCount - Like count
+ */
 function syncLikeStateAcrossPages(postId, liked, likeCount) {
   const likeEvent = new CustomEvent("likeStateChanged", {
     detail: { postId, liked, likeCount },
@@ -475,52 +627,43 @@ function syncLikeStateAcrossPages(postId, liked, likeCount) {
   )
 }
 
-// Add event listeners for like synchronization
-window.addEventListener("likeStateChanged", (e) => {
-  const { postId, liked, likeCount } = e.detail
+/**
+ * Toggle comments visibility
+ * @param {string} postId - Post ID
+ * @param {HTMLElement} element - Comment button element
+ */
+function toggleComments(postId, element) {
+  const post = document.querySelector(`[data-post-id="${postId}"]`)
+  if (!post) return
 
-  const postElement = document.querySelector(`[data-post-id="${postId}"]`)
-  if (postElement) {
-    const heartButton = postElement.querySelector('.post-action[onclick*="toggleHeart"]')
-    if (heartButton) {
-      const icon = heartButton.querySelector("i")
-      const span = heartButton.querySelector("span")
+  const commentsList = post.querySelector(".comments-list")
+  const commentInput = post.querySelector(".comment-input .comment-text")
 
-      if (liked) {
-        icon.classList.remove("far")
-        icon.classList.add("fas")
-        icon.style.color = "#dc3545"
-        span.style.color = "#dc3545"
-        heartButton.classList.add("liked")
-      } else {
-        icon.classList.remove("fas")
-        icon.classList.add("far")
-        icon.style.color = ""
-        span.style.color = ""
-        heartButton.classList.remove("liked")
-      }
+  if (commentsList) {
+    const isHidden = commentsList.style.display === "none"
+    commentsList.style.display = isHidden ? "block" : "none"
+
+    if (isHidden) {
+      element.classList.add("active")
+      setTimeout(() => {
+        if (commentInput) commentInput.focus()
+      }, 100)
+    } else {
+      element.classList.remove("active")
     }
   }
-})
+}
 
-window.addEventListener("storage", (e) => {
-  if (e.key === "lastLikeUpdate") {
-    const updateData = JSON.parse(e.newValue)
-    if (updateData) {
-      window.dispatchEvent(
-        new CustomEvent("likeStateChanged", {
-          detail: updateData,
-        }),
-      )
-    }
-  }
-})
-
-// Comment functionality
+/**
+ * Submit a comment on a post
+ * @param {string} postId - Post ID
+ * @param {string} commentText - Comment text
+ * @param {HTMLInputElement} commentInput - Comment input element
+ */
 function submitComment(postId, commentText, commentInput) {
   if (!commentText.trim()) return
 
-  const post = allPosts.find((p) => p.id === postId)
+  const post = state.allPosts.find((p) => p.id === postId)
   if (!post) return
 
   if (!post.comments) post.comments = []
@@ -539,7 +682,7 @@ function submitComment(postId, commentText, commentInput) {
   }
 
   post.comments.push(newComment)
-  localStorage.setItem("userPosts", JSON.stringify(allPosts))
+  localStorage.setItem("userPosts", JSON.stringify(state.allPosts))
 
   commentInput.value = ""
   addNotification("comment", "Comment Added!", "You commented on this claimed post")
@@ -548,7 +691,12 @@ function submitComment(postId, commentText, commentInput) {
   loadPostsFromStorage()
 }
 
-// Handle comment keypress (Enter to submit)
+/**
+ * Handle comment keypress (Enter to submit)
+ * @param {KeyboardEvent} event - Keypress event
+ * @param {string} postId - Post ID
+ * @param {HTMLInputElement} input - Input element
+ */
 function handleCommentKeypress(event, postId, input) {
   if (event.key === "Enter") {
     event.preventDefault()
@@ -556,15 +704,22 @@ function handleCommentKeypress(event, postId, input) {
   }
 }
 
-// Handle comment submit button click
+/**
+ * Handle comment submit button click
+ * @param {string} postId - Post ID
+ * @param {HTMLButtonElement} button - Submit button
+ */
 function handleCommentSubmit(postId, button) {
   const input = button.previousElementSibling
   submitComment(postId, input.value, input)
 }
 
-// Share functionality
+/**
+ * Share a post
+ * @param {string} postId - Post ID
+ */
 function sharePost(postId) {
-  const post = allPosts.find((p) => p.id === postId)
+  const post = state.allPosts.find((p) => p.id === postId)
   if (!post) return
 
   const shareText = `Check out this claimed item: ${post.description} - ${post.location}`
@@ -588,7 +743,10 @@ function sharePost(postId) {
   }
 }
 
-// Fallback share function
+/**
+ * Fallback share function (copy to clipboard)
+ * @param {string} text - Text to share
+ */
 function fallbackShare(text) {
   navigator.clipboard
     .writeText(text)
@@ -601,7 +759,7 @@ function fallbackShare(text) {
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        background: #28a745;
+        background: #059669;
         color: white;
         padding: 12px 24px;
         border-radius: 8px;
@@ -619,23 +777,10 @@ function fallbackShare(text) {
     })
 }
 
-// Post management functions
-function deletePost(postId) {
-  if (confirm("Are you sure you want to delete this claimed post?")) {
-    allPosts = allPosts.filter((post) => post.id !== postId)
-    localStorage.setItem("userPosts", JSON.stringify(allPosts))
-    loadPostsFromStorage()
-    addNotification("delete", "Post Deleted!", "Your claimed post has been deleted successfully")
-  }
-}
-
-function editPost(postId) {
-  // Redirect to main page with edit mode
-  localStorage.setItem("editPostId", postId)
-  window.location.href = "main.html"
-}
-
-// Toggle post options dropdown
+/**
+ * Toggle post options dropdown
+ * @param {HTMLElement} element - Options element
+ */
 function togglePostOptions(element) {
   const dropdown = element.querySelector(".post-options-dropdown")
   const isVisible = dropdown.style.display === "block"
@@ -647,43 +792,223 @@ function togglePostOptions(element) {
   dropdown.style.display = isVisible ? "none" : "block"
 }
 
-// Add new notification function
+// Make functions available globally
+window.toggleHeart = toggleHeart
+window.toggleComments = toggleComments
+window.handleCommentKeypress = handleCommentKeypress
+window.handleCommentSubmit = handleCommentSubmit
+window.sharePost = sharePost
+window.togglePostOptions = togglePostOptions
+
+
+/**
+ * Delete a post
+ * @param {string} postId - Post ID
+ */
+function deletePost(postId) {
+  state.currentDeletePostId = postId
+
+  // Create delete post modal if it doesn't exist
+  if (!document.getElementById("delete-post-modal")) {
+    const deletePostModalHTML = `
+      <div class="modal" id="delete-post-modal">
+        <div class="modal-content delete-modal-content">
+          <button class="delete-x-btn" id="delete-post-x-btn">
+            <i class="fas fa-times"></i>
+          </button>
+          
+          <div class="delete-modal-body">
+            <div class="delete-icon">
+              <i class="fas fa-trash-alt"></i>
+            </div>
+            
+            <div class="delete-message">
+              <p>Are you sure you want to delete this post?</p>
+            </div>
+            
+            <div class="delete-actions">
+              <button class="delete-btn delete-cancel-btn" id="delete-post-cancel-btn">
+                Cancel
+              </button>
+              <button class="delete-btn delete-confirm-btn" id="delete-post-ok-btn">
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `
+    document.body.insertAdjacentHTML("beforeend", deletePostModalHTML)
+
+    // Add event listeners for delete post modal
+    document.getElementById("delete-post-ok-btn").addEventListener("click", () => {
+      if (state.currentDeletePostId) {
+        state.allPosts = state.allPosts.filter((post) => post.id !== state.currentDeletePostId)
+        localStorage.setItem("userPosts", JSON.stringify(state.allPosts))
+        loadPostsFromStorage()
+        addNotification("delete", "Post Deleted!", "Your claimed post has been deleted successfully")
+      }
+      closeDeletePostModal()
+    })
+
+    document.getElementById("delete-post-cancel-btn").addEventListener("click", closeDeletePostModal)
+    document.getElementById("delete-post-x-btn").addEventListener("click", closeDeletePostModal)
+
+    document.getElementById("delete-post-modal").addEventListener("click", (e) => {
+      if (e.target.id === "delete-post-modal") closeDeletePostModal()
+    })
+  }
+
+  document.getElementById("delete-post-modal").classList.add("active")
+  document.body.style.overflow = "hidden"
+}
+
+
+function closeDeletePostModal() {
+  document.getElementById("delete-post-modal").classList.remove("active")
+  document.body.style.overflow = "auto"
+  state.currentDeletePostId = null
+}
+
+/**
+ * Delete a comment
+ * @param {string} postId - Post ID
+ * @param {string} commentId - Comment ID
+ */
+function deleteComment(postId, commentId) {
+  state.currentDeleteCommentData = { postId, commentId }
+
+  // Create delete comment modal if it doesn't exist
+  if (!document.getElementById("delete-comment-modal")) {
+    const deleteCommentModalHTML = `
+      <div class="modal" id="delete-comment-modal">
+        <div class="modal-content delete-modal-content">
+          <button class="delete-x-btn" id="delete-comment-x-btn">
+            <i class="fas fa-times"></i>
+          </button>
+          
+          <div class="delete-modal-body">
+            <div class="delete-icon">
+              <i class="fas fa-trash-alt"></i>
+            </div>
+            
+            <div class="delete-message">
+              <p>Are you sure you want to delete this comment?</p>
+            </div>
+            
+            <div class="delete-actions">
+              <button class="delete-btn delete-cancel-btn" id="delete-comment-cancel-btn">
+                Cancel
+              </button>
+              <button class="delete-btn delete-confirm-btn" id="delete-comment-ok-btn">
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `
+    document.body.insertAdjacentHTML("beforeend", deleteCommentModalHTML)
+
+    // Add event listeners for delete comment modal
+    document.getElementById("delete-comment-ok-btn").addEventListener("click", () => {
+      if (state.currentDeleteCommentData) {
+        const post = state.allPosts.find((p) => p.id === state.currentDeleteCommentData.postId)
+        if (post && post.comments) {
+          const commentIndex = post.comments.findIndex((c) => c.id === state.currentDeleteCommentData.commentId)
+          if (commentIndex !== -1) {
+            post.comments.splice(commentIndex, 1)
+            localStorage.setItem("userPosts", JSON.stringify(state.allPosts))
+            loadPostsFromStorage()
+            addNotification("delete", "Comment Deleted!", "Your comment has been deleted successfully")
+          }
+        }
+      }
+      closeDeleteCommentModal()
+    })
+
+    document.getElementById("delete-comment-cancel-btn").addEventListener("click", closeDeleteCommentModal)
+    document.getElementById("delete-comment-x-btn").addEventListener("click", closeDeleteCommentModal)
+
+    document.getElementById("delete-comment-modal").addEventListener("click", (e) => {
+      if (e.target.id === "delete-comment-modal") closeDeleteCommentModal()
+    })
+  }
+
+  document.getElementById("delete-comment-modal").classList.add("active")
+  document.body.style.overflow = "hidden"
+}
+
+/**
+ * Close delete comment modal
+ */
+function closeDeleteCommentModal() {
+  document.getElementById("delete-comment-modal").classList.remove("active")
+  document.body.style.overflow = "auto"
+  state.currentDeleteCommentData = null
+}
+
+/**
+ * Edit a post
+ * @param {string} postId - Post ID
+ */
+function editPost(postId) {
+  // Redirect to main page with edit mode
+  localStorage.setItem("editPostId", postId)
+  window.location.href = "main.html"
+}
+
+// Make functions available globally
+window.deletePost = deletePost
+window.deleteComment = deleteComment
+window.editPost = editPost
+
+
+
+/**
+ * Add a new notification
+ * @param {string} type - Notification type
+ * @param {string} title - Notification title
+ * @param {string} message - Notification message
+ */
 function addNotification(type, title, message) {
   const notificationList = document.getElementById("notification-list")
+  if (!notificationList) return
+
   const newNotification = document.createElement("div")
   newNotification.className = "notification-item unread"
 
   let iconClass = "fas fa-info-circle"
-  let iconColor = "#007bff"
+  let iconColor = "#1e3a8a"
 
   switch (type) {
     case "claimed":
       iconClass = "fas fa-check-circle"
-      iconColor = "#28a745"
+      iconColor = "#059669"
       break
     case "found":
       iconClass = "fas fa-search"
-      iconColor = "#007bff"
+      iconColor = "#1e3a8a"
       break
     case "liked":
       iconClass = "fas fa-heart"
-      iconColor = "#dc3545"
+      iconColor = "#dc2626"
       break
     case "comment":
       iconClass = "fas fa-comment"
-      iconColor = "#007bff"
+      iconColor = "#1e3a8a"
       break
     case "share":
       iconClass = "fas fa-share"
-      iconColor = "#17a2b8"
+      iconColor = "#0891b2"
       break
     case "edit":
       iconClass = "fas fa-edit"
-      iconColor = "#ffc107"
+      iconColor = "#f59e0b"
       break
     case "delete":
       iconClass = "fas fa-trash"
-      iconColor = "#dc3545"
+      iconColor = "#dc2626"
       break
   }
 
@@ -699,132 +1024,189 @@ function addNotification(type, title, message) {
   `
 
   notificationList.insertBefore(newNotification, notificationList.firstChild)
-  unreadNotifications++
+  state.unreadNotifications++
   updateNotificationBadge()
 }
 
-// Update notification badge
+/**
+ * Update notification badge
+ */
 function updateNotificationBadge() {
-  if (unreadNotifications > 0) {
-    notificationCount.textContent = unreadNotifications
-    notificationCount.style.display = "flex"
-  } else {
-    notificationCount.style.display = "none"
-  }
-}
-
-// Navigation functions
-hamburgerMenu.addEventListener("click", () => {
-  if (window.innerWidth <= 768) {
-    sidebar.classList.toggle("active")
-  } else {
-    window.location.href = "profile.html"
-  }
-})
-
-navProfile.addEventListener("click", () => {
-  window.location.href = "profile.html"
-})
-
-navFeed.addEventListener("click", () => {
-  window.location.href = "main.html"
-})
-
-navAbout.addEventListener("click", () => {
-  window.location.href = "about.html"
-})
-
-navClaimed.addEventListener("click", () => {
-  // Already on claimed page
-  loadPostsFromStorage()
-})
-
-navLogout.addEventListener("click", () => {
-  if (confirm("Are you sure you want to log out?")) {
-    localStorage.removeItem("userProfile")
-    localStorage.removeItem("mockUser")
-    localStorage.removeItem("userSession")
-    localStorage.removeItem("userPosts")
-    localStorage.removeItem("ifindUserData")
-    window.location.href = "login.html"
-  }
-})
-
-// Notification Bell functionality
-notificationBell.addEventListener("click", (e) => {
-  e.stopPropagation()
-  notificationDropdown.classList.toggle("active")
-  announcementDropdown.classList.remove("active")
-})
-
-// Announcement Icon functionality
-announcementIcon.addEventListener("click", (e) => {
-  e.stopPropagation()
-  announcementDropdown.classList.toggle("active")
-  notificationDropdown.classList.remove("active")
-})
-
-// Mark all notifications as read
-markAllRead.addEventListener("click", () => {
-  const unreadItems = document.querySelectorAll(".notification-item.unread")
-  unreadItems.forEach((item) => {
-    item.classList.remove("unread")
-  })
-  unreadNotifications = 0
-  updateNotificationBadge()
-})
-
-// Close sidebar when clicking outside on mobile
-document.addEventListener("click", (event) => {
-  if (window.innerWidth <= 768) {
-    if (!sidebar.contains(event.target) && !hamburgerMenu.contains(event.target)) {
-      sidebar.classList.remove("active")
+  if (elements.notificationCount) {
+    if (state.unreadNotifications > 0) {
+      elements.notificationCount.textContent = state.unreadNotifications
+      elements.notificationCount.style.display = "flex"
+    } else {
+      elements.notificationCount.style.display = "none"
     }
   }
-})
+}
 
-// Close dropdowns when clicking outside
-document.addEventListener("click", (e) => {
-  if (!notificationBell.contains(e.target)) {
-    notificationDropdown.classList.remove("active")
-  }
-  if (!announcementIcon.contains(e.target)) {
-    announcementDropdown.classList.remove("active")
-  }
-  if (!e.target.closest(".post-options")) {
-    document.querySelectorAll(".post-options-dropdown").forEach((dropdown) => {
-      dropdown.style.display = "none"
+
+function setupNavigationListeners() {
+  if (elements.hamburgerMenu) {
+    elements.hamburgerMenu.addEventListener("click", () => {
+      if (window.innerWidth <= 768) {
+        elements.sidebar.classList.toggle("active")
+      } else {
+        window.location.href = "profile.html"
+      }
     })
   }
-})
 
-// Toggle comments visibility
-function toggleComments(postId, element) {
-  const post = document.querySelector(`[data-post-id="${postId}"]`)
-  if (!post) return
+  if (elements.navProfile) {
+    elements.navProfile.addEventListener("click", () => {
+      window.location.href = "profile.html"
+    })
+  }
 
-  const commentsList = post.querySelector(".comments-list")
-  const commentInput = post.querySelector(".comment-input .comment-text")
+  if (elements.navFeed) {
+    elements.navFeed.addEventListener("click", () => {
+      window.location.href = "main.html"
+    })
+  }
 
-  if (commentsList) {
-    const isHidden = commentsList.style.display === "none"
-    commentsList.style.display = isHidden ? "block" : "none"
+  if (elements.navAbout) {
+    elements.navAbout.addEventListener("click", () => {
+      window.location.href = "about.html"
+    })
+  }
 
-    // Update button state
-    if (isHidden) {
-      element.classList.add("active")
-      // Focus on comment input when opening
-      setTimeout(() => {
-        if (commentInput) commentInput.focus()
-      }, 100)
-    } else {
-      element.classList.remove("active")
-    }
+  if (elements.navClaimed) {
+    elements.navClaimed.addEventListener("click", () => {
+      // Already on claimed page
+      loadPostsFromStorage()
+    })
+  }
+
+  if (elements.navLogout) {
+    elements.navLogout.addEventListener("click", () => {
+      if (confirm("Are you sure you want to log out?")) {
+        localStorage.clear()
+        window.location.href = "login.html"
+      }
+    })
   }
 }
 
-// Initialize page
-document.addEventListener("DOMContentLoaded", () => {
+/**
+ * Set up notification event listeners
+ */
+function setupNotificationListeners() {
+  // Notification Bell functionality
+  if (elements.notificationBell) {
+    elements.notificationBell.addEventListener("click", (e) => {
+      e.stopPropagation()
+      elements.notificationDropdown.classList.toggle("active")
+      if (elements.announcementDropdown) elements.announcementDropdown.classList.remove("active")
+    })
+  }
+
+  // Announcement Icon functionality
+  if (elements.announcementIcon) {
+    elements.announcementIcon.addEventListener("click", (e) => {
+      e.stopPropagation()
+      elements.announcementDropdown.classList.toggle("active")
+      if (elements.notificationDropdown) elements.notificationDropdown.classList.remove("active")
+    })
+  }
+
+  // Mark all notifications as read
+  if (elements.markAllRead) {
+    elements.markAllRead.addEventListener("click", () => {
+      const unreadItems = document.querySelectorAll(".notification-item.unread")
+      unreadItems.forEach((item) => {
+        item.classList.remove("unread")
+      })
+      state.unreadNotifications = 0
+      updateNotificationBadge()
+    })
+  }
+}
+
+
+function setupDocumentListeners() {
+  // Close sidebar when clicking outside on mobile
+  document.addEventListener("click", (event) => {
+    if (window.innerWidth <= 768) {
+      if (
+        elements.sidebar &&
+        elements.hamburgerMenu &&
+        !elements.sidebar.contains(event.target) &&
+        !elements.hamburgerMenu.contains(event.target)
+      ) {
+        elements.sidebar.classList.remove("active")
+      }
+    }
+  })
+
+  // Close dropdowns when clicking outside
+  document.addEventListener("click", (e) => {
+    if (elements.notificationBell && !elements.notificationBell.contains(e.target)) {
+      if (elements.notificationDropdown) elements.notificationDropdown.classList.remove("active")
+    }
+    if (elements.announcementIcon && !elements.announcementIcon.contains(e.target)) {
+      if (elements.announcementDropdown) elements.announcementDropdown.classList.remove("active")
+    }
+    if (!e.target.closest(".post-options")) {
+      document.querySelectorAll(".post-options-dropdown").forEach((dropdown) => {
+        dropdown.style.display = "none"
+      })
+    }
+  })
+
+  // Add event listeners for like synchronization
+  window.addEventListener("likeStateChanged", (e) => {
+    const { postId, liked, likeCount } = e.detail
+
+    const postElement = document.querySelector(`[data-post-id="${postId}"]`)
+    if (postElement) {
+      const heartButton = postElement.querySelector('.post-action[onclick*="toggleHeart"]')
+      if (heartButton) {
+        const icon = heartButton.querySelector("i")
+        const span = heartButton.querySelector("span")
+
+        if (liked) {
+          icon.classList.remove("far")
+          icon.classList.add("fas")
+          icon.style.color = "#dc2626"
+          span.style.color = "#dc2626"
+          heartButton.classList.add("liked")
+        } else {
+          icon.classList.remove("fas")
+          icon.classList.add("far")
+          icon.style.color = ""
+          span.style.color = ""
+          heartButton.classList.remove("liked")
+        }
+      }
+    }
+  })
+
+  // Listen for storage events
+  window.addEventListener("storage", (e) => {
+    if (e.key === "lastLikeUpdate") {
+      const updateData = JSON.parse(e.newValue)
+      if (updateData) {
+        window.dispatchEvent(
+          new CustomEvent("likeStateChanged", {
+            detail: updateData,
+          }),
+        )
+      }
+    } else if (e.key === "userPosts") {
+      loadPostsFromStorage()
+    } else if (e.key === "userProfile" || e.key === "ifindUserData") {
+      const currentUser = getCurrentUser()
+      updateExistingCommentsAvatar(currentUser)
+      initializeUserAvatar()
+      loadPostsFromStorage()
+    }
+  })
+}
+
+
+function initializePage() {
   const currentUser = getCurrentUser()
   if (!currentUser.completedSetup) {
     window.location.href = "setup.html"
@@ -834,14 +1216,12 @@ document.addEventListener("DOMContentLoaded", () => {
   initializeUserAvatar()
   loadPostsFromStorage()
   updateNotificationBadge()
-})
+  injectImageHandlingCSS()
 
-// Add storage event listener to refresh comments when user data changes
-window.addEventListener("storage", (e) => {
-  if (e.key === "userProfile" || e.key === "ifindUserData") {
-    const currentUser = getCurrentUser()
-    updateExistingCommentsAvatar(currentUser)
-    initializeUserAvatar()
-    loadPostsFromStorage()
-  }
-})
+  setupNavigationListeners()
+  setupNotificationListeners()
+  setupDocumentListeners()
+}
+
+// Initialize when DOM is loaded
+document.addEventListener("DOMContentLoaded", initializePage)

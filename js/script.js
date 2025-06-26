@@ -201,16 +201,16 @@ document.getElementById("signup-form").addEventListener("submit", async (event) 
 
   // Show SweetAlert2 success notification
   await Swal.fire({
-    position: "top-end",
-    icon: "success",
-    title: "Your work has been saved",
-    showConfirmButton: false,
-    timer: 1500,
-    toast: true,
-    background: "#fff",
-    color: "#0a2342",
-    iconColor: "#28a745",
-  })
+  position: "center",
+  width: '450px', // <-- Pwede mong i-adjust ito. Subukan mo muna ang 450px.
+  icon: "success",
+  title: "Your work has been saved",
+  showConfirmButton: false,
+  timer: 1500,
+  background: "#fff",
+  color: "#0a2342",
+  iconColor: "#28a745",
+});
 
   // Switch to login form after the alert
   container.classList.remove("active")

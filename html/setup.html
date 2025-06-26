@@ -1,147 +1,210 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>iFind Setup - Parallax</title>
-    <link rel="stylesheet" href="../css/setup.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- SweetAlert2 CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.min.css">
-</head>
-<body>
+    <link rel="stylesheet" href="../css/setup.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.min.css"
+    />
+  </head>
+  <body>
     <div class="main-container">
-        <!-- Header -->
-        <div class="header scroll-reveal">
-            <div class="logo">iFind</div>
+      <!-- Header -->
+      <div class="header scroll-reveal">
+        <div class="logo">
+          <img src="../assets/findme.png" alt="iFind Logo" width="76px" />
+        </div>
+      </div>
+
+      <!-- Setup Container -->
+      <div class="setup-container">
+        <!-- Hero Section -->
+        <div class="hero-section scroll-reveal">
+          <h1 class="hero-title">Complete Your Profile</h1>
+          <p class="hero-subtitle">
+            Set up your iFind profile to help others recognize you when posting
+            or claiming items on campus.
+          </p>
         </div>
 
-        <!-- Setup Container -->
-        <div class="setup-container">
-            <!-- Hero Section -->
-            <div class="hero-section scroll-reveal">
-                <h1 class="hero-title">Complete Your Profile</h1>
-                <p class="hero-subtitle">Set up your iFind profile to help others recognize you when posting or claiming items on campus.</p>
+        <!-- Setup Steps -->
+        <div class="setup-steps">
+          <!-- Step 1: Name - Two column layout -->
+          <div class="setup-step step-1-layout">
+            <div class="step-content">
+              <div class="step-number">Step 01</div>
+              <h2 class="step-title">What's your name?</h2>
+              <p class="step-description">
+                Type in the name you'd like to use for your account. This will
+                be your display name.
+              </p>
+              <input
+                type="text"
+                class="input-field"
+                id="nameInput"
+                placeholder="Enter your full name"
+              />
             </div>
-
-            <!-- Setup Steps -->
-            <div class="setup-steps">
-                <!-- Step 1: Name - Two column layout -->
-                <div class="setup-step step-1-layout">
-                    <div class="step-content">
-                        <div class="step-number">Step 01</div>
-                        <h2 class="step-title">What's your name?</h2>
-                        <p class="step-description">We've pre-filled this with your username, but feel free to change it to your preferred display name.</p>
-                        <input type="text" class="input-field" id="nameInput" placeholder="Enter your full name">
-                    </div>
-                    <div class="step-image step-image-center">
-                        <img src="../assets/idcard.png" alt="ID Card" class="step-illustration">
-                    </div>
-                </div>
-
-                <!-- Step 2: Profile Picture - Centered layout -->
-                <div class="setup-step step-2-layout">
-                    <div class="step-content step-2-content">
-                        <div class="step-number">Step 02</div>
-                        <h2 class="step-title">Choose your avatar</h2>
-                        <p class="step-description">Select from our emoji avatars to help others recognize you.</p>
-                    </div>
-                    <div class="element-3d">
-                        <div class="profile-3d">
-                            <div class="avatar-container" id="profileAvatar">
-                                <div class="avatar-base">
-                                    👤
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Step 3: User Type -->
-                <div class="setup-step step-3-layout">
-                    <div class="step-3-header">
-                        <div class="step-number">Step 3</div>
-                        <h2 class="step-title step-3-title">How will you primarily be using this website?</h2>
-                        <p class="step-description">This helps others know who they're connecting with.</p>
-                    </div>
-                    
-                    <!-- Role Options -->
-                    <div class="step-3-roles">
-                        <div class="role-option role-option-student" data-role="student">
-                            <img src="../assets/8.png" alt="Student" class="role-option-image">
-                            <div class="role-option-label">Student</div>
-                        </div>
-                        <div class="role-option role-option-faculty" data-role="faculty">
-                            <img src="../assets/9.png" alt="Faculty" class="role-option-image">
-                            <div class="role-option-label-white">Faculty</div>
-                        </div>
-                    </div>
-                    
-                    <!-- Complete Setup Button -->
-                    <button class="next-btn complete-setup-btn" id="nextBtn" disabled>Complete setup</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Vertical Progress Section -->
-        <div class="vertical-progress-section">
-          <div class="vertical-progress-container">
-            <div class="vertical-progress-bar" id="progressBar"></div>
-          </div>
-          <div class="progress-steps">
-            <div class="progress-step" data-step="1">
-              <div class="step-dot"></div>
-              <span class="step-label">Step 1</span>
-            </div>
-            <div class="progress-step" data-step="2">
-              <div class="step-dot"></div>
-              <span class="step-label">Step 2</span>
-            </div>
-            <div class="progress-step" data-step="3">
-              <div class="step-dot"></div>
-              <span class="step-label">Step 3</span>
+            <div class="step-image step-image-center">
+              <img
+                src="../assets/idcard.png"
+                alt="ID Card"
+                class="step-illustration"
+              />
             </div>
           </div>
-          <div class="progress-text" id="progressText">0% Complete</div>
+
+          <!-- Step 2: Profile Picture - Centered layout -->
+          <div class="setup-step step-2-layout">
+            <div class="step-content step-2-content">
+              <div class="step-number">Step 02</div>
+              <h2 class="step-title">Choose your avatar</h2>
+              <p class="step-description">
+                Select from our emoji avatars or upload your own profile
+                picture.
+              </p>
+            </div>
+            <div class="element-3d">
+              <div class="profile-3d">
+                <div class="avatar-container" id="profileAvatar">
+                  <div class="avatar-base">👤</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 3: User Type -->
+          <div class="setup-step step-3-layout">
+            <div class="step-3-header">
+              <div class="step-number">Step 3</div>
+              <h2 class="step-title step-3-title">
+                How will you primarily be using this website?
+              </h2>
+              <p class="step-description">
+                This helps others know who they're connecting with.
+              </p>
+            </div>
+
+            <!-- Role Options -->
+            <div class="step-3-roles">
+              <div class="role-option role-option-student" data-role="student">
+                <img
+                  src="../assets/8.png"
+                  alt="Student"
+                  class="role-option-image"
+                />
+                <div class="role-option-label">Student</div>
+              </div>
+              <div class="role-option role-option-faculty" data-role="faculty">
+                <img
+                  src="../assets/9.png"
+                  alt="Faculty"
+                  class="role-option-image"
+                />
+                <div class="role-option-label-white">Faculty</div>
+              </div>
+            </div>
+
+            <!-- Complete Setup Button -->
+            <button class="next-btn complete-setup-btn" id="nextBtn" disabled>
+              Complete setup
+            </button>
+          </div>
         </div>
+      </div>
+
+      <!-- Vertical Progress Section -->
+      <div class="vertical-progress-section">
+        <div class="vertical-progress-container">
+          <div class="vertical-progress-bar" id="progressBar"></div>
+        </div>
+        <div class="progress-steps">
+          <div class="progress-step" data-step="1">
+            <div class="step-dot"></div>
+            <span class="step-label">Step 1</span>
+          </div>
+          <div class="progress-step" data-step="2">
+            <div class="step-dot"></div>
+            <span class="step-label">Step 2</span>
+          </div>
+          <div class="progress-step" data-step="3">
+            <div class="step-dot"></div>
+            <span class="step-label">Step 3</span>
+          </div>
+        </div>
+        <div class="progress-text" id="progressText">0% Complete</div>
+      </div>
     </div>
 
-    <!-- Enhanced Profile Picture Modal -->
+    <!-- Enhanced Profile Picture Modal with Upload Feature -->
     <div class="modal" id="avatarModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title">Choose your avatar</div>
-                <button class="close-modal">&times;</button>
-            </div>
-            
-            <!-- Emoji Avatar Grid Only -->
-            <div class="emoji-section">
-                <h4>Select an emoji avatar</h4>
-                <div class="avatar-grid">
-                    <div class="avatar-option avatar-1" data-avatar="1">👨‍💼</div>
-                    <div class="avatar-option avatar-2" data-avatar="2">👩‍💼</div>
-                    <div class="avatar-option avatar-3" data-avatar="3">👨‍🎓</div>
-                    <div class="avatar-option avatar-4" data-avatar="4">👩‍🎓</div>
-                    <div class="avatar-option avatar-5" data-avatar="5">👨‍🏫</div>
-                    <div class="avatar-option avatar-6" data-avatar="6">👩‍🏫</div>
-                    <div class="avatar-option avatar-7" data-avatar="7">👨‍💻</div>
-                    <div class="avatar-option avatar-8" data-avatar="8">👩‍💻</div>
-                    <div class="avatar-option avatar-9" data-avatar="9">🧑‍🎨</div>
-                    <div class="avatar-option avatar-10" data-avatar="10">👨‍🔬</div>
-                    <div class="avatar-option avatar-11" data-avatar="11">👩‍🔬</div>
-                    <div class="avatar-option avatar-12" data-avatar="12">👨‍🎨</div>
-                </div>
-            </div>
-            
-            <div class="modal-actions">
-                <button class="modal-btn cancel-btn">Cancel</button>
-                <button class="modal-btn save-btn">Save</button>
-            </div>
+      <div class="modal-content">
+        <div class="modal-header">
+          <div class="modal-title">Choose your avatar</div>
+          <button class="close-modal">&times;</button>
         </div>
+
+        <!-- Upload Section -->
+        <div class="upload-section">
+          <h4>Upload your own picture</h4>
+          <div class="upload-area" id="uploadArea">
+            <input
+              type="file"
+              id="imageUpload"
+              accept="image/*"
+              style="display: none"
+            />
+            <div class="upload-content">
+              <i class="fas fa-cloud-upload-alt upload-icon"></i>
+              <p class="upload-text">Click to upload or drag and drop</p>
+              <p class="upload-subtext">PNG, JPG up to 5MB</p>
+            </div>
+            <div class="image-preview" id="imagePreview" style="display: none">
+              <img id="previewImg" src="" alt="Preview" />
+              <button class="remove-image" id="removeImage">&times;</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Divider -->
+        <div class="option-divider">
+          <span>OR</span>
+        </div>
+
+        <!-- Emoji Avatar Grid -->
+        <div class="emoji-section">
+          <h4>Select an emoji avatar</h4>
+          <div class="avatar-grid">
+            <div class="avatar-option avatar-1" data-avatar="1">👨‍💼</div>
+            <div class="avatar-option avatar-2" data-avatar="2">👩‍💼</div>
+            <div class="avatar-option avatar-3" data-avatar="3">👨‍🎓</div>
+            <div class="avatar-option avatar-4" data-avatar="4">👩‍🎓</div>
+            <div class="avatar-option avatar-5" data-avatar="5">👨‍🏫</div>
+            <div class="avatar-option avatar-6" data-avatar="6">👩‍🏫</div>
+            <div class="avatar-option avatar-7" data-avatar="7">👨‍💻</div>
+            <div class="avatar-option avatar-8" data-avatar="8">👩‍💻</div>
+            <div class="avatar-option avatar-9" data-avatar="9">🧑‍🎨</div>
+            <div class="avatar-option avatar-10" data-avatar="10">👨‍🔬</div>
+            <div class="avatar-option avatar-11" data-avatar="11">👩‍🔬</div>
+            <div class="avatar-option avatar-12" data-avatar="12">👨‍🎨</div>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button class="modal-btn cancel-btn">Cancel</button>
+          <button class="modal-btn save-btn">Save</button>
+        </div>
+      </div>
     </div>
 
-    <!-- SweetAlert2 JS -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.all.min.js"></script>
     <script src="../js/setup.js"></script>
-</body>
+  </body>
 </html>
